@@ -2,21 +2,27 @@
 import { useState } from "react";
 import { Filter, X, Camera, Video, MapPin } from "lucide-react";
 
-interface FilterState {
-  style: string;
-  budget: string;
-  crewSize: string;
-  amenities: string[];
-  shootType: string;
-  region: string;
-}
-
 interface SearchFiltersProps {
-  filters: FilterState;
-  onFilterChange: (filters: FilterState) => void;
+  selectedFilters: string[];
+  onFilterChange: (filters: string[]) => void;
+  priceRange: number[];
+  onPriceChange: (range: number[]) => void;
+  currentLocation: string;
+  onLocationChange: (location: string) => void;
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
 }
 
-const SearchFilters = ({ filters, onFilterChange }: SearchFiltersProps) => {
+const SearchFilters = ({ 
+  selectedFilters, 
+  onFilterChange, 
+  priceRange, 
+  onPriceChange, 
+  currentLocation, 
+  onLocationChange, 
+  searchTerm, 
+  onSearchChange 
+}: SearchFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const shootTypeOptions = [
@@ -55,238 +61,162 @@ const SearchFilters = ({ filters, onFilterChange }: SearchFiltersProps) => {
     "Makeup/Prep room", "Changing area", "Drone-friendly"
   ];
 
-  const updateFilter = (key: keyof FilterState, value: any) => {
-    onFilterChange({ ...filters, [key]: value });
-  };
-
-  const toggleAmenity = (amenity: string) => {
-    const newAmenities = filters.amenities.includes(amenity)
-      ? filters.amenities.filter(a => a !== amenity)
-      : [...filters.amenities, amenity];
-    updateFilter('amenities', newAmenities);
+  const toggleFilter = (filter: string) => {
+    const newFilters = selectedFilters.includes(filter)
+      ? selectedFilters.filter(f => f !== filter)
+      : [...selectedFilters, filter];
+    onFilterChange(newFilters);
   };
 
   const clearAllFilters = () => {
-    onFilterChange({
-      style: "",
-      budget: "",
-      crewSize: "",
-      amenities: [],
-      shootType: "",
-      region: ""
-    });
+    onFilterChange([]);
+    onSearchChange("");
+    onPriceChange([0, 50000]);
+    onLocationChange("Metro Manila");
   };
 
-  const hasActiveFilters = filters.style || filters.budget || filters.crewSize || filters.amenities.length > 0 || filters.shootType || filters.region;
-  const activeFilterCount = [filters.style, filters.budget, filters.crewSize, filters.shootType, filters.region, ...filters.amenities].filter(Boolean).length;
+  const hasActiveFilters = selectedFilters.length > 0 || searchTerm || priceRange[0] > 0 || priceRange[1] < 50000 || currentLocation !== "Metro Manila";
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`px-4 py-3 rounded-xl border transition-all flex items-center gap-2 ${
-          hasActiveFilters 
-            ? 'bg-coral-500 text-white border-coral-500 shadow-lg' 
-            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
-        }`}
-      >
-        <Filter className="h-4 w-4" />
-        <span className="font-medium">Filters</span>
-        {hasActiveFilters && (
-          <span className="bg-white/20 text-xs px-2 py-1 rounded-full font-semibold">
-            {activeFilterCount}
-          </span>
-        )}
-      </button>
+    <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-4">
+      {/* Search */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold text-gray-900 mb-3">Search</label>
+        <input
+          type="text"
+          placeholder="Search locations, styles, features..."
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
+        />
+      </div>
 
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div className="fixed inset-0 bg-black/20 z-10" onClick={() => setIsOpen(false)} />
-          
-          {/* Filter Panel */}
-          <div className="absolute top-full right-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-20 max-h-[85vh] overflow-y-auto">
-            {/* Header */}
-            <div className="sticky top-0 bg-white rounded-t-2xl border-b border-gray-100 p-6 flex justify-between items-center">
-              <h3 className="font-bold text-xl text-gray-900">Filter Creative Spaces</h3>
-              <div className="flex items-center gap-2">
-                {hasActiveFilters && (
-                  <button
-                    onClick={clearAllFilters}
-                    className="text-coral-500 text-sm hover:text-coral-600 transition-colors font-medium"
-                  >
-                    Clear all
-                  </button>
+      {/* Location Filter */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold text-gray-900 mb-3">Location</label>
+        <select
+          value={currentLocation}
+          onChange={(e) => onLocationChange(e.target.value)}
+          className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none bg-white"
+        >
+          {regionOptions.map(region => (
+            <option key={region} value={region}>{region}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Price Range */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold text-gray-900 mb-3">
+          Price Range: ₱{priceRange[0].toLocaleString()} - ₱{priceRange[1].toLocaleString()}
+        </label>
+        <div className="space-y-2">
+          <input
+            type="range"
+            min="0"
+            max="50000"
+            step="1000"
+            value={priceRange[0]}
+            onChange={(e) => onPriceChange([parseInt(e.target.value), priceRange[1]])}
+            className="w-full"
+          />
+          <input
+            type="range"
+            min="0"
+            max="50000"
+            step="1000"
+            value={priceRange[1]}
+            onChange={(e) => onPriceChange([priceRange[0], parseInt(e.target.value)])}
+            className="w-full"
+          />
+        </div>
+      </div>
+
+      {/* Popular Styles */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold text-gray-900 mb-3">Popular Styles</label>
+        <div className="flex flex-wrap gap-2">
+          {["Beach/Coastal", "Rooftop/Skyline", "Urban Loft", "Garden/Nature"].map(style => (
+            <button
+              key={style}
+              onClick={() => toggleFilter(style)}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                selectedFilters.includes(style)
+                  ? 'bg-coral-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {style}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Shoot Types */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold text-gray-900 mb-3">Shoot Type</label>
+        <div className="grid grid-cols-3 gap-2">
+          {shootTypeOptions.map(option => (
+            <button
+              key={option.value}
+              onClick={() => toggleFilter(option.value)}
+              className={`p-3 rounded-xl text-sm font-medium transition-all border flex flex-col items-center gap-1 ${
+                selectedFilters.includes(option.value)
+                  ? 'bg-coral-500 text-white border-coral-500'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-coral-300'
+              }`}
+            >
+              <option.icon className="h-4 w-4" />
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Amenities */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold text-gray-900 mb-3">Essential Amenities</label>
+        <div className="grid grid-cols-1 gap-2">
+          {amenityOptions.slice(0, 6).map(amenity => (
+            <label 
+              key={amenity} 
+              className={`flex items-center p-3 rounded-xl cursor-pointer transition-all border ${
+                selectedFilters.includes(amenity)
+                  ? 'bg-coral-50 border-coral-200 text-coral-700'
+                  : 'bg-white border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={selectedFilters.includes(amenity)}
+                onChange={() => toggleFilter(amenity)}
+                className="sr-only"
+              />
+              <div className={`w-4 h-4 rounded border-2 mr-3 flex items-center justify-center ${
+                selectedFilters.includes(amenity)
+                  ? 'bg-coral-500 border-coral-500'
+                  : 'border-gray-300'
+              }`}>
+                {selectedFilters.includes(amenity) && (
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
                 )}
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="h-5 w-5 text-gray-500" />
-                </button>
               </div>
-            </div>
+              <span className="text-sm font-medium">{amenity}</span>
+            </label>
+          ))}
+        </div>
+      </div>
 
-            <div className="p-6 space-y-6">
-              {/* Shoot Type Filter */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">Shoot Type</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {shootTypeOptions.map(option => (
-                    <button
-                      key={option.value}
-                      onClick={() => updateFilter('shootType', filters.shootType === option.value ? '' : option.value)}
-                      className={`p-3 rounded-xl text-sm font-medium transition-all border flex flex-col items-center gap-1 ${
-                        filters.shootType === option.value
-                          ? 'bg-coral-500 text-white border-coral-500'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-coral-300'
-                      }`}
-                    >
-                      <option.icon className="h-4 w-4" />
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Region Filter */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">Region</label>
-                <select
-                  value={filters.region}
-                  onChange={(e) => updateFilter('region', e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none bg-white"
-                >
-                  <option value="">All regions</option>
-                  {regionOptions.map(region => (
-                    <option key={region} value={region}>{region}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Quick Styles */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">Popular Styles</label>
-                <div className="flex flex-wrap gap-2">
-                  {["Beach/Coastal", "Rooftop/Skyline", "Urban Loft", "Garden/Nature"].map(style => (
-                    <button
-                      key={style}
-                      onClick={() => updateFilter('style', filters.style === style ? '' : style)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        filters.style === style
-                          ? 'bg-coral-500 text-white shadow-md'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {style}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* All Styles */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">All Styles</label>
-                <select
-                  value={filters.style}
-                  onChange={(e) => updateFilter('style', e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none bg-white"
-                >
-                  <option value="">Any style</option>
-                  {styleOptions.map(style => (
-                    <option key={style} value={style}>{style}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Budget Filter */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">Budget (per day)</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {budgetOptions.map(option => (
-                    <button
-                      key={option.value}
-                      onClick={() => updateFilter('budget', filters.budget === option.value ? '' : option.value)}
-                      className={`p-3 rounded-xl text-sm font-medium transition-all border ${
-                        filters.budget === option.value
-                          ? 'bg-coral-500 text-white border-coral-500'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-coral-300'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Crew Size Filter */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">Team Size</label>
-                <div className="space-y-2">
-                  {crewSizeOptions.map(option => (
-                    <button
-                      key={option.value}
-                      onClick={() => updateFilter('crewSize', filters.crewSize === option.value ? '' : option.value)}
-                      className={`w-full p-3 rounded-xl text-sm font-medium transition-all border text-left ${
-                        filters.crewSize === option.value
-                          ? 'bg-coral-500 text-white border-coral-500'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-coral-300'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Essential Amenities */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">Essential Amenities</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {amenityOptions.map(amenity => (
-                    <label 
-                      key={amenity} 
-                      className={`flex items-center p-3 rounded-xl cursor-pointer transition-all border ${
-                        filters.amenities.includes(amenity)
-                          ? 'bg-coral-50 border-coral-200 text-coral-700'
-                          : 'bg-white border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={filters.amenities.includes(amenity)}
-                        onChange={() => toggleAmenity(amenity)}
-                        className="sr-only"
-                      />
-                      <div className={`w-4 h-4 rounded border-2 mr-3 flex items-center justify-center ${
-                        filters.amenities.includes(amenity)
-                          ? 'bg-coral-500 border-coral-500'
-                          : 'border-gray-300'
-                      }`}>
-                        {filters.amenities.includes(amenity) && (
-                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </div>
-                      <span className="text-sm font-medium">{amenity}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Apply Button */}
-            <div className="sticky bottom-0 bg-white rounded-b-2xl border-t border-gray-100 p-6">
-              <button
-                onClick={() => setIsOpen(false)}
-                className="w-full bg-coral-500 text-white py-3 rounded-xl font-semibold hover:bg-coral-600 transition-colors shadow-lg"
-              >
-                Apply Filters
-              </button>
-            </div>
-          </div>
-        </>
+      {/* Clear Filters Button */}
+      {hasActiveFilters && (
+        <button
+          onClick={clearAllFilters}
+          className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+        >
+          Clear All Filters
+        </button>
       )}
     </div>
   );
