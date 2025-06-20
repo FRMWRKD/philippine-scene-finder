@@ -45,6 +45,18 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Custom coral color palette */
+    --coral-50: 254 242 242;
+    --coral-100: 254 226 226;
+    --coral-200: 252 165 165;
+    --coral-300: 252 129 129;
+    --coral-400: 248 113 113;
+    --coral-500: 239 68 68;
+    --coral-600: 220 38 38;
+    --coral-700: 185 28 28;
+    --coral-800: 153 27 27;
+    --coral-900: 127 29 29;
   }
 
   .dark {
@@ -111,6 +123,53 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  /* Coral color utilities */
+  .bg-coral-50 { background-color: rgb(254 242 242); }
+  .bg-coral-100 { background-color: rgb(254 226 226); }
+  .bg-coral-200 { background-color: rgb(252 165 165); }
+  .bg-coral-300 { background-color: rgb(252 129 129); }
+  .bg-coral-400 { background-color: rgb(248 113 113); }
+  .bg-coral-500 { background-color: rgb(239 117 72); }
+  .bg-coral-600 { background-color: rgb(223 90 42); }
+  .bg-coral-700 { background-color: rgb(185 28 28); }
+  .bg-coral-800 { background-color: rgb(153 27 27); }
+  .bg-coral-900 { background-color: rgb(127 29 29); }
+
+  .text-coral-50 { color: rgb(254 242 242); }
+  .text-coral-100 { color: rgb(254 226 226); }
+  .text-coral-200 { color: rgb(252 165 165); }
+  .text-coral-300 { color: rgb(252 129 129); }
+  .text-coral-400 { color: rgb(248 113 113); }
+  .text-coral-500 { color: rgb(239 117 72); }
+  .text-coral-600 { color: rgb(223 90 42); }
+  .text-coral-700 { color: rgb(185 28 28); }
+  .text-coral-800 { color: rgb(153 27 27); }
+  .text-coral-900 { color: rgb(127 29 29); }
+
+  .border-coral-50 { border-color: rgb(254 242 242); }
+  .border-coral-100 { border-color: rgb(254 226 226); }
+  .border-coral-200 { border-color: rgb(252 165 165); }
+  .border-coral-300 { border-color: rgb(252 129 129); }
+  .border-coral-400 { border-color: rgb(248 113 113); }
+  .border-coral-500 { border-color: rgb(239 117 72); }
+  .border-coral-600 { border-color: rgb(223 90 42); }
+  .border-coral-700 { border-color: rgb(185 28 28); }
+  .border-coral-800 { border-color: rgb(153 27 27); }
+  .border-coral-900 { border-color: rgb(127 29 29); }
+
+  /* Custom animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
 }
 
 /* Glass morphism effect */
@@ -142,4 +201,50 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #df5a2a;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Focus states */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-coral-500 focus:ring-offset-2;
+}
+
+/* Button variants */
+.btn-primary {
+  @apply bg-coral-500 hover:bg-coral-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors focus-ring;
+}
+
+.btn-secondary {
+  @apply bg-white hover:bg-gray-50 text-coral-600 font-semibold py-2 px-4 rounded-lg border border-coral-200 transition-colors focus-ring;
+}
+
+.btn-ghost {
+  @apply hover:bg-gray-100 text-gray-600 hover:text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors focus-ring;
 }
