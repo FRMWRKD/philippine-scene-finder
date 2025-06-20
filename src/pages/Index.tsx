@@ -4,6 +4,7 @@ import { Search, MapPin, Calendar, MessageCircle } from "lucide-react";
 import LocationCard from "../components/LocationCard";
 import SearchFilters from "../components/SearchFilters";
 import HeroSection from "../components/HeroSection";
+import FloatingActionButton from "../components/FloatingActionButton";
 import { mockLocations } from "../data/mockData";
 
 const Index = () => {
@@ -43,6 +44,33 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-coral-50">
+      {/* Navigation Header */}
+      <nav className="sticky top-0 z-30 bg-white/90 backdrop-blur-lg border-b border-gray-200">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-coral-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">L</span>
+              </div>
+              <h1 className="text-xl font-bold text-gray-900">LocationPH</h1>
+            </div>
+            
+            <div className="hidden md:flex items-center gap-6 text-sm">
+              <a href="#" className="text-gray-600 hover:text-coral-600 transition-colors">Browse</a>
+              <a href="#" className="text-gray-600 hover:text-coral-600 transition-colors">How it works</a>
+              <a href="#" className="text-gray-600 hover:text-coral-600 transition-colors">Support</a>
+              <div className="h-4 w-px bg-gray-300"></div>
+              <button className="text-coral-600 hover:text-coral-700 font-medium transition-colors">
+                Sign In
+              </button>
+              <button className="bg-coral-500 text-white px-4 py-2 rounded-xl font-medium hover:bg-coral-600 transition-colors">
+                Join as Scout
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <HeroSection />
       
@@ -151,6 +179,9 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Action Button for Scouts */}
+      <FloatingActionButton />
     </div>
   );
 };
