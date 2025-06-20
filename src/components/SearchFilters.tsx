@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Filter, X, Camera, Video, MapPin } from "lucide-react";
+import { Search, MapPin, DollarSign, Filter, X } from "lucide-react";
 
 interface SearchFiltersProps {
   selectedFilters: string[];
@@ -13,210 +13,191 @@ interface SearchFiltersProps {
   onSearchChange: (term: string) => void;
 }
 
-const SearchFilters = ({ 
-  selectedFilters, 
-  onFilterChange, 
-  priceRange, 
-  onPriceChange, 
-  currentLocation, 
-  onLocationChange, 
-  searchTerm, 
-  onSearchChange 
+const SearchFilters = ({
+  selectedFilters,
+  onFilterChange,
+  priceRange,
+  onPriceChange,
+  currentLocation,
+  onLocationChange,
+  searchTerm,
+  onSearchChange,
 }: SearchFiltersProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const shootTypeOptions = [
-    { label: "Photography", value: "photography", icon: Camera },
-    { label: "Video/Film", value: "video", icon: Video },
-    { label: "Both", value: "both", icon: MapPin }
+  const availableFilters = [
+    "Photography Studio",
+    "Video Production",
+    "Industrial Design",
+    "Rooftop",
+    "Natural Light",
+    "Warehouse",
+    "Modern",
+    "Vintage",
+    "Outdoor",
+    "Beach",
+    "Urban",
+    "Rustic"
   ];
 
-  const styleOptions = [
-    "Modern Studio", "Spanish Colonial", "Tropical Villa", "Urban Loft", 
-    "Beach/Coastal", "Rooftop/Skyline", "Industrial/Warehouse", "Minimalist", 
-    "Vintage/Heritage", "Garden/Nature", "Mountain/Highland", "Rice Terraces"
-  ];
-
-  const budgetOptions = [
-    { label: "Under ₱3,000", value: "under-3000" },
-    { label: "₱3,000 - ₱8,000", value: "3000-8000" },
-    { label: "₱8,000 - ₱20,000", value: "8000-20000" },
-    { label: "₱20,000+", value: "over-20000" }
-  ];
-
-  const crewSizeOptions = [
-    { label: "Solo/Couple (1-2)", value: "solo" },
-    { label: "Small Team (3-8)", value: "small" },
-    { label: "Medium Crew (9-20)", value: "medium" },
-    { label: "Large Production (20+)", value: "large" }
-  ];
-
-  const regionOptions = [
-    "Metro Manila", "Luzon", "Visayas", "Mindanao", "Palawan", "Bohol", "Cebu", "Siargao"
-  ];
-
-  const amenityOptions = [
-    "Power outlets", "Parking space", "WiFi", "AC/Climate control", "Natural light", 
-    "Bathroom/Restroom", "Kitchen/Catering", "Security", "Equipment rental", 
-    "Makeup/Prep room", "Changing area", "Drone-friendly"
+  const locations = [
+    "Metro Manila",
+    "Cebu",
+    "Davao",
+    "Iloilo",
+    "Baguio",
+    "Boracay",
+    "Palawan",
+    "Bohol"
   ];
 
   const toggleFilter = (filter: string) => {
-    const newFilters = selectedFilters.includes(filter)
-      ? selectedFilters.filter(f => f !== filter)
-      : [...selectedFilters, filter];
-    onFilterChange(newFilters);
+    if (selectedFilters.includes(filter)) {
+      onFilterChange(selectedFilters.filter(f => f !== filter));
+    } else {
+      onFilterChange([...selectedFilters, filter]);
+    }
   };
 
   const clearAllFilters = () => {
     onFilterChange([]);
     onSearchChange("");
     onPriceChange([0, 50000]);
-    onLocationChange("Metro Manila");
+    setShowAdvanced(false);
   };
 
-  const hasActiveFilters = selectedFilters.length > 0 || searchTerm || priceRange[0] > 0 || priceRange[1] < 50000 || currentLocation !== "Metro Manila";
-
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-4">
-      {/* Search */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-900 mb-3">Search</label>
-        <input
-          type="text"
-          placeholder="Search locations, styles, features..."
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
-        />
-      </div>
+    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+      {/* Main Search Bar */}
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="flex-1 min-w-[200px] relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search locations..."
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+          />
+        </div>
 
-      {/* Location Filter */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-900 mb-3">Location</label>
         <select
           value={currentLocation}
           onChange={(e) => onLocationChange(e.target.value)}
-          className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none bg-white"
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent"
         >
-          {regionOptions.map(region => (
-            <option key={region} value={region}>{region}</option>
+          {locations.map(location => (
+            <option key={location} value={location}>{location}</option>
           ))}
         </select>
-      </div>
 
-      {/* Price Range */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-900 mb-3">
-          Price Range: ₱{priceRange[0].toLocaleString()} - ₱{priceRange[1].toLocaleString()}
-        </label>
-        <div className="space-y-2">
-          <input
-            type="range"
-            min="0"
-            max="50000"
-            step="1000"
-            value={priceRange[0]}
-            onChange={(e) => onPriceChange([parseInt(e.target.value), priceRange[1]])}
-            className="w-full"
-          />
-          <input
-            type="range"
-            min="0"
-            max="50000"
-            step="1000"
-            value={priceRange[1]}
-            onChange={(e) => onPriceChange([priceRange[0], parseInt(e.target.value)])}
-            className="w-full"
-          />
-        </div>
-      </div>
-
-      {/* Popular Styles */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-900 mb-3">Popular Styles</label>
-        <div className="flex flex-wrap gap-2">
-          {["Beach/Coastal", "Rooftop/Skyline", "Urban Loft", "Garden/Nature"].map(style => (
-            <button
-              key={style}
-              onClick={() => toggleFilter(style)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                selectedFilters.includes(style)
-                  ? 'bg-coral-500 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {style}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Shoot Types */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-900 mb-3">Shoot Type</label>
-        <div className="grid grid-cols-3 gap-2">
-          {shootTypeOptions.map(option => (
-            <button
-              key={option.value}
-              onClick={() => toggleFilter(option.value)}
-              className={`p-3 rounded-xl text-sm font-medium transition-all border flex flex-col items-center gap-1 ${
-                selectedFilters.includes(option.value)
-                  ? 'bg-coral-500 text-white border-coral-500'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-coral-300'
-              }`}
-            >
-              <option.icon className="h-4 w-4" />
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Amenities */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-900 mb-3">Essential Amenities</label>
-        <div className="grid grid-cols-1 gap-2">
-          {amenityOptions.slice(0, 6).map(amenity => (
-            <label 
-              key={amenity} 
-              className={`flex items-center p-3 rounded-xl cursor-pointer transition-all border ${
-                selectedFilters.includes(amenity)
-                  ? 'bg-coral-50 border-coral-200 text-coral-700'
-                  : 'bg-white border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={selectedFilters.includes(amenity)}
-                onChange={() => toggleFilter(amenity)}
-                className="sr-only"
-              />
-              <div className={`w-4 h-4 rounded border-2 mr-3 flex items-center justify-center ${
-                selectedFilters.includes(amenity)
-                  ? 'bg-coral-500 border-coral-500'
-                  : 'border-gray-300'
-              }`}>
-                {selectedFilters.includes(amenity) && (
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                )}
-              </div>
-              <span className="text-sm font-medium">{amenity}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Clear Filters Button */}
-      {hasActiveFilters && (
         <button
-          onClick={clearAllFilters}
-          className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
-          Clear All Filters
+          <Filter className="h-4 w-4" />
+          Filters
         </button>
+
+        {(selectedFilters.length > 0 || searchTerm || showAdvanced) && (
+          <button
+            onClick={clearAllFilters}
+            className="flex items-center gap-1 px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <X className="h-4 w-4" />
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Quick Filters */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {availableFilters.slice(0, 8).map((filter) => (
+          <button
+            key={filter}
+            onClick={() => toggleFilter(filter)}
+            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+              selectedFilters.includes(filter)
+                ? "bg-coral-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            {filter}
+          </button>
+        ))}
+      </div>
+
+      {/* Advanced Filters */}
+      {showAdvanced && (
+        <div className="border-t pt-4 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Price Range: ₱{priceRange[0].toLocaleString()} - ₱{priceRange[1].toLocaleString()}
+            </label>
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min="0"
+                max="100000"
+                step="1000"
+                value={priceRange[0]}
+                onChange={(e) => onPriceChange([parseInt(e.target.value), priceRange[1]])}
+                className="flex-1"
+              />
+              <input
+                type="range"
+                min="0"
+                max="100000"
+                step="1000"
+                value={priceRange[1]}
+                onChange={(e) => onPriceChange([priceRange[0], parseInt(e.target.value)])}
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">All Categories</label>
+            <div className="flex flex-wrap gap-2">
+              {availableFilters.map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => toggleFilter(filter)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    selectedFilters.includes(filter)
+                      ? "bg-coral-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Active Filters Display */}
+      {selectedFilters.length > 0 && (
+        <div className="border-t pt-3 mt-3">
+          <div className="flex flex-wrap gap-2">
+            <span className="text-sm text-gray-600">Active filters:</span>
+            {selectedFilters.map((filter) => (
+              <span
+                key={filter}
+                className="inline-flex items-center gap-1 px-2 py-1 bg-coral-100 text-coral-700 rounded-full text-xs"
+              >
+                {filter}
+                <button
+                  onClick={() => toggleFilter(filter)}
+                  className="hover:text-coral-900"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
