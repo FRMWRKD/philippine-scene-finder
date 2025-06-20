@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import Index from "./pages/Index";
 import UploadLocation from "./pages/UploadLocation";
 import LocationDetail from "./pages/LocationDetail";
+import LocationScouts from "./pages/LocationScouts";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/upload" element={<UploadLocation />} />
           <Route path="/location/:id" element={<LocationDetail />} />
+          <Route path="/scouts" element={<LocationScouts />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

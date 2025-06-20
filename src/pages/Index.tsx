@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { Search, MapPin, Calendar, MessageCircle } from "lucide-react";
+import { Search, MapPin, Calendar, MessageCircle, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import LocationCard from "../components/LocationCard";
 import SearchFilters from "../components/SearchFilters";
 import HeroSection from "../components/HeroSection";
@@ -8,12 +9,15 @@ import FloatingActionButton from "../components/FloatingActionButton";
 import { mockLocations } from "../data/mockData";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({
     style: "",
     budget: "",
     crewSize: "",
-    amenities: []
+    amenities: [],
+    shootType: "",
+    region: ""
   });
   const [filteredLocations, setFilteredLocations] = useState(mockLocations);
 
@@ -25,8 +29,9 @@ const Index = () => {
       
       const matchesStyle = !selectedFilters.style || location.tags.includes(selectedFilters.style);
       const matchesBudget = !selectedFilters.budget || checkBudgetRange(location.price, selectedFilters.budget);
+      const matchesShootType = !selectedFilters.shootType || checkShootType(location.tags, selectedFilters.shootType);
       
-      return matchesSearch && matchesStyle && matchesBudget;
+      return matchesSearch && matchesStyle && matchesBudget && matchesShootType;
     });
     
     setFilteredLocations(filtered);
@@ -34,19 +39,26 @@ const Index = () => {
 
   const checkBudgetRange = (price: number, range: string) => {
     switch (range) {
-      case "under-5000": return price < 5000;
-      case "5000-15000": return price >= 5000 && price <= 15000;
-      case "15000-30000": return price >= 15000 && price <= 30000;
-      case "over-30000": return price > 30000;
+      case "under-3000": return price < 3000;
+      case "3000-8000": return price >= 3000 && price <= 8000;
+      case "8000-20000": return price >= 8000 && price <= 20000;
+      case "over-20000": return price > 20000;
       default: return true;
     }
   };
 
+  const checkShootType = (tags: string[], shootType: string) => {
+    if (shootType === "photography") return tags.includes("Photography");
+    if (shootType === "video") return tags.includes("Video");
+    if (shootType === "both") return tags.includes("Photography") && tags.includes("Video");
+    return true;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-coral-50">
-      {/* Navigation Header */}
-      <nav className="sticky top-0 z-30 bg-white/90 backdrop-blur-lg border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4">
+      {/* Compact Navigation Header */}
+      <nav className="sticky top-0 z-30 bg-white/95 backdrop-blur-lg border-b border-gray-200">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-coral-500 rounded-lg flex items-center justify-center">
@@ -56,6 +68,13 @@ const Index = () => {
             </div>
             
             <div className="hidden md:flex items-center gap-6 text-sm">
+              <button 
+                onClick={() => navigate("/scouts")}
+                className="text-gray-600 hover:text-coral-600 transition-colors flex items-center gap-1"
+              >
+                <Users className="h-4 w-4" />
+                Location Scouts
+              </button>
               <a href="#" className="text-gray-600 hover:text-coral-600 transition-colors">Browse</a>
               <a href="#" className="text-gray-600 hover:text-coral-600 transition-colors">How it works</a>
               <a href="#" className="text-gray-600 hover:text-coral-600 transition-colors">Support</a>
@@ -71,18 +90,18 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Compact Hero Section */}
       <HeroSection />
       
-      {/* Search Section */}
-      <div className="container mx-auto px-4 -mt-6 relative z-10">
-        <div className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20">
+      {/* Enhanced Search Section */}
+      <div className="container mx-auto px-4 -mt-4 relative z-10">
+        <div className="bg-white/95 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Search locations, styles, or vibes..."
+                placeholder="Search locations by style, region, or vibe..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none transition-all"
@@ -95,8 +114,20 @@ const Index = () => {
           </div>
 
           {/* Active Filters Display */}
-          {(selectedFilters.style || selectedFilters.budget || selectedFilters.crewSize || selectedFilters.amenities.length > 0) && (
+          {(selectedFilters.style || selectedFilters.budget || selectedFilters.crewSize || selectedFilters.amenities.length > 0 || selectedFilters.shootType || selectedFilters.region) && (
             <div className="mt-4 flex flex-wrap gap-2">
+              {selectedFilters.shootType && (
+                <span className="bg-coral-100 text-coral-700 px-3 py-1 rounded-full text-sm font-medium">
+                  {selectedFilters.shootType === "photography" && "Photography"}
+                  {selectedFilters.shootType === "video" && "Video/Film"}
+                  {selectedFilters.shootType === "both" && "Photo & Video"}
+                </span>
+              )}
+              {selectedFilters.region && (
+                <span className="bg-coral-100 text-coral-700 px-3 py-1 rounded-full text-sm font-medium">
+                  {selectedFilters.region}
+                </span>
+              )}
               {selectedFilters.style && (
                 <span className="bg-coral-100 text-coral-700 px-3 py-1 rounded-full text-sm font-medium">
                   {selectedFilters.style}
@@ -104,18 +135,18 @@ const Index = () => {
               )}
               {selectedFilters.budget && (
                 <span className="bg-coral-100 text-coral-700 px-3 py-1 rounded-full text-sm font-medium">
-                  {selectedFilters.budget === "under-5000" && "Under ₱5,000"}
-                  {selectedFilters.budget === "5000-15000" && "₱5,000 - ₱15,000"}
-                  {selectedFilters.budget === "15000-30000" && "₱15,000 - ₱30,000"}
-                  {selectedFilters.budget === "over-30000" && "Over ₱30,000"}
+                  {selectedFilters.budget === "under-3000" && "Under ₱3,000"}
+                  {selectedFilters.budget === "3000-8000" && "₱3,000 - ₱8,000"}
+                  {selectedFilters.budget === "8000-20000" && "₱8,000 - ₱20,000"}
+                  {selectedFilters.budget === "over-20000" && "₱20,000+"}
                 </span>
               )}
               {selectedFilters.crewSize && (
                 <span className="bg-coral-100 text-coral-700 px-3 py-1 rounded-full text-sm font-medium">
-                  {selectedFilters.crewSize === "solo" && "Solo"}
-                  {selectedFilters.crewSize === "small" && "Small crew"}
-                  {selectedFilters.crewSize === "medium" && "Medium crew"}
-                  {selectedFilters.crewSize === "large" && "Large crew"}
+                  {selectedFilters.crewSize === "solo" && "Solo/Couple"}
+                  {selectedFilters.crewSize === "small" && "Small Team"}
+                  {selectedFilters.crewSize === "medium" && "Medium Crew"}
+                  {selectedFilters.crewSize === "large" && "Large Production"}
                 </span>
               )}
               {selectedFilters.amenities.map(amenity => (
@@ -132,10 +163,10 @@ const Index = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">
-            {filteredLocations.length} stunning locations found
+            {filteredLocations.length} creative spaces found
           </h2>
           <div className="text-sm text-gray-600">
-            Showing results for the Philippines
+            Perfect for photographers & filmmakers
           </div>
         </div>
 
@@ -161,20 +192,20 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold mb-2">500+</div>
+              <div className="text-3xl font-bold mb-2">800+</div>
               <div className="text-coral-100">Verified Locations</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">1,200+</div>
-              <div className="text-coral-100">Happy Creators</div>
+              <div className="text-3xl font-bold mb-2">2,500+</div>
+              <div className="text-coral-100">Creative Professionals</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">24/7</div>
-              <div className="text-coral-100">Support</div>
+              <div className="text-3xl font-bold mb-2">150+</div>
+              <div className="text-coral-100">Location Scouts</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">₱2M+</div>
-              <div className="text-coral-100">Earned by Hosts</div>
+              <div className="text-3xl font-bold mb-2">₱5M+</div>
+              <div className="text-coral-100">Earned by Scouts</div>
             </div>
           </div>
         </div>

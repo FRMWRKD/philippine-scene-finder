@@ -1,12 +1,14 @@
 
 import { useState } from "react";
-import { Filter, X } from "lucide-react";
+import { Filter, X, Camera, Video, MapPin } from "lucide-react";
 
 interface FilterState {
   style: string;
   budget: string;
   crewSize: string;
   amenities: string[];
+  shootType: string;
+  region: string;
 }
 
 interface SearchFiltersProps {
@@ -17,28 +19,40 @@ interface SearchFiltersProps {
 const SearchFilters = ({ filters, onFilterChange }: SearchFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const shootTypeOptions = [
+    { label: "Photography", value: "photography", icon: Camera },
+    { label: "Video/Film", value: "video", icon: Video },
+    { label: "Both", value: "both", icon: MapPin }
+  ];
+
   const styleOptions = [
     "Modern Studio", "Spanish Colonial", "Tropical Villa", "Urban Loft", 
-    "Beachfront", "Rooftop", "Industrial", "Minimalist", "Vintage", "Garden"
+    "Beach/Coastal", "Rooftop/Skyline", "Industrial/Warehouse", "Minimalist", 
+    "Vintage/Heritage", "Garden/Nature", "Mountain/Highland", "Rice Terraces"
   ];
 
   const budgetOptions = [
-    { label: "Under ₱5,000", value: "under-5000" },
-    { label: "₱5,000 - ₱15,000", value: "5000-15000" },
-    { label: "₱15,000 - ₱30,000", value: "15000-30000" },
-    { label: "Over ₱30,000", value: "over-30000" }
+    { label: "Under ₱3,000", value: "under-3000" },
+    { label: "₱3,000 - ₱8,000", value: "3000-8000" },
+    { label: "₱8,000 - ₱20,000", value: "8000-20000" },
+    { label: "₱20,000+", value: "over-20000" }
   ];
 
   const crewSizeOptions = [
-    { label: "Solo (1-2 people)", value: "solo" },
-    { label: "Small (3-8 people)", value: "small" },
-    { label: "Medium (9-20 people)", value: "medium" },
-    { label: "Large (20+ people)", value: "large" }
+    { label: "Solo/Couple (1-2)", value: "solo" },
+    { label: "Small Team (3-8)", value: "small" },
+    { label: "Medium Crew (9-20)", value: "medium" },
+    { label: "Large Production (20+)", value: "large" }
+  ];
+
+  const regionOptions = [
+    "Metro Manila", "Luzon", "Visayas", "Mindanao", "Palawan", "Bohol", "Cebu", "Siargao"
   ];
 
   const amenityOptions = [
-    "Power outlets", "Parking", "WiFi", "AC", "Natural light", 
-    "Bathroom", "Kitchen", "Security", "Equipment rental", "Catering"
+    "Power outlets", "Parking space", "WiFi", "AC/Climate control", "Natural light", 
+    "Bathroom/Restroom", "Kitchen/Catering", "Security", "Equipment rental", 
+    "Makeup/Prep room", "Changing area", "Drone-friendly"
   ];
 
   const updateFilter = (key: keyof FilterState, value: any) => {
@@ -57,12 +71,14 @@ const SearchFilters = ({ filters, onFilterChange }: SearchFiltersProps) => {
       style: "",
       budget: "",
       crewSize: "",
-      amenities: []
+      amenities: [],
+      shootType: "",
+      region: ""
     });
   };
 
-  const hasActiveFilters = filters.style || filters.budget || filters.crewSize || filters.amenities.length > 0;
-  const activeFilterCount = [filters.style, filters.budget, filters.crewSize, ...filters.amenities].filter(Boolean).length;
+  const hasActiveFilters = filters.style || filters.budget || filters.crewSize || filters.amenities.length > 0 || filters.shootType || filters.region;
+  const activeFilterCount = [filters.style, filters.budget, filters.crewSize, filters.shootType, filters.region, ...filters.amenities].filter(Boolean).length;
 
   return (
     <div className="relative">
@@ -89,10 +105,10 @@ const SearchFilters = ({ filters, onFilterChange }: SearchFiltersProps) => {
           <div className="fixed inset-0 bg-black/20 z-10" onClick={() => setIsOpen(false)} />
           
           {/* Filter Panel */}
-          <div className="absolute top-full right-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-20 max-h-[80vh] overflow-y-auto">
+          <div className="absolute top-full right-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-20 max-h-[85vh] overflow-y-auto">
             {/* Header */}
             <div className="sticky top-0 bg-white rounded-t-2xl border-b border-gray-100 p-6 flex justify-between items-center">
-              <h3 className="font-bold text-xl text-gray-900">Filter Locations</h3>
+              <h3 className="font-bold text-xl text-gray-900">Filter Creative Spaces</h3>
               <div className="flex items-center gap-2">
                 {hasActiveFilters && (
                   <button
@@ -112,11 +128,47 @@ const SearchFilters = ({ filters, onFilterChange }: SearchFiltersProps) => {
             </div>
 
             <div className="p-6 space-y-6">
-              {/* Quick Filters */}
+              {/* Shoot Type Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-3">Shoot Type</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {shootTypeOptions.map(option => (
+                    <button
+                      key={option.value}
+                      onClick={() => updateFilter('shootType', filters.shootType === option.value ? '' : option.value)}
+                      className={`p-3 rounded-xl text-sm font-medium transition-all border flex flex-col items-center gap-1 ${
+                        filters.shootType === option.value
+                          ? 'bg-coral-500 text-white border-coral-500'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-coral-300'
+                      }`}
+                    >
+                      <option.icon className="h-4 w-4" />
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Region Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-3">Region</label>
+                <select
+                  value={filters.region}
+                  onChange={(e) => updateFilter('region', e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none bg-white"
+                >
+                  <option value="">All regions</option>
+                  {regionOptions.map(region => (
+                    <option key={region} value={region}>{region}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Quick Styles */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">Popular Styles</label>
                 <div className="flex flex-wrap gap-2">
-                  {["Modern Studio", "Beachfront", "Rooftop", "Garden"].map(style => (
+                  {["Beach/Coastal", "Rooftop/Skyline", "Urban Loft", "Garden/Nature"].map(style => (
                     <button
                       key={style}
                       onClick={() => updateFilter('style', filters.style === style ? '' : style)}
@@ -132,7 +184,7 @@ const SearchFilters = ({ filters, onFilterChange }: SearchFiltersProps) => {
                 </div>
               </div>
 
-              {/* Style Filter */}
+              {/* All Styles */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">All Styles</label>
                 <select
@@ -169,7 +221,7 @@ const SearchFilters = ({ filters, onFilterChange }: SearchFiltersProps) => {
 
               {/* Crew Size Filter */}
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">Crew Size</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-3">Team Size</label>
                 <div className="space-y-2">
                   {crewSizeOptions.map(option => (
                     <button
@@ -187,7 +239,7 @@ const SearchFilters = ({ filters, onFilterChange }: SearchFiltersProps) => {
                 </div>
               </div>
 
-              {/* Amenities Filter */}
+              {/* Essential Amenities */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">Essential Amenities</label>
                 <div className="grid grid-cols-2 gap-2">
