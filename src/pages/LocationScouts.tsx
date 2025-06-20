@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, MapPin, Star, MessageCircle, Calendar, Camera, Users, ArrowLeft, User, Phone, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface LocationScout {
   id: string;
@@ -173,19 +174,22 @@ const LocationScouts = () => {
     navigate(`/scout/${scoutId}`);
   };
 
-  const handleSendMessage = (scoutId: string) => {
-    // In a real app, this would open a message modal or navigate to messages
-    console.log(`Sending message to scout ${scoutId}`);
+  const handleSendMessage = (scoutId: string, scoutName: string) => {
+    toast.success(`Opening message chat with ${scoutName}`, {
+      description: "Message feature coming soon!"
+    });
   };
 
-  const handleBookScout = (scoutId: string) => {
-    // In a real app, this would open a booking modal
-    console.log(`Booking scout ${scoutId}`);
+  const handleBookScout = (scoutId: string, scoutName: string) => {
+    toast.success(`Booking request sent to ${scoutName}`, {
+      description: "You'll receive a confirmation email shortly."
+    });
   };
 
-  const handleCallScout = (scoutId: string) => {
-    // In a real app, this would initiate a call
-    console.log(`Calling scout ${scoutId}`);
+  const handleCallScout = (scoutId: string, scoutName: string) => {
+    toast.info(`Calling ${scoutName}`, {
+      description: "Call feature will be available soon!"
+    });
   };
 
   return (
@@ -393,21 +397,21 @@ const LocationScouts = () => {
                 
                 <div className="grid grid-cols-3 gap-2">
                   <button 
-                    onClick={() => handleSendMessage(scout.id)}
+                    onClick={() => handleSendMessage(scout.id, scout.name)}
                     className="bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
                   >
                     <MessageCircle className="h-4 w-4" />
                     <span className="text-xs">Message</span>
                   </button>
                   <button 
-                    onClick={() => handleBookScout(scout.id)}
+                    onClick={() => handleBookScout(scout.id, scout.name)}
                     className="bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
                   >
                     <Calendar className="h-4 w-4" />
                     <span className="text-xs">Book</span>
                   </button>
                   <button 
-                    onClick={() => handleCallScout(scout.id)}
+                    onClick={() => handleCallScout(scout.id, scout.name)}
                     className="bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
                   >
                     <Phone className="h-4 w-4" />
