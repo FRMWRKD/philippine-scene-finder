@@ -129,9 +129,9 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <HeroSection />
       
-      <div className="container mx-auto px-4 py-6">
+      <div id="locations-section" className="container mx-auto px-4 py-8">
         {/* Filters at the top */}
-        <div className="mb-6">
+        <div className="mb-8">
           <SearchFilters
             selectedFilters={selectedFilters}
             onFilterChange={handleFilterChange}
@@ -145,28 +145,28 @@ const Index = () => {
         </div>
 
         {/* View Mode Toggle and Results Count */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-bold text-gray-900">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-6">
+            <h2 className="text-2xl font-bold text-gray-900">
               {viewMode === 'locations' ? 'Discover Locations' : 'Browse Images'}
             </h2>
-            <div className="flex bg-gray-200 rounded-lg p-1">
+            <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-200">
               <button
                 onClick={() => setViewMode('locations')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   viewMode === 'locations' 
-                    ? 'bg-white text-gray-900 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-coral-500 text-white shadow-md' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
                 Locations
               </button>
               <button
                 onClick={() => setViewMode('images')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   viewMode === 'images' 
-                    ? 'bg-white text-gray-900 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-coral-500 text-white shadow-md' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
                 Images
@@ -174,7 +174,7 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 bg-white px-4 py-2 rounded-lg border border-gray-200">
             {viewMode === 'locations' 
               ? `${filteredLocations.length} locations found`
               : `${filteredImages.length} images found`
@@ -186,21 +186,21 @@ const Index = () => {
         <div>
           {viewMode === 'locations' ? (
             // Location Cards Grid
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {filteredLocations.map((location) => (
                 <LocationCard key={location.id} location={location} />
               ))}
             </div>
           ) : (
             // Image Gallery Grid
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {filteredImages.map((imageData) => (
                 <div
                   key={imageData.id}
                   className="group cursor-pointer"
                   onClick={() => handleImageClick(imageData)}
                 >
-                  <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3">
+                  <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4 shadow-sm hover:shadow-lg transition-shadow">
                     <img
                       src={imageData.image}
                       alt={imageData.title}
@@ -208,8 +208,8 @@ const Index = () => {
                     />
                   </div>
                   
-                  <div className="space-y-2">
-                    <h3 className="font-medium text-gray-900 text-sm line-clamp-2 group-hover:text-coral-600 transition-colors">
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 group-hover:text-coral-600 transition-colors">
                       {imageData.title}
                     </h3>
                     
@@ -218,7 +218,7 @@ const Index = () => {
                       <span>{imageData.location.location}</span>
                     </div>
                     
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2">
                       {imageData.tags.slice(0, 2).map((tag, index) => (
                         <button
                           key={index}
@@ -226,7 +226,7 @@ const Index = () => {
                             e.stopPropagation();
                             handleTagClick(tag);
                           }}
-                          className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full font-medium hover:bg-blue-100 transition-colors"
+                          className="px-3 py-1 bg-coral-50 text-coral-600 text-xs rounded-full font-medium hover:bg-coral-100 transition-colors border border-coral-200"
                         >
                           {tag}
                         </button>
@@ -241,8 +241,8 @@ const Index = () => {
           {/* No Results */}
           {((viewMode === 'locations' && filteredLocations.length === 0) || 
             (viewMode === 'images' && filteredImages.length === 0)) && (
-            <div className="text-center py-12">
-              <div className="text-gray-500 text-lg mb-4">
+            <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+              <div className="text-gray-500 text-xl mb-6">
                 No {viewMode} found matching your criteria
               </div>
               <button
@@ -254,9 +254,9 @@ const Index = () => {
                   const newSearchParams = new URLSearchParams();
                   setSearchParams(newSearchParams);
                 }}
-                className="bg-coral-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-coral-600 transition-colors"
+                className="bg-coral-500 text-white px-8 py-4 rounded-xl font-semibold hover:bg-coral-600 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                Clear Filters
+                Clear All Filters
               </button>
             </div>
           )}
