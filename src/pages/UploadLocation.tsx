@@ -1,418 +1,355 @@
 
-import { useState, useCallback } from "react";
-import { Upload, Camera, MapPin, DollarSign, Users, Zap, Car, Check, X, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface ImageAnalysis {
-  tags: string[];
-  style: string;
-  lighting: string;
-  mood: string;
-  technicalFeatures: string[];
-}
-
-interface UploadedImage {
-  id: string;
-  file: File;
-  url: string;
-  isHero: boolean;
-  analysis?: ImageAnalysis;
-  analyzing: boolean;
-}
+import { Camera, Upload, MapPin, DollarSign, Users, Zap, Car, CheckCircle } from "lucide-react";
 
 const UploadLocation = () => {
   const navigate = useNavigate();
-  const [images, setImages] = useState<UploadedImage[]>([]);
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    location: "",
-    price: "",
-    sizeM2: "",
-    powerAmps: "",
-    maxCrew: "",
-    amenities: [] as string[],
-    availability: "flexible"
+    title: '',
+    description: '',
+    location: '',
+    price: '',
+    sizeM2: '',
+    powerAmps: '',
+    maxCrew: '',
+    parking: false,
+    tags: [] as string[],
+    images: [] as File[]
   });
 
-  // Mock AI image analysis function
-  const analyzeImage = async (file: File): Promise<ImageAnalysis> => {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Mock analysis based on file name and random generation for demo
-    const styles = ["Modern Studio", "Spanish Colonial", "Tropical Villa", "Urban Loft", "Industrial", "Minimalist", "Vintage", "Beachfront"];
-    const lighting = ["Natural light", "Golden hour", "Dramatic shadows", "Soft diffused", "High contrast"];
-    const moods = ["Serene", "Dramatic", "Romantic", "Professional", "Rustic", "Luxurious"];
-    const features = ["Power outlets", "High ceilings", "Large windows", "Open space", "Water access", "Sunset views"];
-    
-    return {
-      tags: [styles[Math.floor(Math.random() * styles.length)], "Professional"],
-      style: styles[Math.floor(Math.random() * styles.length)],
-      lighting: lighting[Math.floor(Math.random() * lighting.length)],
-      mood: moods[Math.floor(Math.random() * moods.length)],
-      technicalFeatures: features.slice(0, Math.floor(Math.random() * 3) + 1)
-    };
+  const availableTags = [
+    "Photography Studio",
+    "Video Production", 
+    "Industrial Design",
+    "Rooftop",
+    "Natural Light",
+    "Warehouse",
+    "Modern",
+    "Vintage",
+    "Outdoor",
+    "Beach",
+    "Urban",
+    "Rustic",
+    "Corporate",
+    "Creative Space"
+  ];
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUpload = useCallback(async (files: FileList) => {
-    const newImages: UploadedImage[] = Array.from(files).map((file, index) => ({
-      id: `${Date.now()}-${index}`,
-      file,
-      url: URL.createObjectURL(file),
-      isHero: images.length === 0 && index === 0,
-      analyzing: true
-    }));
-
-    setImages(prev => [...prev, ...newImages]);
-
-    // Analyze each image
-    for (const image of newImages) {
-      try {
-        const analysis = await analyzeImage(image.file);
-        setImages(prev => prev.map(img => 
-          img.id === image.id 
-            ? { ...img, analysis, analyzing: false }
-            : img
-        ));
-      } catch (error) {
-        setImages(prev => prev.map(img => 
-          img.id === image.id 
-            ? { ...img, analyzing: false }
-            : img
-        ));
-      }
-    }
-  }, [images.length]);
-
-  const setAsHero = (imageId: string) => {
-    setImages(prev => prev.map(img => ({
-      ...img,
-      isHero: img.id === imageId
-    })));
-  };
-
-  const removeImage = (imageId: string) => {
-    setImages(prev => {
-      const filtered = prev.filter(img => img.id !== imageId);
-      if (filtered.length > 0 && !filtered.some(img => img.isHero)) {
-        filtered[0].isHero = true;
-      }
-      return filtered;
-    });
-  };
-
-  const toggleAmenity = (amenity: string) => {
+  const toggleTag = (tag: string) => {
     setFormData(prev => ({
       ...prev,
-      amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter(a => a !== amenity)
-        : [...prev.amenities, amenity]
+      tags: prev.tags.includes(tag) 
+        ? prev.tags.filter(t => t !== tag)
+        : [...prev.tags, tag]
+    }));
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setFormData(prev => ({ ...prev, images: [...prev.images, ...files] }));
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting location:", { formData, images });
-    // Here you would upload to your backend
-    navigate("/");
+    // Here you would typically send the data to your backend
+    console.log('Submitting location:', formData);
+    navigate('/');
   };
 
-  const amenityOptions = [
-    "Power outlets", "Parking", "WiFi", "AC", "Natural light", 
-    "Bathroom", "Kitchen", "Security", "Equipment rental", "Catering"
-  ];
+  const nextStep = () => {
+    if (currentStep < 3) setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-coral-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Share Your Perfect Location
-            </h1>
-            <p className="text-lg text-gray-600">
-              Help photographers and videographers discover your amazing space
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">List Your Location</h1>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Share your amazing space with filmmakers and photographers across the Philippines. 
+            Join our community of location scouts and start earning today.
+          </p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Image Upload Section */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Camera className="h-5 w-5 text-coral-500" />
-                Location Images
-              </h2>
-              
-              {/* Upload Area */}
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center mb-6 hover:border-coral-400 transition-colors">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={(e) => e.target.files && handleImageUpload(e.target.files)}
-                  className="hidden"
-                  id="image-upload"
-                />
-                <label htmlFor="image-upload" className="cursor-pointer">
-                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-lg font-medium text-gray-700">
-                    Drop images here or click to upload
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Upload high-quality images. First image will be your hero image.
-                  </p>
-                </label>
-              </div>
-
-              {/* Uploaded Images Grid */}
-              {images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {images.map((image) => (
-                    <div key={image.id} className="relative group">
-                      <div className="aspect-square rounded-xl overflow-hidden bg-gray-100">
-                        <img
-                          src={image.url}
-                          alt="Location"
-                          className="w-full h-full object-cover"
-                        />
-                        
-                        {/* Hero Badge */}
-                        {image.isHero && (
-                          <div className="absolute top-2 left-2 bg-coral-500 text-white px-2 py-1 rounded-lg text-xs font-medium">
-                            Hero
-                          </div>
-                        )}
-
-                        {/* Analysis Status */}
-                        {image.analyzing && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <div className="text-white text-center">
-                              <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-                              <p className="text-sm">Analyzing...</p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Controls */}
-                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {!image.isHero && (
-                            <button
-                              type="button"
-                              onClick={() => setAsHero(image.id)}
-                              className="bg-white/90 p-1 rounded-lg hover:bg-white transition-colors"
-                              title="Set as hero image"
-                            >
-                              <Camera className="h-4 w-4 text-gray-700" />
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => removeImage(image.id)}
-                            className="bg-red-500/90 p-1 rounded-lg hover:bg-red-500 transition-colors"
-                            title="Remove image"
-                          >
-                            <X className="h-4 w-4 text-white" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* AI Analysis Results */}
-                      {image.analysis && !image.analyzing && (
-                        <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                          <p className="text-xs font-medium text-gray-700 mb-1">AI Analysis:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {image.analysis.tags.map((tag, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-coral-100 text-coral-700 text-xs rounded-full"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                          <p className="text-xs text-gray-600 mt-1">
-                            {image.analysis.style} • {image.analysis.lighting}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center space-x-4">
+            {[1, 2, 3].map((step) => (
+              <div key={step} className="flex items-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                  step <= currentStep 
+                    ? 'bg-coral-500 text-white' 
+                    : 'bg-gray-200 text-gray-500'
+                }`}>
+                  {step < currentStep ? <CheckCircle className="h-5 w-5" /> : step}
                 </div>
-              )}
-            </div>
+                {step < 3 && (
+                  <div className={`w-12 h-1 mx-2 ${
+                    step < currentStep ? 'bg-coral-500' : 'bg-gray-200'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
 
-            {/* Location Details */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-coral-500" />
-                Location Details
-              </h2>
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8">
+          {/* Step 1: Basic Information */}
+          {currentStep === 1 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Basic Information</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Location Title
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Location Title *
                   </label>
                   <input
                     type="text"
                     value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
-                    placeholder="e.g., Stunning Modern Villa with Pool"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Location Address
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
-                    placeholder="e.g., Makati, Metro Manila"
+                    onChange={(e) => handleInputChange('title', e.target.value)}
+                    placeholder="e.g., Modern Photography Studio in Makati"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent"
                     required
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Description *
                   </label>
                   <textarea
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="Describe your location, its unique features, and what makes it perfect for productions..."
                     rows={4}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
-                    placeholder="Describe your location, its unique features, and what makes it perfect for shoots..."
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent"
                     required
                   />
                 </div>
-              </div>
-            </div>
 
-            {/* Technical Specs */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Zap className="h-5 w-5 text-coral-500" />
-                Technical Specifications
-              </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Price per Day (₱)
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <MapPin className="inline h-4 w-4 mr-1" />
+                    Location *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => handleInputChange('location', e.target.value)}
+                    placeholder="e.g., Makati City, Metro Manila"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <DollarSign className="inline h-4 w-4 mr-1" />
+                    Price per Day (₱) *
                   </label>
                   <input
                     type="number"
                     value={formData.price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
-                    placeholder="12000"
+                    onChange={(e) => handleInputChange('price', e.target.value)}
+                    placeholder="e.g., 5000"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Details & Amenities */}
+          {currentStep === 2 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Details & Amenities</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Size (m²) *
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.sizeM2}
+                    onChange={(e) => handleInputChange('sizeM2', e.target.value)}
+                    placeholder="e.g., 100"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Size (m²)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.sizeM2}
-                    onChange={(e) => setFormData(prev => ({ ...prev, sizeM2: e.target.value }))}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
-                    placeholder="250"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Power (Amps)
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <Zap className="inline h-4 w-4 mr-1" />
+                    Power (Amps) *
                   </label>
                   <input
                     type="number"
                     value={formData.powerAmps}
-                    onChange={(e) => setFormData(prev => ({ ...prev, powerAmps: e.target.value }))}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
-                    placeholder="50"
+                    onChange={(e) => handleInputChange('powerAmps', e.target.value)}
+                    placeholder="e.g., 60"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+                    required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Max Crew Size
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <Users className="inline h-4 w-4 mr-1" />
+                    Max Crew Size *
                   </label>
                   <input
                     type="number"
                     value={formData.maxCrew}
-                    onChange={(e) => setFormData(prev => ({ ...prev, maxCrew: e.target.value }))}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
-                    placeholder="15"
+                    onChange={(e) => handleInputChange('maxCrew', e.target.value)}
+                    placeholder="e.g., 20"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+                    required
                   />
                 </div>
               </div>
 
-              {/* Amenities */}
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Available Amenities
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="parking"
+                  checked={formData.parking}
+                  onChange={(e) => handleInputChange('parking', e.target.checked)}
+                  className="w-5 h-5 text-coral-600 border-gray-300 rounded focus:ring-coral-500"
+                />
+                <label htmlFor="parking" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Car className="h-4 w-4" />
+                  Parking Available
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                  {amenityOptions.map(amenity => (
-                    <label 
-                      key={amenity} 
-                      className={`flex items-center p-3 rounded-xl cursor-pointer transition-all border ${
-                        formData.amenities.includes(amenity)
-                          ? 'bg-coral-50 border-coral-200 text-coral-700'
-                          : 'bg-white border-gray-200 hover:border-gray-300'
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Categories & Tags
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {availableTags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => toggleTag(tag)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        formData.tags.includes(tag)
+                          ? "bg-coral-500 text-white shadow-md"
+                          : "bg-gray-100 text-gray-700 hover:bg-coral-50 hover:text-coral-600 border border-gray-200"
                       }`}
                     >
-                      <input
-                        type="checkbox"
-                        checked={formData.amenities.includes(amenity)}
-                        onChange={() => toggleAmenity(amenity)}
-                        className="sr-only"
-                      />
-                      <div className={`w-4 h-4 rounded border-2 mr-3 flex items-center justify-center ${
-                        formData.amenities.includes(amenity)
-                          ? 'bg-coral-500 border-coral-500'
-                          : 'border-gray-300'
-                      }`}>
-                        {formData.amenities.includes(amenity) && (
-                          <Check className="w-3 h-3 text-white" />
-                        )}
-                      </div>
-                      <span className="text-sm font-medium">{amenity}</span>
-                    </label>
+                      {tag}
+                    </button>
                   ))}
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Submit */}
-            <div className="flex gap-4">
+          {/* Step 3: Photos */}
+          {currentStep === 3 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Upload Photos</h2>
+              
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-coral-500 transition-colors">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label htmlFor="image-upload" className="cursor-pointer">
+                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-lg font-medium text-gray-700 mb-2">
+                    Upload Your Photos
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    Drag and drop or click to select multiple images
+                  </p>
+                </label>
+              </div>
+
+              {formData.images.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {formData.images.map((image, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt={`Upload ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={prevStep}
+              disabled={currentStep === 1}
+              className={`px-6 py-3 rounded-xl font-medium transition-all ${
+                currentStep === 1 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Previous
+            </button>
+
+            {currentStep < 3 ? (
               <button
                 type="button"
-                onClick={() => navigate("/")}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                onClick={nextStep}
+                className="px-6 py-3 bg-coral-500 text-white rounded-xl font-medium hover:bg-coral-600 transition-colors shadow-lg hover:shadow-xl"
               >
-                Cancel
+                Next Step
               </button>
+            ) : (
               <button
                 type="submit"
-                disabled={images.length === 0 || images.some(img => img.analyzing)}
-                className="flex-1 bg-coral-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-coral-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="px-8 py-3 bg-gradient-to-r from-coral-500 to-orange-500 text-white rounded-xl font-medium hover:from-coral-600 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                {images.some(img => img.analyzing) ? "Processing Images..." : "Publish Location"}
+                List My Location
               </button>
-            </div>
-          </form>
-        </div>
+            )}
+          </div>
+        </form>
       </div>
     </div>
   );
