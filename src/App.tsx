@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import LocationDetail from "./pages/LocationDetail";
+import ImageDetail from "./pages/ImageDetail";
 import LocationScouts from "./pages/LocationScouts";
 import ScoutProfile from "./pages/ScoutProfile";
 import UploadLocation from "./pages/UploadLocation";
@@ -22,6 +23,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/location/:id" element={<LocationDetail />} />
+          <Route path="/image/:locationId/:imageIndex" element={<ImageDetail />} />
           <Route path="/scouts" element={<LocationScouts />} />
           <Route path="/scout/:id" element={<ScoutProfile />} />
           <Route path="/upload" element={<UploadLocation />} />
