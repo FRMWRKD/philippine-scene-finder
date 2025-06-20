@@ -1,9 +1,11 @@
+
 import { useState, useEffect, useMemo } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, Map } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import HeroSection from "../components/HeroSection";
 import LocationCard from "../components/LocationCard";
 import SearchFilters from "../components/SearchFilters";
+import LocationMap from "../components/LocationMap";
 import { mockLocations } from "../data/mockData";
 import FloatingActionButton from "../components/FloatingActionButton";
 
@@ -12,7 +14,8 @@ const Index = () => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const [currentLocation, setCurrentLocation] = useState("Metro Manila");
-  const [viewMode, setViewMode] = useState<'locations' | 'images'>('locations');
+  const [viewMode, setViewMode] = useState<'locations' | 'images' | 'map'>('locations');
+  const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -127,33 +130,39 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeroSection />
+      <HeroSection 
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onFiltersClick={() => setShowFilters(!showFilters)}
+      />
       
       <div id="locations-section" className="container mx-auto px-4 py-8">
-        {/* Filters at the top */}
-        <div className="mb-8">
-          <SearchFilters
-            selectedFilters={selectedFilters}
-            onFilterChange={handleFilterChange}
-            priceRange={priceRange}
-            onPriceChange={setPriceRange}
-            currentLocation={currentLocation}
-            onLocationChange={setCurrentLocation}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-          />
-        </div>
+        {/* Filters - Show/Hide based on state */}
+        {showFilters && (
+          <div className="mb-8">
+            <SearchFilters
+              selectedFilters={selectedFilters}
+              onFilterChange={handleFilterChange}
+              priceRange={priceRange}
+              onPriceChange={setPriceRange}
+              currentLocation={currentLocation}
+              onLocationChange={setCurrentLocation}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+            />
+          </div>
+        )}
 
         {/* View Mode Toggle and Results Count */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-6">
             <h2 className="text-2xl font-bold text-gray-900">
-              {viewMode === 'locations' ? 'Discover Locations' : 'Browse Images'}
+              {viewMode === 'locations' ? 'Discover Locations' : viewMode === 'images' ? 'Browse Images' : 'Map View'}
             </h2>
             <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-200">
               <button
                 onClick={() => setViewMode('locations')}
-                className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   viewMode === 'locations' 
                     ? 'bg-coral-500 text-white shadow-md' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -163,7 +172,7 @@ const Index = () => {
               </button>
               <button
                 onClick={() => setViewMode('images')}
-                className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   viewMode === 'images' 
                     ? 'bg-coral-500 text-white shadow-md' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -171,13 +180,26 @@ const Index = () => {
               >
                 Images
               </button>
+              <button
+                onClick={() => setViewMode('map')}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  viewMode === 'map' 
+                    ? 'bg-coral-500 text-white shadow-md' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <Map className="h-4 w-4 inline mr-1" />
+                Map
+              </button>
             </div>
           </div>
           
           <div className="text-sm text-gray-600 bg-white px-4 py-2 rounded-lg border border-gray-200">
             {viewMode === 'locations' 
               ? `${filteredLocations.length} locations found`
-              : `${filteredImages.length} images found`
+              : viewMode === 'images'
+              ? `${filteredImages.length} images found`
+              : `${filteredLocations.length} locations on map`
             }
           </div>
         </div>
@@ -191,7 +213,7 @@ const Index = () => {
                 <LocationCard key={location.id} location={location} />
               ))}
             </div>
-          ) : (
+          ) : viewMode === 'images' ? (
             // Image Gallery Grid
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {filteredImages.map((imageData) => (
@@ -236,6 +258,11 @@ const Index = () => {
                 </div>
               ))}
             </div>
+          ) : (
+            // Map View
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              <LocationMap locations={filteredLocations} />
+            </div>
           )}
 
           {/* No Results */}
@@ -250,6 +277,7 @@ const Index = () => {
                   setSelectedFilters([]);
                   setSearchTerm("");
                   setPriceRange([0, 50000]);
+                  setShowFilters(false);
                   // Clear URL parameters
                   const newSearchParams = new URLSearchParams();
                   setSearchParams(newSearchParams);
