@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { X, Send, Paperclip, Image } from "lucide-react";
+import { X, Send, Paperclip, Image, Phone, Video } from "lucide-react";
 
 interface Location {
   id: string;
@@ -31,6 +31,13 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
       content: "Hi! Thanks for your interest in my location. I'd be happy to help with your shoot. What kind of project are you working on?",
       timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
       type: "text"
+    },
+    {
+      id: "2",
+      sender: "scout",
+      content: "I can provide additional photos, arrange a virtual tour, or schedule an on-site visit. Let me know what works best for you!",
+      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
+      type: "text"
     }
   ]);
 
@@ -54,10 +61,11 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
     // Simulate scout response
     setTimeout(() => {
       const responses = [
-        "That sounds like a great project! I'd love to help.",
-        "The space would be perfect for that type of shoot.",
-        "Let me know if you have any specific questions about the location.",
-        "I can definitely accommodate those requirements."
+        "That sounds like a fantastic project! I'd love to help make it happen.",
+        "Perfect! This location would be ideal for that type of shoot.",
+        "Great choice! I can definitely accommodate those requirements.",
+        "Wonderful! Let me know if you'd like to schedule a virtual tour first.",
+        "Excellent! I have some additional angles that might work perfectly for your vision."
       ];
       
       const autoResponse: Message = {
@@ -69,7 +77,7 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
       };
 
       setMessages(prev => [...prev, autoResponse]);
-    }, 1000);
+    }, 1500);
   };
 
   const formatTime = (date: Date) => {
@@ -78,19 +86,32 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full h-[600px] flex flex-col">
+      <div className="bg-white rounded-2xl max-w-2xl w-full h-[700px] flex flex-col">
         {/* Header */}
         <div className="border-b border-gray-200 p-4 flex justify-between items-center">
-          <div>
-            <h2 className="font-semibold text-gray-900">{location.title}</h2>
-            <p className="text-sm text-gray-600">{location.location}</p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-coral-100 rounded-full flex items-center justify-center">
+              <span className="text-coral-600 font-semibold text-sm">LS</span>
+            </div>
+            <div>
+              <h2 className="font-semibold text-gray-900">{location.title}</h2>
+              <p className="text-sm text-gray-600">{location.location}</p>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <Phone className="h-4 w-4 text-gray-600" />
+            </button>
+            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <Video className="h-4 w-4 text-gray-600" />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+          </div>
         </div>
 
         {/* Messages */}
@@ -100,36 +121,57 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
               key={msg.id}
               className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
-              <div
-                className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                  msg.sender === "user"
-                    ? "bg-coral-500 text-white"
-                    : "bg-gray-100 text-gray-900"
-                }`}
-              >
-                <p className="text-sm">{msg.content}</p>
-                <p
-                  className={`text-xs mt-1 ${
-                    msg.sender === "user" ? "text-coral-100" : "text-gray-500"
+              <div className={`flex gap-2 max-w-[80%] ${msg.sender === "user" ? "flex-row-reverse" : ""}`}>
+                {msg.sender === "scout" && (
+                  <div className="w-8 h-8 bg-coral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-coral-600 font-semibold text-xs">LS</span>
+                  </div>
+                )}
+                <div
+                  className={`rounded-2xl px-4 py-2 ${
+                    msg.sender === "user"
+                      ? "bg-coral-500 text-white"
+                      : "bg-gray-100 text-gray-900"
                   }`}
                 >
-                  {formatTime(msg.timestamp)}
-                </p>
+                  <p className="text-sm">{msg.content}</p>
+                  <p
+                    className={`text-xs mt-1 ${
+                      msg.sender === "user" ? "text-coral-100" : "text-gray-500"
+                    }`}
+                  >
+                    {formatTime(msg.timestamp)}
+                  </p>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
+        {/* Quick Actions */}
+        <div className="border-t border-gray-100 p-3">
+          <div className="flex gap-2 justify-center">
+            <button className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+              <Video className="h-4 w-4" />
+              Virtual Tour
+            </button>
+            <button className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+              <Phone className="h-4 w-4" />
+              Call Scout
+            </button>
+          </div>
+        </div>
+
         {/* Message Input */}
         <div className="border-t border-gray-200 p-4">
-          <form onSubmit={handleSendMessage} className="flex gap-2">
+          <form onSubmit={handleSendMessage} className="flex gap-3">
             <div className="flex-1 relative">
               <input
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Type your message..."
-                className="w-full p-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
+                className="w-full p-3 pr-20 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex gap-1">
                 <button
