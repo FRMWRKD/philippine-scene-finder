@@ -224,11 +224,22 @@ const ScoutProfile = () => {
       <BookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
+        location={{
+          id: scout.id,
+          title: scout.name,
+          price: scout.hourlyRate,
+          location: scout.location
+        }}
       />
 
       <MessageModal
         isOpen={showMessageModal}
         onClose={() => setShowMessageModal(false)}
+        location={{
+          id: scout.id,
+          title: scout.name,
+          location: scout.location
+        }}
       />
     </div>
   );

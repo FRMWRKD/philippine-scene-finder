@@ -104,7 +104,9 @@ const LocationDetail = () => {
               <p className="text-gray-700 leading-relaxed">
                 This beautiful location offers the perfect setting for your production needs. 
                 With professional-grade facilities and stunning aesthetics, it provides an ideal 
-                backdrop for both photography and film projects.
+                backdrop for both photography and film projects. The space features modern amenities,
+                excellent lighting conditions, and flexible layouts that can accommodate various 
+                creative visions and production requirements.
               </p>
             </div>
 
@@ -214,11 +216,22 @@ const LocationDetail = () => {
       <BookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
+        location={{
+          id: location.id,
+          title: location.title,
+          price: location.price,
+          location: location.location
+        }}
       />
 
       <MessageModal
         isOpen={showMessageModal}
         onClose={() => setShowMessageModal(false)}
+        location={{
+          id: location.id,
+          title: location.title,
+          location: location.location
+        }}
       />
 
       <ImageModal
