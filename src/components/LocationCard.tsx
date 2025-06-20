@@ -27,10 +27,28 @@ interface LocationCardProps {
 
 const LocationCard = ({ location }: LocationCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
+
+  const allImages = [location.heroImage, ...location.gallery];
 
   const handleCardClick = () => {
     navigate(`/location/${location.id}`);
+  };
+
+  const handleImageClick = (e: React.MouseEvent, imageIndex: number) => {
+    e.stopPropagation();
+    navigate(`/location/${location.id}/image/${imageIndex}`);
+  };
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
   };
 
   return (
@@ -38,13 +56,48 @@ const LocationCard = ({ location }: LocationCardProps) => {
       className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer transform hover:-translate-y-2"
       onClick={handleCardClick}
     >
-      {/* Image Container */}
+      {/* Image Container with Navigation */}
       <div className="relative h-64 overflow-hidden">
         <img
-          src={location.heroImage}
+          src={allImages[currentImageIndex]}
           alt={location.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          onClick={(e) => handleImageClick(e, currentImageIndex)}
         />
+        
+        {/* Image Navigation */}
+        {allImages.length > 1 && (
+          <>
+            <button
+              onClick={prevImage}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+            >
+              ‹
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+            >
+              ›
+            </button>
+            
+            {/* Image Dots */}
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
+              {allImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex(index);
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
         
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -75,6 +128,11 @@ const LocationCard = ({ location }: LocationCardProps) => {
         {/* Price badge */}
         <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
           <span className="text-sm font-semibold text-gray-900">₱{location.price.toLocaleString()}/day</span>
+        </div>
+
+        {/* Image count badge */}
+        <div className="absolute top-4 left-4 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
+          {allImages.length} photos
         </div>
       </div>
 
