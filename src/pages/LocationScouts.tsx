@@ -27,7 +27,7 @@ const mockScouts: LocationScout[] = [
     avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face",
     rating: 4.9,
     reviewCount: 127,
-    specialty: ["Beach Locations", "Urban Studios", "Heritage Sites"],
+    specialty: ["Manila Bay Sunsets", "Intramuros Heritage", "BGC Modern"],
     location: "Metro Manila",
     experience: "5+ years",
     responseTime: "Within 2 hours",
@@ -37,7 +37,7 @@ const mockScouts: LocationScout[] = [
       "https://images.unsplash.com/photo-1516205651411-aef33a44f7c2?w=300&h=200&fit=crop",
       "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=300&h=200&fit=crop"
     ],
-    about: "Specialized in finding unique locations for film and photography across Metro Manila and nearby provinces.",
+    about: "Specialized in finding unique Manila locations from Spanish colonial heritage sites in Intramuros to modern BGC skylines and iconic Manila Bay sunsets.",
     priceRange: "₱3,000 - ₱15,000",
     languages: ["English", "Filipino", "Tagalog"]
   },
@@ -47,8 +47,8 @@ const mockScouts: LocationScout[] = [
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
     rating: 4.8,
     reviewCount: 89,
-    specialty: ["Mountain Locations", "Rice Terraces", "Outdoor Adventures"],
-    location: "Baguio & Benguet",
+    specialty: ["Banaue Rice Terraces", "Sagada Caves", "Cordillera Mountains"],
+    location: "Baguio & Cordilleras",
     experience: "7+ years",
     responseTime: "Within 4 hours",
     totalBookings: 215,
@@ -57,7 +57,7 @@ const mockScouts: LocationScout[] = [
       "https://images.unsplash.com/photo-1571771710463-8e84c5ce7708?w=300&h=200&fit=crop",
       "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&h=200&fit=crop"
     ],
-    about: "Expert in mountain and highland locations, perfect for nature documentaries and adventure shoots.",
+    about: "Expert in Cordillera mountain locations including the world-famous Banaue Rice Terraces, mystical Sagada caves, and Baguio's pine forests.",
     priceRange: "₱2,500 - ₱12,000",
     languages: ["English", "Filipino", "Ilocano"]
   },
@@ -67,8 +67,8 @@ const mockScouts: LocationScout[] = [
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
     rating: 5.0,
     reviewCount: 203,
-    specialty: ["Beach Resorts", "Island Locations", "Underwater Shoots"],
-    location: "Palawan & Islands",
+    specialty: ["El Nido Lagoons", "Coron Wrecks", "Puerto Princesa"],
+    location: "Palawan",
     experience: "6+ years",
     responseTime: "Within 1 hour",
     totalBookings: 456,
@@ -77,9 +77,69 @@ const mockScouts: LocationScout[] = [
       "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=200&fit=crop",
       "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=300&h=200&fit=crop"
     ],
-    about: "Island specialist with connections to pristine beaches and exclusive resort locations throughout Palawan.",
+    about: "Palawan specialist with exclusive access to hidden lagoons in El Nido, underwater shipwrecks in Coron, and pristine beaches throughout the province.",
     priceRange: "₱4,000 - ₱20,000",
+    languages: ["English", "Filipino", "Tagalog"]
+  },
+  {
+    id: "4",
+    name: "Miguel Fernandez",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    rating: 4.7,
+    reviewCount: 156,
+    specialty: ["Chocolate Hills", "Tarsier Sanctuary", "Loboc River"],
+    location: "Bohol",
+    experience: "4+ years",
+    responseTime: "Within 3 hours",
+    totalBookings: 278,
+    portfolio: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=300&h=200&fit=crop"
+    ],
+    about: "Bohol expert specializing in the iconic Chocolate Hills, Tarsier wildlife photography, and scenic Loboc River cruises for nature documentaries.",
+    priceRange: "₱3,500 - ₱14,000",
     languages: ["English", "Filipino", "Cebuano"]
+  },
+  {
+    id: "5",
+    name: "Ana Villanueva",
+    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+    rating: 4.9,
+    reviewCount: 192,
+    specialty: ["Cloud 9 Breaks", "Magpupungko Pools", "Mangrove Forests"],
+    location: "Siargao",
+    experience: "5+ years",
+    responseTime: "Within 2 hours",
+    totalBookings: 368,
+    portfolio: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=300&h=200&fit=crop"
+    ],
+    about: "Siargao surf culture expert with access to Cloud 9 surf breaks, pristine Magpupungko rock pools, and untouched mangrove forests for adventure shoots.",
+    priceRange: "₱3,800 - ₱16,000",
+    languages: ["English", "Filipino", "Cebuano"]
+  },
+  {
+    id: "6",
+    name: "Rafael Cruz",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    rating: 4.8,
+    reviewCount: 143,
+    specialty: ["Mayon Volcano", "Cagsawa Ruins", "Donsol Whale Sharks"],
+    location: "Bicol Region",
+    experience: "6+ years",
+    responseTime: "Within 4 hours",
+    totalBookings: 245,
+    portfolio: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=200&fit=crop",
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=300&h=200&fit=crop"
+    ],
+    about: "Bicol specialist featuring the perfect cone of Mayon Volcano, historic Cagsawa Ruins, and world-famous whale shark encounters in Donsol.",
+    priceRange: "₱3,200 - ₱13,500",
+    languages: ["English", "Filipino", "Bicolano"]
   }
 ];
 
@@ -89,8 +149,17 @@ const LocationScouts = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
 
-  const specialties = ["Beach Locations", "Urban Studios", "Mountain Locations", "Heritage Sites", "Rice Terraces", "Island Locations"];
-  const regions = ["Metro Manila", "Baguio & Benguet", "Palawan & Islands", "Cebu", "Bohol", "Siargao"];
+  const specialties = [
+    "Manila Bay Sunsets", "Intramuros Heritage", "BGC Modern", "Banaue Rice Terraces", 
+    "Sagada Caves", "El Nido Lagoons", "Coron Wrecks", "Chocolate Hills", 
+    "Tarsier Sanctuary", "Cloud 9 Breaks", "Mayon Volcano", "Cagsawa Ruins"
+  ];
+
+  const regions = [
+    "Metro Manila", "Baguio & Cordilleras", "Palawan", "Bohol", "Siargao", 
+    "Bicol Region", "Cebu", "La Union", "Ilocos Norte", "Batanes", 
+    "Camiguin", "Siquijor"
+  ];
 
   const filteredScouts = mockScouts.filter(scout => {
     const matchesSearch = scout.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -146,10 +215,10 @@ const LocationScouts = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-3xl md:text-5xl font-bold mb-4">
-              Connect with Expert Location Scouts
+              Connect with Filipino Location Scouts
             </h1>
             <p className="text-lg md:text-xl text-white/90 mb-6">
-              Find verified professionals who know the best spots across the Philippines
+              Find verified professionals who know the best spots from Luzon to Mindanao
             </p>
             <div className="flex justify-center gap-8 text-sm">
               <div className="flex items-center gap-2">
@@ -211,7 +280,7 @@ const LocationScouts = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">
-            {filteredScouts.length} Location Scouts Available
+            {filteredScouts.length} Filipino Location Scouts Available
           </h2>
         </div>
 
