@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { MapPin, Map } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -134,6 +133,7 @@ const Index = () => {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onFiltersClick={() => setShowFilters(!showFilters)}
+        showFilters={showFilters}
       />
       
       <div id="locations-section" className="container mx-auto px-4 py-8">
