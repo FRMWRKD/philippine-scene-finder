@@ -75,12 +75,12 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white rounded-t-2xl border-b border-gray-200 p-6 flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Book Location</h2>
-            <p className="text-sm text-gray-600">{location.title}</p>
+            <h2 className="text-2xl font-bold text-gray-900">Book Location</h2>
+            <p className="text-gray-600">{location.title}</p>
           </div>
           <button
             onClick={onClose}
@@ -90,81 +90,93 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-8">
           {/* Booking Type */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-3">
-              Choose Your Experience
-            </label>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose Your Experience</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={() => setBookingType("virtual")}
-                className={`p-4 rounded-xl border-2 transition-all text-left ${
+                className={`p-6 rounded-2xl border-2 transition-all text-left hover:shadow-lg ${
                   bookingType === "virtual"
-                    ? 'border-coral-500 bg-coral-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-coral-500 bg-coral-50 shadow-md'
+                    : 'border-gray-200 hover:border-coral-300'
                 }`}
               >
-                <div className="flex items-center gap-3 mb-2">
-                  <Video className="h-5 w-5 text-coral-600" />
-                  <div className="font-medium text-gray-900">Virtual Tour</div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-coral-100 rounded-xl flex items-center justify-center">
+                    <Video className="h-6 w-6 text-coral-600" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900 text-lg">Virtual Tour</div>
+                    <div className="text-sm text-gray-500">Live video walkthrough</div>
+                  </div>
                 </div>
-                <div className="text-sm text-gray-600 mb-2">
+                <div className="text-sm text-gray-600 mb-3">
                   30-minute live video walkthrough with the scout
                 </div>
-                <div className="text-lg font-bold text-coral-600">₱500</div>
+                <div className="text-2xl font-bold text-coral-600">₱500</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setBookingType("onsite")}
-                className={`p-4 rounded-xl border-2 transition-all text-left ${
+                className={`p-6 rounded-2xl border-2 transition-all text-left hover:shadow-lg ${
                   bookingType === "onsite"
-                    ? 'border-coral-500 bg-coral-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-coral-500 bg-coral-50 shadow-md'
+                    : 'border-gray-200 hover:border-coral-300'
                 }`}
               >
-                <div className="flex items-center gap-3 mb-2">
-                  <MapPin className="h-5 w-5 text-coral-600" />
-                  <div className="font-medium text-gray-900">On-Site Visit</div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-coral-100 rounded-xl flex items-center justify-center">
+                    <MapPin className="h-6 w-6 text-coral-600" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900 text-lg">On-Site Visit</div>
+                    <div className="text-sm text-gray-500">Physical scouting</div>
+                  </div>
                 </div>
-                <div className="text-sm text-gray-600 mb-2">
+                <div className="text-sm text-gray-600 mb-3">
                   Physical location scouting with professional guidance
                 </div>
-                <div className="text-lg font-bold text-coral-600">
+                <div className="text-2xl font-bold text-coral-600">
                   ₱{(location.price / 8).toLocaleString()}/hr
                 </div>
               </button>
             </div>
           </div>
 
-          {/* Date and Time */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Date and Time Selection */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Date Selection */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-3">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
                 Select Date
-              </label>
-              <div className="border border-gray-200 rounded-xl p-3">
+              </h3>
+              <div className="border border-gray-200 rounded-2xl p-4 bg-gray-50">
                 <CalendarComponent
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   disabled={(date) => date < new Date()}
-                  className="w-full"
+                  className="w-full bg-white rounded-xl shadow-sm"
                 />
               </div>
             </div>
 
-            <div className="space-y-4">
+            {/* Time and Options */}
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
                   Preferred Time
-                </label>
+                </h3>
                 <select
                   value={timeSlot}
                   onChange={(e) => setTimeSlot(e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
+                  className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none bg-white text-gray-900"
                   required
                 >
                   <option value="">Select time</option>
@@ -177,13 +189,13 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
               {bookingType === "onsite" && (
                 <>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
                       Duration
                     </label>
                     <select
                       value={duration}
                       onChange={(e) => setDuration(e.target.value)}
-                      className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
+                      className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none bg-white"
                     >
                       <option value="2">2 hours</option>
                       <option value="4">4 hours</option>
@@ -192,13 +204,14 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    <label className="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                      <Users className="h-4 w-4" />
                       Crew Size
                     </label>
                     <select
                       value={crewSize}
                       onChange={(e) => setCrewSize(e.target.value)}
-                      className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
+                      className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none bg-white"
                     >
                       <option value="1-2">1-2 people</option>
                       <option value="3-5">3-5 people</option>
@@ -211,40 +224,38 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
             </div>
           </div>
 
-          {/* Message */}
+          {/* Project Description */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-3">
-              Tell us about your project
-            </label>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Tell us about your project</h3>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              rows={3}
-              className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
+              rows={4}
+              className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none resize-none"
               placeholder="Describe your project, specific requirements, or any questions for the scout..."
             />
           </div>
 
           {/* Cost Summary */}
-          <div className="bg-gradient-to-r from-coral-50 to-orange-50 rounded-xl p-4 border border-coral-200">
+          <div className="bg-gradient-to-r from-coral-50 to-orange-50 rounded-2xl p-6 border border-coral-200">
             <div className="flex justify-between items-center">
               <div>
-                <div className="font-semibold text-gray-900">Total Cost</div>
-                <div className="text-sm text-gray-600">
-                  {bookingType === "virtual" ? "30-min virtual consultation" : `${duration} hours on-site`}
+                <div className="text-xl font-bold text-gray-900">Total Cost</div>
+                <div className="text-gray-600">
+                  {bookingType === "virtual" ? "30-min virtual consultation" : `${duration} hours on-site visit`}
                 </div>
               </div>
-              <div className="text-2xl font-bold text-coral-600">
+              <div className="text-3xl font-bold text-coral-600">
                 ₱{totalCost.toLocaleString()}
               </div>
             </div>
           </div>
 
-          {/* Submit */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={!selectedDate || !timeSlot}
-            className="w-full bg-coral-500 text-white py-4 px-6 rounded-xl font-semibold hover:bg-coral-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-lg"
+            className="w-full bg-gradient-to-r from-coral-500 to-coral-600 text-white py-4 px-6 rounded-2xl font-semibold hover:from-coral-600 hover:to-coral-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none"
           >
             {bookingType === "virtual" ? "Book Virtual Tour" : "Request On-Site Visit"}
           </button>
