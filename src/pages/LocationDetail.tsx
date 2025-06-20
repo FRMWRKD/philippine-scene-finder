@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Users, Zap, Car, MessageCircle, Calendar, Heart, Share2, Star, Clock, Shield, Wifi, Camera, Volume2, Sun, Thermometer, Ruler, Tag } from "lucide-react";
 import { mockLocations } from "../data/mockData";
 import BookingModal from "../components/BookingModal";
 import MessageModal from "../components/MessageModal";
+import ImageModal from "../components/ImageModal";
 
 const LocationDetail = () => {
   const { id } = useParams();
@@ -12,6 +12,7 @@ const LocationDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
 
   const location = mockLocations.find(loc => loc.id === id);
@@ -87,6 +88,11 @@ const LocationDetail = () => {
     navigate(`/?tag=${encodeURIComponent(tag)}`);
   };
 
+  const handleImageClick = (index: number) => {
+    setCurrentImageIndex(index);
+    setIsImageModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -119,14 +125,14 @@ const LocationDetail = () => {
         </div>
       </div>
 
-      {/* Image Gallery */}
+      {/* Image Gallery - Made Smaller */}
       <div className="relative">
-        <div className="aspect-[16/9] md:aspect-[2/1] lg:aspect-[3/1] bg-gray-100">
+        <div className="aspect-[16/9] md:aspect-[5/2] bg-gray-100">
           <img
             src={allImages[currentImageIndex]}
             alt={location.title}
             className="w-full h-full object-cover cursor-pointer"
-            onClick={() => navigate(`/location/${location.id}/image/${currentImageIndex}`)}
+            onClick={() => handleImageClick(currentImageIndex)}
           />
         </div>
 
@@ -267,7 +273,7 @@ const LocationDetail = () => {
               </div>
             </div>
 
-            {/* Photo Gallery Grid */}
+            {/* Photo Gallery Grid - Updated with Modal */}
             {allImages.length > 1 && (
               <div className="mb-8">
                 <h2 className="text-2xl font-semibold mb-6">Photo Gallery</h2>
@@ -275,7 +281,7 @@ const LocationDetail = () => {
                   {allImages.map((image, index) => (
                     <button
                       key={index}
-                      onClick={() => navigate(`/location/${location.id}/image/${index}`)}
+                      onClick={() => handleImageClick(index)}
                       className={`aspect-square rounded-lg overflow-hidden border-2 transition-all hover:border-coral-300 ${
                         index === currentImageIndex 
                           ? 'border-coral-500 ring-2 ring-coral-200' 
@@ -419,6 +425,15 @@ const LocationDetail = () => {
         isOpen={isMessageOpen}
         onClose={() => setIsMessageOpen(false)}
         location={location}
+      />
+
+      <ImageModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        images={allImages}
+        currentIndex={currentImageIndex}
+        onIndexChange={setCurrentImageIndex}
+        locationTitle={location.title}
       />
     </div>
   );

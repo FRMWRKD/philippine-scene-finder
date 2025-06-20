@@ -1,12 +1,16 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Star, MessageCircle, Calendar, Camera, Users, Clock, Award, Heart, Share2 } from "lucide-react";
+import { ArrowLeft, MapPin, Star, MessageCircle, Calendar, Camera, Users, Clock, Award, Heart, Share2, Search, Filter } from "lucide-react";
+import { mockLocations } from "../data/mockData";
+import LocationCard from "../components/LocationCard";
 
 const ScoutProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isFollowing, setIsFollowing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStyle, setSelectedStyle] = useState("");
+  const [selectedBudget, setSelectedBudget] = useState("");
 
   // Mock scout data - in real app this would come from API
   const scout = {
@@ -75,6 +79,30 @@ const ScoutProfile = () => {
       projectsCompleted: "340+"
     }
   };
+
+  // Filter scout's locations
+  const scoutLocations = mockLocations.filter(location => 
+    // In real app, this would filter by scout ID
+    true // For now, show all locations as if they're managed by this scout
+  );
+
+  const filteredLocations = scoutLocations.filter(location => {
+    const matchesSearch = searchQuery === "" ||
+      location.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      location.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      location.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesStyle = selectedStyle === "" || location.tags.includes(selectedStyle);
+
+    const matchesBudget =
+      selectedBudget === "" ||
+      (selectedBudget === "under-3000" && location.price < 3000) ||
+      (selectedBudget === "3000-8000" && location.price >= 3000 && location.price <= 8000) ||
+      (selectedBudget === "8000-20000" && location.price > 8000 && location.price <= 20000) ||
+      (selectedBudget === "over-20000" && location.price > 20000);
+
+    return matchesSearch && matchesStyle && matchesBudget;
+  });
 
   if (!scout) {
     return (
@@ -215,24 +243,73 @@ const ScoutProfile = () => {
               </div>
             </div>
 
-            {/* Portfolio */}
+            {/* Scout's Locations with Filters */}
             <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h2 className="text-xl font-semibold mb-4">Portfolio Highlights</h2>
+              <h2 className="text-xl font-semibold mb-4">Managed Locations ({filteredLocations.length})</h2>
+              
+              {/* Search and Filters */}
+              <div className="mb-6 space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="text"
+                    placeholder="Search locations..."
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                
+                <div className="flex gap-3">
+                  <select
+                    value={selectedStyle}
+                    onChange={(e) => setSelectedStyle(e.target.value)}
+                    className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
+                  >
+                    <option value="">All Styles</option>
+                    <option value="Modern">Modern</option>
+                    <option value="Industrial">Industrial</option>
+                    <option value="Vintage">Vintage</option>
+                    <option value="Minimalist">Minimalist</option>
+                    <option value="Traditional">Traditional</option>
+                  </select>
+                  
+                  <select
+                    value={selectedBudget}
+                    onChange={(e) => setSelectedBudget(e.target.value)}
+                    className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
+                  >
+                    <option value="">All Budgets</option>
+                    <option value="under-3000">Under ₱3,000</option>
+                    <option value="3000-8000">₱3,000 - ₱8,000</option>
+                    <option value="8000-20000">₱8,000 - ₱20,000</option>
+                    <option value="over-20000">Over ₱20,000</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Locations Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {scout.portfolio.map(item => (
-                  <div key={item.id} className="group cursor-pointer">
-                    <div className="aspect-video rounded-lg overflow-hidden mb-3">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
-                    <p className="text-gray-600 text-sm">{item.description}</p>
-                  </div>
+                {filteredLocations.map(location => (
+                  <LocationCard key={location.id} location={location} />
                 ))}
               </div>
+
+              {filteredLocations.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-gray-500 mb-2">No locations found</div>
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedStyle("");
+                      setSelectedBudget("");
+                    }}
+                    className="text-coral-600 hover:text-coral-700 font-medium"
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Reviews */}
@@ -261,6 +338,25 @@ const ScoutProfile = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
+            {/* Contact Card */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className="space-y-3 mb-6">
+                <button className="w-full bg-coral-500 text-white py-3 px-4 rounded-xl font-semibold hover:bg-coral-600 transition-colors flex items-center justify-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  Message Scout
+                </button>
+                
+                <button className="w-full border border-coral-500 text-coral-500 py-3 px-4 rounded-xl font-semibold hover:bg-coral-50 transition-colors flex items-center justify-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Book Consultation
+                </button>
+              </div>
+              
+              <div className="text-center text-sm text-gray-500">
+                Response time: {scout.responseTime}
+              </div>
+            </div>
+
             {/* Quick Stats */}
             <div className="bg-white rounded-2xl p-6 shadow-lg">
               <h3 className="font-semibold text-gray-900 mb-4">Quick Stats</h3>
