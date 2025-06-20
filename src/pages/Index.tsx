@@ -128,7 +128,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-coral-50/20">
       <HeroSection 
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -136,10 +136,10 @@ const Index = () => {
         showFilters={showFilters}
       />
       
-      <div id="locations-section" className="container mx-auto px-4 py-8">
+      <div id="locations-section" className="container mx-auto px-4 py-12">
         {/* Filters - Show/Hide based on state */}
         {showFilters && (
-          <div className="mb-8">
+          <div className="mb-12">
             <SearchFilters
               selectedFilters={selectedFilters}
               onFilterChange={handleFilterChange}
@@ -154,53 +154,55 @@ const Index = () => {
         )}
 
         {/* View Mode Toggle and Results Count */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-6">
-            <h2 className="text-2xl font-bold text-gray-900">
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-8">
+            <h2 className="text-3xl font-bold text-gray-900">
               {viewMode === 'locations' ? 'Discover Locations' : viewMode === 'images' ? 'Browse Images' : 'Map View'}
             </h2>
-            <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-200">
+            <div className="glass bg-white/80 backdrop-blur-lg rounded-2xl p-2 shadow-lg border border-white/30">
               <button
                 onClick={() => setViewMode('locations')}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
                   viewMode === 'locations' 
-                    ? 'bg-coral-500 text-white shadow-md' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'bg-coral-500 text-white shadow-lg hover:shadow-xl' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
                 }`}
               >
                 Locations
               </button>
               <button
                 onClick={() => setViewMode('images')}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
                   viewMode === 'images' 
-                    ? 'bg-coral-500 text-white shadow-md' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'bg-coral-500 text-white shadow-lg hover:shadow-xl' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
                 }`}
               >
                 Images
               </button>
               <button
                 onClick={() => setViewMode('map')}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
                   viewMode === 'map' 
-                    ? 'bg-coral-500 text-white shadow-md' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'bg-coral-500 text-white shadow-lg hover:shadow-xl' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
                 }`}
               >
-                <Map className="h-4 w-4 inline mr-1" />
+                <Map className="h-4 w-4 inline mr-2" />
                 Map
               </button>
             </div>
           </div>
           
-          <div className="text-sm text-gray-600 bg-white px-4 py-2 rounded-lg border border-gray-200">
-            {viewMode === 'locations' 
-              ? `${filteredLocations.length} locations found`
-              : viewMode === 'images'
-              ? `${filteredImages.length} images found`
-              : `${filteredLocations.length} locations on map`
-            }
+          <div className="glass bg-white/80 backdrop-blur-lg px-6 py-3 rounded-2xl border border-white/30 shadow-lg">
+            <span className="text-sm font-medium text-gray-700">
+              {viewMode === 'locations' 
+                ? `${filteredLocations.length} locations found`
+                : viewMode === 'images'
+                ? `${filteredImages.length} images found`
+                : `${filteredLocations.length} locations on map`
+              }
+            </span>
           </div>
         </div>
 
@@ -219,14 +221,14 @@ const Index = () => {
               {filteredImages.map((imageData) => (
                 <div
                   key={imageData.id}
-                  className="group cursor-pointer"
+                  className="group cursor-pointer transform hover:scale-105 transition-all duration-300"
                   onClick={() => handleImageClick(imageData)}
                 >
-                  <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4 shadow-sm hover:shadow-lg transition-shadow">
+                  <div className="aspect-square rounded-2xl overflow-hidden bg-gray-100 mb-4 shadow-lg hover:shadow-2xl transition-all duration-300">
                     <img
                       src={imageData.image}
                       alt={imageData.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                   
@@ -248,7 +250,7 @@ const Index = () => {
                             e.stopPropagation();
                             handleTagClick(tag);
                           }}
-                          className="px-3 py-1 bg-coral-50 text-coral-600 text-xs rounded-full font-medium hover:bg-coral-100 transition-colors border border-coral-200"
+                          className="px-3 py-1 bg-coral-50/80 backdrop-blur-sm text-coral-600 text-xs rounded-full font-medium hover:bg-coral-100 transition-all duration-200 border border-coral-200/50 transform hover:scale-105"
                         >
                           {tag}
                         </button>
@@ -260,7 +262,7 @@ const Index = () => {
             </div>
           ) : (
             // Map View
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="glass bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/30">
               <LocationMap locations={filteredLocations} />
             </div>
           )}
@@ -268,8 +270,8 @@ const Index = () => {
           {/* No Results */}
           {((viewMode === 'locations' && filteredLocations.length === 0) || 
             (viewMode === 'images' && filteredImages.length === 0)) && (
-            <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
-              <div className="text-gray-500 text-xl mb-6">
+            <div className="text-center py-20 glass bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/30">
+              <div className="text-gray-500 text-xl mb-8">
                 No {viewMode} found matching your criteria
               </div>
               <button
@@ -282,7 +284,7 @@ const Index = () => {
                   const newSearchParams = new URLSearchParams();
                   setSearchParams(newSearchParams);
                 }}
-                className="bg-coral-500 text-white px-8 py-4 rounded-xl font-semibold hover:bg-coral-600 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="bg-coral-500 text-white px-10 py-5 rounded-2xl font-semibold hover:bg-coral-600 transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105"
               >
                 Clear All Filters
               </button>
