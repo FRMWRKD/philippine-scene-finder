@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { MapPin } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -15,14 +14,25 @@ const Index = () => {
   const [currentLocation, setCurrentLocation] = useState("Metro Manila");
   const [viewMode, setViewMode] = useState<'locations' | 'images'>('locations');
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     const tagParam = searchParams.get("tag");
     if (tagParam && !selectedFilters.includes(tagParam)) {
       setSelectedFilters([tagParam]);
     }
-  }, [searchParams, selectedFilters]);
+  }, [searchParams]);
+
+  const handleFilterChange = (filters: string[]) => {
+    setSelectedFilters(filters);
+    
+    // Update URL to remove tag parameter if no filters are selected
+    if (filters.length === 0) {
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete("tag");
+      setSearchParams(newSearchParams);
+    }
+  };
 
   const filteredLocations = useMemo(() => {
     return mockLocations.filter((location) => {
@@ -105,7 +115,13 @@ const Index = () => {
 
   const handleTagClick = (tag: string) => {
     if (!selectedFilters.includes(tag)) {
-      setSelectedFilters([...selectedFilters, tag]);
+      const newFilters = [...selectedFilters, tag];
+      setSelectedFilters(newFilters);
+      
+      // Update URL with the new tag
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set("tag", tag);
+      setSearchParams(newSearchParams);
     }
   };
 
@@ -118,7 +134,7 @@ const Index = () => {
         <div className="mb-6">
           <SearchFilters
             selectedFilters={selectedFilters}
-            onFilterChange={setSelectedFilters}
+            onFilterChange={handleFilterChange}
             priceRange={priceRange}
             onPriceChange={setPriceRange}
             currentLocation={currentLocation}
@@ -234,6 +250,9 @@ const Index = () => {
                   setSelectedFilters([]);
                   setSearchTerm("");
                   setPriceRange([0, 50000]);
+                  // Clear URL parameters
+                  const newSearchParams = new URLSearchParams();
+                  setSearchParams(newSearchParams);
                 }}
                 className="bg-coral-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-coral-600 transition-colors"
               >

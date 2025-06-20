@@ -66,6 +66,10 @@ const SearchFilters = ({
     setShowAdvanced(false);
   };
 
+  const removeFilter = (filterToRemove: string) => {
+    onFilterChange(selectedFilters.filter(f => f !== filterToRemove));
+  };
+
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
       {/* Main Search Bar */}
@@ -189,7 +193,7 @@ const SearchFilters = ({
               >
                 {filter}
                 <button
-                  onClick={() => toggleFilter(filter)}
+                  onClick={() => removeFilter(filter)}
                   className="hover:text-coral-900"
                 >
                   <X className="h-3 w-3" />
