@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Users, Zap, Car, MessageCircle, Calendar, Heart, Share2, Star } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Zap, Car, MessageCircle, Calendar, Heart, Share2, Star, Clock, Shield, Wifi, Camera, Volume2, Sun, Thermometer, Ruler, Tag } from "lucide-react";
 import { mockLocations } from "../data/mockData";
 import BookingModal from "../components/BookingModal";
 import MessageModal from "../components/MessageModal";
@@ -33,6 +33,59 @@ const LocationDetail = () => {
   }
 
   const allImages = [location.heroImage, ...location.gallery];
+
+  // Mock additional data that would come from API
+  const locationDetails = {
+    description: "This versatile studio space combines industrial aesthetics with modern amenities, perfect for fashion photography, product shoots, and commercial filming. Natural light floods the space during golden hours, while professional lighting equipment ensures consistent results throughout the day.",
+    amenities: [
+      { icon: Wifi, name: "High-Speed WiFi", available: true },
+      { icon: Car, name: "Parking Space", available: location.metadata.parking },
+      { icon: Shield, name: "Security", available: true },
+      { icon: Volume2, name: "Sound Equipment", available: true },
+      { icon: Thermometer, name: "Climate Control", available: true },
+      { icon: Camera, name: "Backdrop Support", available: true }
+    ],
+    specifications: [
+      { label: "Space Size", value: `${location.metadata.sizeM2}m²`, icon: Ruler },
+      { label: "Power Supply", value: `${location.metadata.powerAmps}A`, icon: Zap },
+      { label: "Max Crew", value: `${location.metadata.maxCrew} people`, icon: Users },
+      { label: "Ceiling Height", value: "4.5m", icon: Ruler },
+      { label: "Natural Light", value: "North-facing windows", icon: Sun },
+      { label: "Setup Time", value: "30 minutes", icon: Clock }
+    ],
+    policies: [
+      "24-hour advance booking required",
+      "Professional use only",
+      "Additional charges for overtime",
+      "Damage deposit required",
+      "No smoking policy",
+      "Clean-up included in base rate"
+    ],
+    nearbyLocations: [
+      "Coffee shop (2 min walk)",
+      "Equipment rental (5 min drive)",
+      "Makeup studio (next building)",
+      "Catering services (10 min walk)"
+    ],
+    scout: {
+      id: "1",
+      name: "Maria Santos",
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=60&h=60&fit=crop&crop=face",
+      rating: 4.9,
+      responseTime: "Within 2 hours"
+    }
+  };
+
+  const relatedLocations = mockLocations
+    .filter(loc => 
+      loc.id !== location.id && 
+      loc.tags.some(tag => location.tags.includes(tag))
+    )
+    .slice(0, 3);
+
+  const handleTagClick = (tag: string) => {
+    navigate(`/?tag=${encodeURIComponent(tag)}`);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -72,7 +125,8 @@ const LocationDetail = () => {
           <img
             src={allImages[currentImageIndex]}
             alt={location.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover cursor-pointer"
+            onClick={() => navigate(`/location/${location.id}/image/${currentImageIndex}`)}
           />
         </div>
 
@@ -93,7 +147,6 @@ const LocationDetail = () => {
           </div>
         )}
 
-        {/* Image Counter */}
         <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-xl text-sm">
           {currentImageIndex + 1} / {allImages.length}
         </div>
@@ -105,98 +158,169 @@ const LocationDetail = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Title & Location */}
-            <div className="mb-6">
+            <div className="mb-8">
               <div className="flex items-center gap-2 text-gray-600 mb-2">
                 <MapPin className="h-4 w-4" />
                 <span>{location.location}</span>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
                 {location.title}
               </h1>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                  <span className="font-medium">{location.rating}</span>
-                  <span className="text-gray-500">({location.reviews} reviews)</span>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
+                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                    <span className="font-semibold text-lg">{location.rating}</span>
+                    <span className="text-gray-500">({location.reviews} reviews)</span>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-coral-600">
+                <div className="text-3xl font-bold text-coral-600">
                   ₱{location.price.toLocaleString()}/day
+                </div>
+              </div>
+
+              {/* Description */}
+              <p className="text-gray-700 text-lg leading-relaxed mb-6">
+                {locationDetails.description}
+              </p>
+
+              {/* Clickable Tags */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Tag className="h-5 w-5" />
+                  Tags & Categories
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {location.tags.map((tag, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleTagClick(tag)}
+                      className="px-4 py-2 bg-coral-50 text-coral-700 rounded-full text-sm font-medium hover:bg-coral-100 transition-colors border border-coral-200"
+                    >
+                      {tag}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Tags */}
+            {/* Technical Specifications */}
             <div className="mb-8">
-              <div className="flex flex-wrap gap-2">
-                {location.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-coral-50 text-coral-700 rounded-full text-sm font-medium"
-                  >
-                    {tag}
-                  </span>
+              <h2 className="text-2xl font-semibold mb-6">Technical Specifications</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {locationDetails.specifications.map((spec, index) => (
+                  <div key={index} className="bg-gray-50 rounded-xl p-4 flex items-center gap-3">
+                    <spec.icon className="h-6 w-6 text-coral-500" />
+                    <div>
+                      <div className="font-semibold text-gray-900">{spec.value}</div>
+                      <div className="text-sm text-gray-600">{spec.label}</div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
 
-            {/* Technical Specs */}
+            {/* Amenities */}
             <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4">Technical Specifications</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {location.metadata.sizeM2}m²
+              <h2 className="text-2xl font-semibold mb-6">Amenities & Features</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {locationDetails.amenities.map((amenity, index) => (
+                  <div key={index} className={`flex items-center gap-3 p-4 rounded-xl border ${
+                    amenity.available 
+                      ? 'bg-green-50 border-green-200 text-green-800' 
+                      : 'bg-gray-50 border-gray-200 text-gray-500'
+                  }`}>
+                    <amenity.icon className="h-5 w-5" />
+                    <span className="font-medium">{amenity.name}</span>
+                    <span className="ml-auto">
+                      {amenity.available ? '✓' : '✗'}
+                    </span>
                   </div>
-                  <div className="text-sm text-gray-600">Space</div>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {location.metadata.powerAmps}A
-                  </div>
-                  <div className="text-sm text-gray-600">Power</div>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {location.metadata.maxCrew}
-                  </div>
-                  <div className="text-sm text-gray-600">Max Crew</div>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    {location.metadata.parking ? (
-                      <Car className="h-6 w-6 text-green-500" />
-                    ) : (
-                      <Car className="h-6 w-6 text-gray-400" />
-                    )}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {location.metadata.parking ? 'Parking' : 'No Parking'}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Gallery Thumbnails */}
+            {/* Policies */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-6">Booking Policies</h2>
+              <div className="bg-gray-50 rounded-xl p-6">
+                <ul className="space-y-3">
+                  {locationDetails.policies.map((policy, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-coral-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="text-gray-700">{policy}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Nearby Services */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-6">Nearby Services</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {locationDetails.nearbyLocations.map((nearby, index) => (
+                  <div key={index} className="bg-blue-50 rounded-lg p-3 text-center">
+                    <span className="text-blue-700 font-medium">{nearby}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Photo Gallery Grid */}
             {allImages.length > 1 && (
               <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">Photo Gallery</h2>
-                <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                <h2 className="text-2xl font-semibold mb-6">Photo Gallery</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {allImages.map((image, index) => (
                     <button
                       key={index}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                      onClick={() => navigate(`/location/${location.id}/image/${index}`)}
+                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all hover:border-coral-300 ${
                         index === currentImageIndex 
                           ? 'border-coral-500 ring-2 ring-coral-200' 
-                          : 'border-gray-200 hover:border-gray-300'
+                          : 'border-gray-200'
                       }`}
                     >
                       <img
                         src={image}
                         alt={`${location.title} ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform"
                       />
                     </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Related Locations */}
+            {relatedLocations.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-2xl font-semibold mb-6">Similar Locations</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {relatedLocations.map(relatedLocation => (
+                    <div 
+                      key={relatedLocation.id}
+                      className="group cursor-pointer"
+                      onClick={() => navigate(`/location/${relatedLocation.id}`)}
+                    >
+                      <div className="aspect-video rounded-lg overflow-hidden mb-3">
+                        <img
+                          src={relatedLocation.heroImage}
+                          alt={relatedLocation.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1">{relatedLocation.title}</h3>
+                      <p className="text-gray-600 text-sm mb-2">{relatedLocation.location}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-coral-600">₱{relatedLocation.price.toLocaleString()}/day</span>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                          <span className="text-sm">{relatedLocation.rating}</span>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -205,10 +329,11 @@ const LocationDetail = () => {
 
           {/* Booking Sidebar */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24">
+            <div className="sticky top-24 space-y-6">
+              {/* Booking Card */}
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
                 <div className="mb-6">
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
+                  <div className="text-3xl font-bold text-gray-900 mb-1">
                     ₱{location.price.toLocaleString()}
                   </div>
                   <div className="text-gray-600">per day</div>
@@ -234,6 +359,48 @@ const LocationDetail = () => {
 
                 <div className="text-center text-sm text-gray-500">
                   You won't be charged yet
+                </div>
+              </div>
+
+              {/* Scout Info */}
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+                <h3 className="font-semibold text-gray-900 mb-4">Your Location Scout</h3>
+                <div 
+                  className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
+                  onClick={() => navigate(`/scout/${locationDetails.scout.id}`)}
+                >
+                  <img
+                    src={locationDetails.scout.avatar}
+                    alt={locationDetails.scout.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">{locationDetails.scout.name}</div>
+                    <div className="flex items-center gap-1 text-sm">
+                      <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                      <span>{locationDetails.scout.rating}</span>
+                      <span className="text-gray-500">• {locationDetails.scout.responseTime}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+                <h3 className="font-semibold text-gray-900 mb-4">Quick Facts</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Response rate</span>
+                    <span className="font-semibold">95%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Avg response time</span>
+                    <span className="font-semibold">2 hours</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total bookings</span>
+                    <span className="font-semibold">127</span>
+                  </div>
                 </div>
               </div>
             </div>

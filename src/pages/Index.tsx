@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search, MapPin, Camera } from "lucide-react";
 import LocationCard from "../components/LocationCard";
 import SearchFilters from "../components/SearchFilters";
@@ -35,6 +36,7 @@ const FloatingActionButton = () => (
 
 const Index = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({
     style: "",
@@ -45,6 +47,14 @@ const Index = () => {
     region: ""
   });
   const [filteredLocations, setFilteredLocations] = useState(mockLocations);
+
+  // Handle tag filtering from URL
+  useEffect(() => {
+    const tagFromUrl = searchParams.get('tag');
+    if (tagFromUrl) {
+      setSearchQuery(tagFromUrl);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     applyFilters();
