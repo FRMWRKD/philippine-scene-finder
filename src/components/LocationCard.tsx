@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MapPin, Calendar, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -41,6 +42,16 @@ const LocationCard = ({ location }: LocationCardProps) => {
     e.stopPropagation();
     setCurrentImageIndex(imageIndex);
     setIsImageModalOpen(true);
+  };
+
+  const handleBookNow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/location/${location.id}#book`);
+  };
+
+  const handleMessage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/location/${location.id}#message`);
   };
 
   const nextImage = (e: React.MouseEvent) => {
@@ -209,20 +220,14 @@ const LocationCard = ({ location }: LocationCardProps) => {
           <div className="flex gap-2">
             <button 
               className="flex-1 bg-coral-500 text-white py-2 px-4 rounded-xl font-medium hover:bg-coral-600 transition-colors flex items-center justify-center gap-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Handle booking
-              }}
+              onClick={handleBookNow}
             >
               <Calendar className="h-4 w-4" />
               Book Now
             </button>
             <button 
               className="bg-gray-100 text-gray-600 p-2 rounded-xl hover:bg-gray-200 transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Handle message
-              }}
+              onClick={handleMessage}
             >
               <MessageCircle className="h-4 w-4" />
             </button>

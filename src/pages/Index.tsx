@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { MapPin } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -12,7 +13,7 @@ const Index = () => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const [currentLocation, setCurrentLocation] = useState("Metro Manila");
-  const [viewMode, setViewMode<'locations' | 'images'>('locations');
+  const [viewMode, setViewMode] = useState<'locations' | 'images'>('locations');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -38,7 +39,7 @@ const Index = () => {
 
       return matchesSearch && matchesFilters && matchesPrice && matchesLocation;
     });
-  }, [mockLocations, searchTerm, selectedFilters, priceRange, currentLocation]);
+  }, [searchTerm, selectedFilters, priceRange, currentLocation]);
 
   // Create image gallery data from all locations
   const allImages = useMemo(() => {
