@@ -64,6 +64,16 @@ const LocationCard = ({ location }: LocationCardProps) => {
     setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
   };
 
+  const handleLikeToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsLiked(!isLiked);
+  };
+
+  const handleDotNavigation = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    setCurrentImageIndex(index);
+  };
+
   return (
     <>
       <div 
@@ -84,13 +94,13 @@ const LocationCard = ({ location }: LocationCardProps) => {
             <>
               <button
                 onClick={prevImage}
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 hover:scale-110"
               >
                 ‹
               </button>
               <button
                 onClick={nextImage}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 hover:scale-110"
               >
                 ›
               </button>
@@ -100,12 +110,9 @@ const LocationCard = ({ location }: LocationCardProps) => {
                 {allImages.map((_, index) => (
                   <button
                     key={index}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentImageIndex(index);
-                    }}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                    onClick={(e) => handleDotNavigation(e, index)}
+                    className={`w-2 h-2 rounded-full transition-all hover:scale-125 ${
+                      index === currentImageIndex ? 'bg-white' : 'bg-white/50 hover:bg-white/70'
                     }`}
                   />
                 ))}
@@ -118,14 +125,11 @@ const LocationCard = ({ location }: LocationCardProps) => {
           
           {/* Like button */}
           <button
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsLiked(!isLiked);
-            }}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all hover:scale-110"
+            onClick={handleLikeToggle}
           >
             <svg
-              className={`h-5 w-5 ${isLiked ? 'text-coral-500 fill-current' : 'text-gray-600'}`}
+              className={`h-5 w-5 transition-colors ${isLiked ? 'text-coral-500 fill-current' : 'text-gray-600 hover:text-coral-500'}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -140,12 +144,12 @@ const LocationCard = ({ location }: LocationCardProps) => {
           </button>
 
           {/* Price badge */}
-          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
+          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-lg">
             <span className="text-sm font-semibold text-gray-900">₱{location.price.toLocaleString()}/day</span>
           </div>
 
           {/* Image count badge */}
-          <div className="absolute top-4 left-4 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
+          <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-medium">
             {allImages.length} photos
           </div>
         </div>
@@ -175,13 +179,13 @@ const LocationCard = ({ location }: LocationCardProps) => {
             {location.tags.slice(0, 3).map((tag, index) => (
               <span
                 key={index}
-                className="px-2 py-1 bg-coral-50 text-coral-600 text-xs rounded-full font-medium"
+                className="px-2 py-1 bg-coral-50 text-coral-600 text-xs rounded-full font-medium border border-coral-100"
               >
                 {tag}
               </span>
             ))}
             {location.tags.length > 3 && (
-              <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
+              <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-full border border-gray-200">
                 +{location.tags.length - 3}
               </span>
             )}
@@ -190,21 +194,21 @@ const LocationCard = ({ location }: LocationCardProps) => {
           {/* Metadata */}
           <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
             <div>
-              <span className="font-medium">{location.metadata.sizeM2}m²</span>
+              <span className="font-medium text-gray-900">{location.metadata.sizeM2}m²</span>
               <span className="text-gray-500"> space</span>
             </div>
             <div>
-              <span className="font-medium">{location.metadata.maxCrew}</span>
+              <span className="font-medium text-gray-900">{location.metadata.maxCrew}</span>
               <span className="text-gray-500"> max crew</span>
             </div>
             <div>
-              <span className="font-medium">{location.metadata.powerAmps}A</span>
+              <span className="font-medium text-gray-900">{location.metadata.powerAmps}A</span>
               <span className="text-gray-500"> power</span>
             </div>
             <div className="flex items-center gap-1">
               {location.metadata.parking ? (
                 <>
-                  <span className="text-green-500">✓</span>
+                  <span className="text-green-500 font-bold">✓</span>
                   <span className="text-gray-500">Parking</span>
                 </>
               ) : (
@@ -219,14 +223,14 @@ const LocationCard = ({ location }: LocationCardProps) => {
           {/* Action buttons */}
           <div className="flex gap-2">
             <button 
-              className="flex-1 bg-coral-500 text-white py-2 px-4 rounded-xl font-medium hover:bg-coral-600 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 bg-coral-500 text-white py-2 px-4 rounded-xl font-medium hover:bg-coral-600 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
               onClick={handleBookNow}
             >
               <Calendar className="h-4 w-4" />
               Book Now
             </button>
             <button 
-              className="bg-gray-100 text-gray-600 p-2 rounded-xl hover:bg-gray-200 transition-colors"
+              className="bg-gray-100 text-gray-600 p-2 rounded-xl hover:bg-gray-200 transition-all duration-200 hover:text-coral-600 transform hover:scale-105"
               onClick={handleMessage}
             >
               <MessageCircle className="h-4 w-4" />

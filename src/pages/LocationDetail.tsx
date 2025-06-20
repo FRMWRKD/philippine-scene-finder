@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Users, Zap, Car, MessageCircle, Calendar, Heart, Share2, Star, Clock, Shield, Wifi, Camera, Volume2, Sun, Thermometer, Ruler, Tag } from "lucide-react";
 import { mockLocations } from "../data/mockData";
@@ -16,6 +16,16 @@ const LocationDetail = () => {
   const [isLiked, setIsLiked] = useState(false);
 
   const location = mockLocations.find(loc => loc.id === id);
+
+  // Handle URL hash navigation for booking and messaging
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === '#book') {
+      setIsBookingOpen(true);
+    } else if (hash === '#message') {
+      setIsMessageOpen(true);
+    }
+  }, []);
 
   if (!location) {
     return (
@@ -93,26 +103,54 @@ const LocationDetail = () => {
     setIsImageModalOpen(true);
   };
 
+  const handleBookNow = () => {
+    setIsBookingOpen(true);
+    window.history.pushState(null, '', '#book');
+  };
+
+  const handleMessage = () => {
+    setIsMessageOpen(true);
+    window.history.pushState(null, '', '#message');
+  };
+
+  const handleCloseModal = () => {
+    setIsBookingOpen(false);
+    setIsMessageOpen(false);
+    window.history.pushState(null, '', window.location.pathname);
+  };
+
+  const handleScoutClick = () => {
+    navigate(`/scout/${locationDetails.scout.id}`);
+  };
+
+  const handleRelatedLocationClick = (locationId: string) => {
+    navigate(`/location/${locationId}`);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-lg border-b border-gray-200">
+      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate("/")}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
               <span className="font-medium">Back to search</span>
             </button>
 
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsLiked(!isLiked)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
+                  isLiked 
+                    ? 'bg-coral-50 border-coral-200 text-coral-600' 
+                    : 'border-gray-200 hover:bg-gray-50 text-gray-600'
+                }`}
               >
-                <Heart className={`h-4 w-4 ${isLiked ? 'text-coral-500 fill-current' : 'text-gray-600'}`} />
+                <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
                 <span className="text-sm font-medium">Save</span>
               </button>
               
@@ -125,37 +163,60 @@ const LocationDetail = () => {
         </div>
       </div>
 
-      {/* Image Gallery - Made Smaller */}
+      {/* Image Gallery */}
       <div className="relative">
         <div className="aspect-[16/9] md:aspect-[5/2] bg-gray-100">
           <img
             src={allImages[currentImageIndex]}
             alt={location.title}
-            className="w-full h-full object-cover cursor-pointer"
+            className="w-full h-full object-cover cursor-pointer hover:brightness-110 transition-all"
             onClick={() => handleImageClick(currentImageIndex)}
           />
         </div>
 
         {/* Image Navigation */}
         {allImages.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-            <div className="flex gap-2 bg-black/50 backdrop-blur-sm rounded-xl p-2">
-              {allImages.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    index === currentImageIndex ? 'bg-white' : 'bg-white/50'
-                  }`}
-                />
-              ))}
+          <>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+              <div className="flex gap-2 bg-black/60 backdrop-blur-sm rounded-xl p-2">
+                {allImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`w-3 h-3 rounded-full transition-all ${
+                      index === currentImageIndex ? 'bg-white' : 'bg-white/50 hover:bg-white/70'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+
+            {/* Arrow Navigation */}
+            <button
+              onClick={() => setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length)}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-all hover:scale-110"
+            >
+              ‹
+            </button>
+            <button
+              onClick={() => setCurrentImageIndex((prev) => (prev + 1) % allImages.length)}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-all hover:scale-110"
+            >
+              ›
+            </button>
+          </>
         )}
 
-        <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-xl text-sm">
+        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-xl text-sm font-medium">
           {currentImageIndex + 1} / {allImages.length}
         </div>
+
+        <button
+          onClick={() => handleImageClick(currentImageIndex)}
+          className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-xl text-sm font-medium hover:bg-black/70 transition-colors"
+        >
+          View Gallery
+        </button>
       </div>
 
       {/* Content */}
@@ -273,7 +334,7 @@ const LocationDetail = () => {
               </div>
             </div>
 
-            {/* Photo Gallery Grid - Updated with Modal */}
+            {/* Photo Gallery Grid */}
             {allImages.length > 1 && (
               <div className="mb-8">
                 <h2 className="text-2xl font-semibold mb-6">Photo Gallery</h2>
@@ -282,7 +343,7 @@ const LocationDetail = () => {
                     <button
                       key={index}
                       onClick={() => handleImageClick(index)}
-                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all hover:border-coral-300 ${
+                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all hover:border-coral-300 hover:shadow-lg transform hover:scale-105 ${
                         index === currentImageIndex 
                           ? 'border-coral-500 ring-2 ring-coral-200' 
                           : 'border-gray-200'
@@ -291,7 +352,7 @@ const LocationDetail = () => {
                       <img
                         src={image}
                         alt={`${location.title} ${index + 1}`}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform"
+                        className="w-full h-full object-cover"
                       />
                     </button>
                   ))}
@@ -307,17 +368,17 @@ const LocationDetail = () => {
                   {relatedLocations.map(relatedLocation => (
                     <div 
                       key={relatedLocation.id}
-                      className="group cursor-pointer"
-                      onClick={() => navigate(`/location/${relatedLocation.id}`)}
+                      className="group cursor-pointer transform hover:scale-105 transition-all duration-300"
+                      onClick={() => handleRelatedLocationClick(relatedLocation.id)}
                     >
-                      <div className="aspect-video rounded-lg overflow-hidden mb-3">
+                      <div className="aspect-video rounded-lg overflow-hidden mb-3 shadow-lg">
                         <img
                           src={relatedLocation.heroImage}
                           alt={relatedLocation.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                       </div>
-                      <h3 className="font-semibold text-gray-900 mb-1">{relatedLocation.title}</h3>
+                      <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-coral-600 transition-colors">{relatedLocation.title}</h3>
                       <p className="text-gray-600 text-sm mb-2">{relatedLocation.location}</p>
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-coral-600">₱{relatedLocation.price.toLocaleString()}/day</span>
@@ -337,7 +398,7 @@ const LocationDetail = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
               {/* Booking Card */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-shadow">
                 <div className="mb-6">
                   <div className="text-3xl font-bold text-gray-900 mb-1">
                     ₱{location.price.toLocaleString()}
@@ -347,16 +408,16 @@ const LocationDetail = () => {
 
                 <div className="space-y-3 mb-6">
                   <button
-                    onClick={() => setIsBookingOpen(true)}
-                    className="w-full bg-coral-500 text-white py-3 px-4 rounded-xl font-semibold hover:bg-coral-600 transition-colors flex items-center justify-center gap-2"
+                    onClick={handleBookNow}
+                    className="w-full bg-coral-500 text-white py-3 px-4 rounded-xl font-semibold hover:bg-coral-600 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     <Calendar className="h-4 w-4" />
                     Book This Location
                   </button>
                   
                   <button
-                    onClick={() => setIsMessageOpen(true)}
-                    className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-xl font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                    onClick={handleMessage}
+                    className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-2 hover:border-coral-300"
                   >
                     <MessageCircle className="h-4 w-4" />
                     Message Scout
@@ -369,43 +430,43 @@ const LocationDetail = () => {
               </div>
 
               {/* Scout Info */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-shadow">
                 <h3 className="font-semibold text-gray-900 mb-4">Your Location Scout</h3>
-                <div 
-                  className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
-                  onClick={() => navigate(`/scout/${locationDetails.scout.id}`)}
+                <button 
+                  onClick={handleScoutClick}
+                  className="flex items-center gap-3 w-full hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors group"
                 >
                   <img
                     src={locationDetails.scout.avatar}
                     alt={locationDetails.scout.name}
-                    className="w-12 h-12 rounded-full object-cover"
+                    className="w-12 h-12 rounded-full object-cover ring-2 ring-coral-100 group-hover:ring-coral-200 transition-all"
                   />
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900">{locationDetails.scout.name}</div>
+                  <div className="flex-1 text-left">
+                    <div className="font-semibold text-gray-900 group-hover:text-coral-600 transition-colors">{locationDetails.scout.name}</div>
                     <div className="flex items-center gap-1 text-sm">
                       <Star className="h-3 w-3 text-yellow-400 fill-current" />
                       <span>{locationDetails.scout.rating}</span>
                       <span className="text-gray-500">• {locationDetails.scout.responseTime}</span>
                     </div>
                   </div>
-                </div>
+                </button>
               </div>
 
               {/* Quick Stats */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-xl">
                 <h3 className="font-semibold text-gray-900 mb-4">Quick Facts</h3>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Response rate</span>
-                    <span className="font-semibold">95%</span>
+                    <span className="font-semibold text-green-600">95%</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Avg response time</span>
-                    <span className="font-semibold">2 hours</span>
+                    <span className="font-semibold text-coral-600">2 hours</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total bookings</span>
-                    <span className="font-semibold">127</span>
+                    <span className="font-semibold text-blue-600">127</span>
                   </div>
                 </div>
               </div>
@@ -417,13 +478,13 @@ const LocationDetail = () => {
       {/* Modals */}
       <BookingModal
         isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
+        onClose={handleCloseModal}
         location={location}
       />
       
       <MessageModal
         isOpen={isMessageOpen}
-        onClose={() => setIsMessageOpen(false)}
+        onClose={handleCloseModal}
         location={location}
       />
 
