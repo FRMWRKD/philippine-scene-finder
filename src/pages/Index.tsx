@@ -47,9 +47,9 @@ const Index = () => {
       <HeroSection />
       
       {/* Search Section */}
-      <div className="container mx-auto px-4 -mt-8 relative z-10">
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20">
-          <div className="flex flex-col md:flex-row gap-4">
+      <div className="container mx-auto px-4 -mt-6 relative z-10">
+        <div className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
@@ -65,6 +65,38 @@ const Index = () => {
               onFilterChange={setSelectedFilters} 
             />
           </div>
+
+          {/* Active Filters Display */}
+          {(selectedFilters.style || selectedFilters.budget || selectedFilters.crewSize || selectedFilters.amenities.length > 0) && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {selectedFilters.style && (
+                <span className="bg-coral-100 text-coral-700 px-3 py-1 rounded-full text-sm font-medium">
+                  {selectedFilters.style}
+                </span>
+              )}
+              {selectedFilters.budget && (
+                <span className="bg-coral-100 text-coral-700 px-3 py-1 rounded-full text-sm font-medium">
+                  {selectedFilters.budget === "under-5000" && "Under ₱5,000"}
+                  {selectedFilters.budget === "5000-15000" && "₱5,000 - ₱15,000"}
+                  {selectedFilters.budget === "15000-30000" && "₱15,000 - ₱30,000"}
+                  {selectedFilters.budget === "over-30000" && "Over ₱30,000"}
+                </span>
+              )}
+              {selectedFilters.crewSize && (
+                <span className="bg-coral-100 text-coral-700 px-3 py-1 rounded-full text-sm font-medium">
+                  {selectedFilters.crewSize === "solo" && "Solo"}
+                  {selectedFilters.crewSize === "small" && "Small crew"}
+                  {selectedFilters.crewSize === "medium" && "Medium crew"}
+                  {selectedFilters.crewSize === "large" && "Large crew"}
+                </span>
+              )}
+              {selectedFilters.amenities.map(amenity => (
+                <span key={amenity} className="bg-coral-100 text-coral-700 px-3 py-1 rounded-full text-sm font-medium">
+                  {amenity}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
