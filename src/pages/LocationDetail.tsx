@@ -41,12 +41,11 @@ const LocationDetail = () => {
     if (navigator.share) {
       navigator.share({
         title: location.title,
-        text: location.description,
+        text: `Check out this amazing location: ${location.title}`,
         url: window.location.href,
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      // You could add a toast notification here
     }
   };
 
@@ -102,7 +101,11 @@ const LocationDetail = () => {
             {/* Description */}
             <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
               <h2 className="text-xl font-bold text-gray-900 mb-4">About This Location</h2>
-              <p className="text-gray-700 leading-relaxed">{location.description}</p>
+              <p className="text-gray-700 leading-relaxed">
+                This beautiful location offers the perfect setting for your production needs. 
+                With professional-grade facilities and stunning aesthetics, it provides an ideal 
+                backdrop for both photography and film projects.
+              </p>
             </div>
 
             {/* Features & Amenities */}
@@ -186,15 +189,19 @@ const LocationDetail = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Size:</span>
-                    <span className="font-medium">{location.size || '500 sqm'}</span>
+                    <span className="font-medium">{location.metadata.sizeM2} sqm</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Capacity:</span>
-                    <span className="font-medium">{location.capacity || '50 people'}</span>
+                    <span className="text-gray-600">Max Crew:</span>
+                    <span className="font-medium">{location.metadata.maxCrew} people</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Type:</span>
-                    <span className="font-medium">{location.type || 'Studio'}</span>
+                    <span className="text-gray-600">Power:</span>
+                    <span className="font-medium">{location.metadata.powerAmps}A</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Parking:</span>
+                    <span className="font-medium">{location.metadata.parking ? 'Available' : 'Not Available'}</span>
                   </div>
                 </div>
               </div>
@@ -207,15 +214,11 @@ const LocationDetail = () => {
       <BookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
-        locationTitle={location.title}
-        dailyRate={location.price}
       />
 
       <MessageModal
         isOpen={showMessageModal}
         onClose={() => setShowMessageModal(false)}
-        recipientName={location.title}
-        recipientType="location owner"
       />
 
       <ImageModal
@@ -224,6 +227,7 @@ const LocationDetail = () => {
         images={allImages}
         currentIndex={selectedImageIndex}
         onIndexChange={setSelectedImageIndex}
+        locationTitle={location.title}
       />
     </div>
   );
