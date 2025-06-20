@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Search, MapPin, Star, MessageCircle, Calendar, Camera, Users, ArrowLeft } from "lucide-react";
+import { Search, MapPin, Star, MessageCircle, Calendar, Camera, Users, ArrowLeft, User, Phone, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface LocationScout {
@@ -169,6 +168,25 @@ const LocationScouts = () => {
     
     return matchesSearch && matchesSpecialty && matchesRegion;
   });
+
+  const handleViewProfile = (scoutId: string) => {
+    navigate(`/scout/${scoutId}`);
+  };
+
+  const handleSendMessage = (scoutId: string) => {
+    // In a real app, this would open a message modal or navigate to messages
+    console.log(`Sending message to scout ${scoutId}`);
+  };
+
+  const handleBookScout = (scoutId: string) => {
+    // In a real app, this would open a booking modal
+    console.log(`Booking scout ${scoutId}`);
+  };
+
+  const handleCallScout = (scoutId: string) => {
+    // In a real app, this would initiate a call
+    console.log(`Calling scout ${scoutId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-coral-50">
@@ -363,16 +381,39 @@ const LocationScouts = () => {
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="px-6 pb-6 flex gap-3">
-                <button className="flex-1 bg-coral-500 text-white py-3 rounded-xl font-semibold hover:bg-coral-600 transition-colors flex items-center justify-center gap-2">
-                  <MessageCircle className="h-4 w-4" />
-                  Message
+              {/* Action Buttons */}
+              <div className="px-6 pb-6 space-y-3">
+                <button 
+                  onClick={() => handleViewProfile(scout.id)}
+                  className="w-full bg-coral-500 text-white py-3 rounded-xl font-semibold hover:bg-coral-600 transition-colors flex items-center justify-center gap-2"
+                >
+                  <User className="h-4 w-4" />
+                  View Profile
                 </button>
-                <button className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Book
-                </button>
+                
+                <div className="grid grid-cols-3 gap-2">
+                  <button 
+                    onClick={() => handleSendMessage(scout.id)}
+                    className="bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span className="text-xs">Message</span>
+                  </button>
+                  <button 
+                    onClick={() => handleBookScout(scout.id)}
+                    className="bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span className="text-xs">Book</span>
+                  </button>
+                  <button 
+                    onClick={() => handleCallScout(scout.id)}
+                    className="bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Phone className="h-4 w-4" />
+                    <span className="text-xs">Call</span>
+                  </button>
+                </div>
               </div>
             </div>
           ))}
