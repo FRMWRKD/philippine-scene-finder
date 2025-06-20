@@ -86,12 +86,12 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full h-[700px] flex flex-col">
+      <div className="bg-white rounded-2xl max-w-2xl w-full h-[700px] flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="border-b border-gray-200 p-4 flex justify-between items-center">
+        <div className="border-b border-gray-200 p-4 flex justify-between items-center bg-gradient-to-r from-coral-50 to-orange-50 rounded-t-2xl">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-coral-100 rounded-full flex items-center justify-center">
-              <span className="text-coral-600 font-semibold text-sm">LS</span>
+            <div className="w-10 h-10 bg-coral-500 rounded-full flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">LS</span>
             </div>
             <div>
               <h2 className="font-semibold text-gray-900">{location.title}</h2>
@@ -99,15 +99,15 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <button className="p-2 hover:bg-white/50 rounded-lg transition-colors">
               <Phone className="h-4 w-4 text-gray-600" />
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <button className="p-2 hover:bg-white/50 rounded-lg transition-colors">
               <Video className="h-4 w-4 text-gray-600" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-white/50 rounded-lg transition-colors"
             >
               <X className="h-5 w-5 text-gray-500" />
             </button>
@@ -115,7 +115,7 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -123,15 +123,15 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
             >
               <div className={`flex gap-2 max-w-[80%] ${msg.sender === "user" ? "flex-row-reverse" : ""}`}>
                 {msg.sender === "scout" && (
-                  <div className="w-8 h-8 bg-coral-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-coral-600 font-semibold text-xs">LS</span>
+                  <div className="w-8 h-8 bg-coral-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-semibold text-xs">LS</span>
                   </div>
                 )}
                 <div
-                  className={`rounded-2xl px-4 py-2 ${
+                  className={`rounded-2xl px-4 py-2 shadow-sm ${
                     msg.sender === "user"
                       ? "bg-coral-500 text-white"
-                      : "bg-gray-100 text-gray-900"
+                      : "bg-white text-gray-900 border border-gray-100"
                   }`}
                 >
                   <p className="text-sm">{msg.content}</p>
@@ -149,13 +149,13 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
         </div>
 
         {/* Quick Actions */}
-        <div className="border-t border-gray-100 p-3">
+        <div className="border-t border-gray-100 p-3 bg-white">
           <div className="flex gap-2 justify-center">
-            <button className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+            <button className="flex items-center gap-2 px-4 py-2 bg-coral-100 text-coral-700 rounded-lg hover:bg-coral-200 transition-colors text-sm font-medium">
               <Video className="h-4 w-4" />
               Virtual Tour
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+            <button className="flex items-center gap-2 px-4 py-2 bg-coral-100 text-coral-700 rounded-lg hover:bg-coral-200 transition-colors text-sm font-medium">
               <Phone className="h-4 w-4" />
               Call Scout
             </button>
@@ -163,7 +163,7 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
         </div>
 
         {/* Message Input */}
-        <div className="border-t border-gray-200 p-4">
+        <div className="border-t border-gray-200 p-4 bg-white rounded-b-2xl">
           <form onSubmit={handleSendMessage} className="flex gap-3">
             <div className="flex-1 relative">
               <input
@@ -171,7 +171,7 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Type your message..."
-                className="w-full p-3 pr-20 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none"
+                className="w-full p-3 pr-20 border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500 focus:border-transparent outline-none shadow-sm"
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex gap-1">
                 <button
@@ -193,7 +193,7 @@ const MessageModal = ({ isOpen, onClose, location }: MessageModalProps) => {
             <button
               type="submit"
               disabled={!message.trim()}
-              className="bg-coral-500 text-white p-3 rounded-xl hover:bg-coral-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="bg-coral-500 text-white p-3 rounded-xl hover:bg-coral-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-lg hover:shadow-xl"
             >
               <Send className="h-4 w-4" />
             </button>

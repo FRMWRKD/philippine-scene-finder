@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Star, MessageCircle, Calendar, Camera, Users, Clock, Award, Heart, Share2, Search, Filter } from "lucide-react";
 import { mockLocations } from "../data/mockData";
 import LocationCard from "../components/LocationCard";
+import MessageModal from "../components/MessageModal";
+import BookingModal from "../components/BookingModal";
 
 const ScoutProfile = () => {
   const { id } = useParams();
@@ -11,10 +13,12 @@ const ScoutProfile = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("");
   const [selectedBudget, setSelectedBudget] = useState("");
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   // Mock scout data - in real app this would come from API
   const scout = {
-    id: "1",
+    id: id || "1",
     name: "Maria Santos",
     avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face",
     coverImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=300&fit=crop",
@@ -35,26 +39,6 @@ const ScoutProfile = () => {
       "Transportation arrangements",
       "Equipment rental connections",
       "Cultural sensitivity guidance"
-    ],
-    portfolio: [
-      {
-        id: "1",
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop",
-        title: "Manila Bay Golden Hour",
-        description: "Sunset shoot at Manila Bay with city skyline backdrop"
-      },
-      {
-        id: "2",
-        image: "https://images.unsplash.com/photo-1516205651411-aef33a44f7c2?w=300&h=200&fit=crop",
-        title: "Intramuros Heritage Walk",
-        description: "Spanish colonial architecture and cobblestone streets"
-      },
-      {
-        id: "3",
-        image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=300&h=200&fit=crop",
-        title: "BGC Modern Architecture",
-        description: "Contemporary glass buildings and urban landscapes"
-      }
     ],
     reviews: [
       {
@@ -104,6 +88,14 @@ const ScoutProfile = () => {
     return matchesSearch && matchesStyle && matchesBudget;
   });
 
+  const handleMessageClick = () => {
+    setIsMessageModalOpen(true);
+  };
+
+  const handleBookingClick = () => {
+    setIsBookingModalOpen(true);
+  };
+
   if (!scout) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -123,12 +115,12 @@ const ScoutProfile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-coral-50">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-lg border-b border-gray-200">
+      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate("/scouts")}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200"
             >
               <ArrowLeft className="h-5 w-5" />
               <span className="font-medium">Back to scouts</span>
@@ -137,10 +129,10 @@ const ScoutProfile = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsFollowing(!isFollowing)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-colors ${
+                className={`flex items-center gap-2 px-6 py-2 rounded-xl border transition-all duration-200 ${
                   isFollowing 
-                    ? 'bg-coral-500 text-white border-coral-500' 
-                    : 'border-gray-200 hover:bg-gray-50'
+                    ? 'bg-coral-500 text-white border-coral-500 shadow-lg hover:bg-coral-600' 
+                    : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                 }`}
               >
                 <Heart className={`h-4 w-4 ${isFollowing ? 'fill-current' : ''}`} />
@@ -149,7 +141,7 @@ const ScoutProfile = () => {
                 </span>
               </button>
               
-              <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
+              <button className="flex items-center gap-2 px-6 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
                 <Share2 className="h-4 w-4 text-gray-600" />
                 <span className="text-sm font-medium">Share</span>
               </button>
@@ -203,11 +195,17 @@ const ScoutProfile = () => {
                   </div>
                   
                   <div className="flex gap-3">
-                    <button className="bg-coral-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-coral-600 transition-colors flex items-center gap-2">
+                    <button 
+                      onClick={handleMessageClick}
+                      className="bg-coral-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-coral-600 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+                    >
                       <MessageCircle className="h-4 w-4" />
                       Message
                     </button>
-                    <button className="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center gap-2">
+                    <button 
+                      onClick={handleBookingClick}
+                      className="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-200 flex items-center gap-2"
+                    >
                       <Calendar className="h-4 w-4" />
                       Book Scout
                     </button>
@@ -341,12 +339,18 @@ const ScoutProfile = () => {
             {/* Contact Card */}
             <div className="bg-white rounded-2xl p-6 shadow-lg">
               <div className="space-y-3 mb-6">
-                <button className="w-full bg-coral-500 text-white py-3 px-4 rounded-xl font-semibold hover:bg-coral-600 transition-colors flex items-center justify-center gap-2">
+                <button 
+                  onClick={handleMessageClick}
+                  className="w-full bg-coral-500 text-white py-3 px-4 rounded-xl font-semibold hover:bg-coral-600 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                >
                   <MessageCircle className="h-4 w-4" />
                   Message Scout
                 </button>
                 
-                <button className="w-full border border-coral-500 text-coral-500 py-3 px-4 rounded-xl font-semibold hover:bg-coral-50 transition-colors flex items-center justify-center gap-2">
+                <button 
+                  onClick={handleBookingClick}
+                  className="w-full border border-coral-500 text-coral-500 py-3 px-4 rounded-xl font-semibold hover:bg-coral-50 transition-all duration-200 flex items-center justify-center gap-2"
+                >
                   <Calendar className="h-4 w-4" />
                   Book Consultation
                 </button>
@@ -413,6 +417,19 @@ const ScoutProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <MessageModal 
+        isOpen={isMessageModalOpen}
+        onClose={() => setIsMessageModalOpen(false)}
+        location={{ id: scout.id, title: `Chat with ${scout.name}`, location: scout.location }}
+      />
+      
+      <BookingModal 
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        location={{ id: scout.id, title: `Book ${scout.name}`, location: scout.location, price: 0 }}
+      />
     </div>
   );
 };
