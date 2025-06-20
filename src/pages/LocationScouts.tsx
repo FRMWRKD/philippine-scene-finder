@@ -170,22 +170,6 @@ const LocationScouts = () => {
     return matchesSearch && matchesSpecialty && matchesRegion;
   });
 
-  const handleScoutClick = (scoutId: string) => {
-    navigate(`/scout/${scoutId}`);
-  };
-
-  const handleMessageClick = (e: React.MouseEvent, scoutId: string) => {
-    e.stopPropagation();
-    // For now, navigate to scout profile - in real app would open message modal
-    navigate(`/scout/${scoutId}`);
-  };
-
-  const handleBookClick = (e: React.MouseEvent, scoutId: string) => {
-    e.stopPropagation();
-    // For now, navigate to scout profile - in real app would open booking modal
-    navigate(`/scout/${scoutId}`);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-coral-50">
       {/* Header */}
@@ -302,11 +286,7 @@ const LocationScouts = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredScouts.map((scout) => (
-            <div 
-              key={scout.id} 
-              className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-200 cursor-pointer"
-              onClick={() => handleScoutClick(scout.id)}
-            >
+            <div key={scout.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-200">
               {/* Scout Header */}
               <div className="p-6 pb-4">
                 <div className="flex items-start gap-4">
@@ -385,17 +365,11 @@ const LocationScouts = () => {
 
               {/* Actions */}
               <div className="px-6 pb-6 flex gap-3">
-                <button 
-                  onClick={(e) => handleMessageClick(e, scout.id)}
-                  className="flex-1 bg-coral-500 text-white py-3 rounded-xl font-semibold hover:bg-coral-600 transition-colors flex items-center justify-center gap-2"
-                >
+                <button className="flex-1 bg-coral-500 text-white py-3 rounded-xl font-semibold hover:bg-coral-600 transition-colors flex items-center justify-center gap-2">
                   <MessageCircle className="h-4 w-4" />
                   Message
                 </button>
-                <button 
-                  onClick={(e) => handleBookClick(e, scout.id)}
-                  className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
-                >
+                <button className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
                   <Calendar className="h-4 w-4" />
                   Book
                 </button>
