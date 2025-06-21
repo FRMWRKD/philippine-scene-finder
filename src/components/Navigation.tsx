@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Search, Menu, X, Camera, Users, Upload, HelpCircle, Heart, LogIn, LogOut } from "lucide-react";
+import { Search, Menu, X, Camera, Users, Upload, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginModal from "./LoginModal";
@@ -19,8 +19,6 @@ const Navigation = () => {
     { path: "/", label: "Locations", icon: Camera },
     { path: "/scouts", label: "Scouts", icon: Users },
     { path: "/upload", label: "List Location", icon: Upload },
-    { path: "/how-it-works", label: "How it Works", icon: HelpCircle },
-    { path: "/support", label: "Support", icon: Heart },
   ];
 
   const handleLogoClick = () => {

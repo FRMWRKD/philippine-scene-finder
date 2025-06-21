@@ -1,5 +1,5 @@
 
-import { Camera, Facebook, Twitter, Instagram, Mail, Phone, MapPin } from "lucide-react";
+import { Camera, Facebook, Twitter, Instagram, Mail, Phone, MapPin, HelpCircle, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -45,16 +45,27 @@ const Footer = () => {
               <Link to="/upload" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
                 List Your Location
               </Link>
-              <Link to="/how-it-works" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
+              <Link 
+                to="/how-it-works" 
+                className="flex items-center gap-2 text-gray-300 hover:text-coral-400 transition-colors text-sm font-medium"
+              >
+                <HelpCircle className="h-4 w-4" />
                 How It Works
               </Link>
             </div>
           </div>
 
-          {/* For Creatives */}
+          {/* Help & Support */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-coral-400">For Creatives</h3>
+            <h3 className="text-lg font-semibold text-coral-400">Help & Support</h3>
             <div className="space-y-2">
+              <Link 
+                to="/support" 
+                className="flex items-center gap-2 text-gray-300 hover:text-coral-400 transition-colors text-sm font-medium"
+              >
+                <Heart className="h-4 w-4" />
+                Support Center
+              </Link>
               <a href="#" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
                 Photography Locations
               </a>
