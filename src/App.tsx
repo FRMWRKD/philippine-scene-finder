@@ -13,6 +13,7 @@ import ScoutProfile from "./pages/ScoutProfile";
 import UploadLocation from "./pages/UploadLocation";
 import HowItWorks from "./pages/HowItWorks";
 import Support from "./pages/Support";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/upload" element={<UploadLocation />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/support" element={<Support />} />
+              <Route path="/admin" element={<AdminDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
