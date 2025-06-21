@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { MapPin, Search, Filter, Grid, List, Plus, Calendar, DollarSign, User, MessageSquare, Star, Edit, Trash, Eye } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { MapPin, Search, Filter, Grid, List, Plus, Calendar, DollarSign, User, MessageSquare, Star, Edit, Trash, Eye, Download, Upload, MoreHorizontal, Copy, Archive, Zap, TrendingUp, Clock, CheckSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageGallery from "./ImageGallery";
 import PropertyTagManager from "./PropertyTagManager";
@@ -57,41 +59,44 @@ interface Property {
   tags: string[];
   amenities: string[];
   attachedMovies: AttachedMovie[];
+  lastUpdated?: string;
+  views?: number;
+  revenue?: string;
 }
 
 const ScoutDashboard = () => {
   const { toast } = useToast();
   
-  // View and pagination states
+  // Enhanced state management
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortBy, setSortBy] = useState("lastUpdated");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [isAddLocationOpen, setIsAddLocationOpen] = useState(false);
+  const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
+  const [quickFilters, setQuickFilters] = useState({
+    highPerforming: false,
+    needsAttention: false,
+    recentlyAdded: false,
+  });
+
+  // Advanced filtering states
+  const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  const [ratingFilter, setRatingFilter] = useState("all");
+  const [bookingsFilter, setBookingsFilter] = useState("all");
+  const [dateRange, setDateRange] = useState({ from: "", to: "" });
 
   // Message pagination
   const [messageCurrentPage, setMessageCurrentPage] = useState(1);
   const [messageSearchTerm, setMessageSearchTerm] = useState("");
   const [messageStatusFilter, setMessageStatusFilter] = useState("all");
 
-  const [scoutProfile, setScoutProfile] = useState({
-    name: "Maria Santos",
-    bio: "Professional location scout with 10+ years experience in the Philippines film industry",
-    email: "maria@example.com",
-    phone: "+63 917 123 4567",
-    website: "www.mariascout.com",
-    instagram: "@mariascout",
-    facebook: "Maria Santos Location Scout",
-    linkedin: "maria-santos-scout",
-    youtube: "Maria Santos Films",
-    experience: "10 years",
-    specialty: "Beach & Mountain Locations",
-  });
-
+  // Enhanced mock data with performance metrics
   const [scoutProperties, setScoutProperties] = useState<Property[]>([
     {
       id: 1,
@@ -100,39 +105,13 @@ const ScoutDashboard = () => {
       category: "Beach",
       price: "₱5,000",
       status: "active",
-      bookings: 24,
+      bookings: 156,
       rating: 4.8,
       description: "Beautiful beachfront location perfect for photoshoots and film productions",
-      images: [
-        {
-          id: 1,
-          url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
-          title: "Main Beach View",
-          description: "Stunning wide-angle view of the pristine white sand beach",
-          alt: "Boracay beach main view",
-          category: "exterior",
-          lighting: "golden-hour",
-          season: "summer",
-          weather: "sunny",
-          colors: ["blue", "white", "golden"],
-          metaTags: ["beach", "sunset", "tropical", "paradise", "wide-shot"],
-          isPrimary: true,
-        },
-        {
-          id: 2,
-          url: "https://images.unsplash.com/photo-1544551763-46a013bb70d5",
-          title: "Romantic Sunset",
-          description: "Perfect romantic sunset angle for wedding scenes",
-          alt: "Beautiful sunset at Boracay",
-          category: "exterior",
-          lighting: "golden-hour",
-          season: "summer",
-          weather: "sunny",
-          colors: ["orange", "pink", "purple"],
-          metaTags: ["sunset", "romantic", "silhouette", "dramatic"],
-          isPrimary: false,
-        },
-      ],
+      lastUpdated: "2024-01-15",
+      views: 2847,
+      revenue: "₱780,000",
+      images: [],
       features: ["Beachfront Access", "Sunset Views", "Private Beach", "Water Sports", "Restaurant"],
       tags: ["Beach", "Sunset", "Water", "Tropical", "Resort"],
       amenities: ["Parking", "WiFi", "Restrooms", "Catering Available", "Equipment Rental"],
@@ -145,38 +124,140 @@ const ScoutDashboard = () => {
       category: "Mountain",
       price: "₱3,500",
       status: "active",
-      bookings: 18,
+      bookings: 89,
       rating: 4.6,
       description: "Scenic mountain views with cool climate and pine forests",
-      images: [
-        {
-          id: 4,
-          url: "https://images.unsplash.com/photo-1464822759844-d150165c4795",
-          title: "Mountain Panorama",
-          description: "Breathtaking panoramic view of the mountain range",
-          alt: "Baguio mountain view",
-          category: "exterior",
-          lighting: "daylight",
-          season: "autumn",
-          weather: "cloudy",
-          colors: ["green", "brown", "gray"],
-          metaTags: ["mountain", "panoramic", "nature", "scenic"],
-          isPrimary: true,
-        },
-      ],
+      lastUpdated: "2024-01-10",
+      views: 1453,
+      revenue: "₱311,500",
+      images: [],
       features: ["Mountain Views", "Cool Climate", "Pine Trees", "Hiking Trails"],
       tags: ["Mountain", "Nature", "Cool", "Pine", "Hiking"],
       amenities: ["Parking", "Guide Available", "Camping Allowed"],
       attachedMovies: [],
     },
+    // Add more mock data to simulate thousands of properties
   ]);
 
   const [scoutStats, setScoutStats] = useState({
-    totalProperties: 8,
-    activeBookings: 15,
-    monthlyEarnings: "₱45,000",
+    totalProperties: 2847,
+    activeBookings: 423,
+    monthlyEarnings: "₱2,450,000",
     averageRating: 4.7,
+    totalViews: 156789,
+    conversionRate: "12.3%",
+    responseTime: "2.1 hrs",
+    topCategory: "Beach",
   });
+
+  // Enhanced filtering with performance optimization
+  const filteredAndSortedProperties = useMemo(() => {
+    let filtered = scoutProperties.filter(property => {
+      const matchesSearch = property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           property.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesStatus = statusFilter === "all" || property.status === statusFilter;
+      const matchesCategory = categoryFilter === "all" || property.category === categoryFilter;
+      
+      const matchesPrice = (!priceRange.min || parseFloat(property.price.replace(/[^\d]/g, '')) >= parseFloat(priceRange.min)) &&
+                          (!priceRange.max || parseFloat(property.price.replace(/[^\d]/g, '')) <= parseFloat(priceRange.max));
+      
+      const matchesRating = ratingFilter === "all" || 
+                           (ratingFilter === "high" && property.rating >= 4.5) ||
+                           (ratingFilter === "medium" && property.rating >= 3.5 && property.rating < 4.5) ||
+                           (ratingFilter === "low" && property.rating < 3.5);
+      
+      const matchesBookings = bookingsFilter === "all" ||
+                             (bookingsFilter === "high" && property.bookings >= 100) ||
+                             (bookingsFilter === "medium" && property.bookings >= 50 && property.bookings < 100) ||
+                             (bookingsFilter === "low" && property.bookings < 50);
+
+      // Quick filters
+      if (quickFilters.highPerforming && (property.rating < 4.5 || property.bookings < 100)) return false;
+      if (quickFilters.needsAttention && (property.rating >= 4.0 && property.bookings >= 50)) return false;
+      if (quickFilters.recentlyAdded && property.lastUpdated && 
+          new Date(property.lastUpdated) < new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) return false;
+
+      return matchesSearch && matchesStatus && matchesCategory && matchesPrice && matchesRating && matchesBookings;
+    });
+
+    // Sorting
+    filtered.sort((a, b) => {
+      let aValue: any = a[sortBy as keyof Property];
+      let bValue: any = b[sortBy as keyof Property];
+      
+      if (sortBy === "price") {
+        aValue = parseFloat(String(aValue).replace(/[^\d]/g, ''));
+        bValue = parseFloat(String(bValue).replace(/[^\d]/g, ''));
+      }
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      }
+      
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      
+      return 0;
+    });
+
+    return filtered;
+  }, [scoutProperties, searchTerm, statusFilter, categoryFilter, priceRange, ratingFilter, bookingsFilter, quickFilters, sortBy, sortOrder]);
+
+  const totalPages = Math.ceil(filteredAndSortedProperties.length / itemsPerPage);
+  const paginatedProperties = filteredAndSortedProperties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Enhanced handlers with bulk operations
+  const handleBulkAction = useCallback((action: string) => {
+    if (selectedProperties.length === 0) {
+      toast({ title: "No Selection", description: "Please select properties first." });
+      return;
+    }
+
+    switch (action) {
+      case "activate":
+        setScoutProperties(props => props.map(p => 
+          selectedProperties.includes(p.id) ? { ...p, status: "active" } : p
+        ));
+        toast({ title: "Bulk Update", description: `${selectedProperties.length} properties activated.` });
+        break;
+      case "deactivate":
+        setScoutProperties(props => props.map(p => 
+          selectedProperties.includes(p.id) ? { ...p, status: "inactive" } : p
+        ));
+        toast({ title: "Bulk Update", description: `${selectedProperties.length} properties deactivated.` });
+        break;
+      case "delete":
+        setScoutProperties(props => props.filter(p => !selectedProperties.includes(p.id)));
+        toast({ title: "Bulk Delete", description: `${selectedProperties.length} properties deleted.`, variant: "destructive" });
+        break;
+      case "export":
+        handleExport();
+        break;
+    }
+    setSelectedProperties([]);
+  }, [selectedProperties, toast]);
+
+  const handleExport = useCallback(async () => {
+    setIsExporting(true);
+    // Simulate export process
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    toast({ title: "Export Complete", description: "Properties exported successfully." });
+    setIsExporting(false);
+  }, [toast]);
+
+  const handleSelectAll = useCallback(() => {
+    if (selectedProperties.length === paginatedProperties.length) {
+      setSelectedProperties([]);
+    } else {
+      setSelectedProperties(paginatedProperties.map(p => p.id));
+    }
+  }, [selectedProperties, paginatedProperties]);
 
   // Image Management Functions
   const handleAddImage = (propertyId: number, imageData: Omit<PropertyImage, "id">) => {
@@ -293,96 +374,121 @@ const ScoutDashboard = () => {
   };
 
   // Property filtering and pagination
-  const filteredProperties = scoutProperties.filter(property => {
-    const matchesSearch = property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         property.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || property.status === statusFilter;
-    const matchesCategory = categoryFilter === "all" || property.category === categoryFilter;
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
-
-  const sortedProperties = [...filteredProperties].sort((a, b) => {
-    let aValue = a[sortBy as keyof Property];
-    let bValue = b[sortBy as keyof Property];
-    
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-    }
-    
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-    }
-    
-    return 0;
-  });
-
-  const totalPages = Math.ceil(sortedProperties.length / itemsPerPage);
-  const paginatedProperties = sortedProperties.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
   const PropertyListView = () => (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      {/* Bulk Actions Bar */}
+      {selectedProperties.length > 0 && (
+        <Card className="p-3 bg-blue-50 border-blue-200">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-blue-700">
+              {selectedProperties.length} selected
+            </span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => handleBulkAction("activate")}>
+                <CheckSquare className="h-4 w-4 mr-1" />
+                Activate
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleBulkAction("deactivate")}>
+                <Archive className="h-4 w-4 mr-1" />
+                Deactivate
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleBulkAction("export")}>
+                <Download className="h-4 w-4 mr-1" />
+                Export
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => handleBulkAction("delete")}>
+                <Trash className="h-4 w-4 mr-1" />
+                Delete
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-10">
+              <Checkbox
+                checked={selectedProperties.length === paginatedProperties.length && paginatedProperties.length > 0}
+                onCheckedChange={handleSelectAll}
+              />
+            </TableHead>
             <TableHead className="w-16">#</TableHead>
-            <TableHead>Property</TableHead>
+            <TableHead className="cursor-pointer" onClick={() => setSortBy("name")}>
+              Property {sortBy === "name" && (sortOrder === "asc" ? "↑" : "↓")}
+            </TableHead>
             <TableHead>Location</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Images</TableHead>
-            <TableHead>Bookings</TableHead>
-            <TableHead>Rating</TableHead>
-            <TableHead className="w-32">Actions</TableHead>
+            <TableHead className="cursor-pointer" onClick={() => setSortBy("price")}>
+              Price {sortBy === "price" && (sortOrder === "asc" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => setSortBy("bookings")}>
+              Bookings {sortBy === "bookings" && (sortOrder === "asc" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => setSortBy("rating")}>
+              Rating {sortBy === "rating" && (sortOrder === "asc" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead>Performance</TableHead>
+            <TableHead className="w-24">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {paginatedProperties.map((property, index) => (
-            <TableRow key={property.id} className="hover:bg-muted/50">
-              <TableCell className="font-mono text-sm">
+            <TableRow 
+              key={property.id} 
+              className={`hover:bg-muted/50 ${selectedProperties.includes(property.id) ? "bg-blue-50" : ""}`}
+            >
+              <TableCell>
+                <Checkbox
+                  checked={selectedProperties.includes(property.id)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedProperties([...selectedProperties, property.id]);
+                    } else {
+                      setSelectedProperties(selectedProperties.filter(id => id !== property.id));
+                    }
+                  }}
+                />
+              </TableCell>
+              <TableCell className="font-mono text-xs text-muted-foreground">
                 {(currentPage - 1) * itemsPerPage + index + 1}
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <img
                     src={property.images[0]?.url || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4"}
                     alt={property.name}
-                    className="w-12 h-12 rounded-md object-cover"
+                    className="w-8 h-8 rounded object-cover"
                   />
-                  <div>
-                    <div className="font-medium">{property.name}</div>
-                    <div className="text-sm text-muted-foreground truncate max-w-[200px]">
-                      {property.description}
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{property.name}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Eye className="h-3 w-3" />
+                      {property.views?.toLocaleString() || 0}
                     </div>
                   </div>
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-sm">{property.location}</span>
-                </div>
+                <div className="text-sm">{property.location}</div>
               </TableCell>
               <TableCell>
-                <Badge variant="outline">{property.category}</Badge>
+                <Badge variant="outline" className="text-xs">{property.category}</Badge>
               </TableCell>
               <TableCell>
-                <Badge variant={property.status === "active" ? "default" : "secondary"}>
+                <Badge 
+                  variant={property.status === "active" ? "default" : "secondary"}
+                  className="text-xs"
+                >
                   {property.status}
                 </Badge>
               </TableCell>
-              <TableCell className="font-semibold text-coral-600">
+              <TableCell className="font-semibold text-coral-600 text-sm">
                 {property.price}
               </TableCell>
-              <TableCell>
-                <span className="text-sm bg-muted px-2 py-1 rounded">
-                  {property.images.length}
-                </span>
-              </TableCell>
-              <TableCell>{property.bookings}</TableCell>
+              <TableCell className="text-sm">{property.bookings}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-1">
                   <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -390,223 +496,183 @@ const ScoutDashboard = () => {
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-1">
-                  <Button size="sm" variant="ghost">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleDeleteProperty(property.id)}>
-                    <Trash className="h-4 w-4" />
-                  </Button>
+                <div className="text-xs">
+                  <div className="text-green-600 font-medium">{property.revenue}</div>
+                  <div className="text-muted-foreground">{property.images.length} imgs</div>
                 </div>
+              </TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" variant="ghost">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive">
+                      <Trash className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
       
+      {/* Enhanced Pagination with Jump */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedProperties.length)} of {sortedProperties.length} properties
+            Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredAndSortedProperties.length)} of {filteredAndSortedProperties.length} properties
           </div>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                />
-              </PaginationItem>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const page = i + Math.max(1, currentPage - 2);
-                return (
-                  <PaginationItem key={page}>
-                    <PaginationLink 
-                      onClick={() => setCurrentPage(page)}
-                      isActive={currentPage === page}
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
-              <PaginationItem>
-                <PaginationNext 
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
-    </div>
-  );
-
-  const PropertyGridView = () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {paginatedProperties.map((property) => (
-          <Card key={property.id} className="hover:shadow-md transition-shadow">
-            <div className="aspect-video relative">
-              <img
-                src={property.images[0]?.url || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4"}
-                alt={property.name}
-                className="w-full h-full object-cover rounded-t-lg"
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Go to page:</span>
+              <Input
+                type="number"
+                min="1"
+                max={totalPages}
+                value={currentPage}
+                onChange={(e) => setCurrentPage(Math.max(1, Math.min(totalPages, parseInt(e.target.value) || 1)))}
+                className="w-16 h-8 text-center"
               />
-              <Badge 
-                className={`absolute top-2 right-2 ${property.status === "active" ? "bg-green-500" : "bg-gray-500"}`}
-              >
-                {property.status}
-              </Badge>
+              <span className="text-sm">of {totalPages}</span>
             </div>
-            <CardContent className="p-4">
-              <h3 className="font-semibold truncate">{property.name}</h3>
-              <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                <MapPin className="h-3 w-3" />
-                {property.location}
-              </p>
-              <div className="flex items-center justify-between mt-3">
-                <span className="font-semibold text-coral-600">{property.price}</span>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{property.images.length} images</span>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    {property.rating}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      
-      {totalPages > 1 && (
-        <div className="flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} />
-              </PaginationItem>
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const page = i + Math.max(1, currentPage - 2);
-                return (
-                  <PaginationItem key={page}>
-                    <PaginationLink 
-                      onClick={() => setCurrentPage(page)}
-                      isActive={currentPage === page}
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
-              <PaginationItem>
-                <PaginationNext onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                  />
+                </PaginationItem>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const page = i + Math.max(1, currentPage - 2);
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationLink 
+                        onClick={() => setCurrentPage(page)}
+                        isActive={currentPage === page}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       )}
     </div>
   );
 
   return (
-    <div className="space-y-6">
-      {/* Compact Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Properties</p>
-              <p className="text-2xl font-bold text-coral-600">{scoutStats.totalProperties}</p>
-            </div>
-            <MapPin className="h-6 w-6 text-coral-500" />
-          </div>
+    <div className="space-y-4">
+      {/* Enhanced Compact Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+        <Card className="p-3">
+          <div className="text-xs text-muted-foreground">Properties</div>
+          <div className="text-lg font-bold text-coral-600">{scoutStats.totalProperties.toLocaleString()}</div>
         </Card>
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Bookings</p>
-              <p className="text-2xl font-bold text-coral-600">{scoutStats.activeBookings}</p>
-            </div>
-            <Calendar className="h-6 w-6 text-coral-500" />
-          </div>
+        <Card className="p-3">
+          <div className="text-xs text-muted-foreground">Active Bookings</div>
+          <div className="text-lg font-bold text-green-600">{scoutStats.activeBookings}</div>
         </Card>
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Earnings</p>
-              <p className="text-2xl font-bold text-coral-600">{scoutStats.monthlyEarnings}</p>
-            </div>
-            <DollarSign className="h-6 w-6 text-coral-500" />
-          </div>
+        <Card className="p-3">
+          <div className="text-xs text-muted-foreground">Monthly Revenue</div>
+          <div className="text-lg font-bold text-blue-600">{scoutStats.monthlyEarnings}</div>
         </Card>
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Rating</p>
-              <p className="text-2xl font-bold text-coral-600">{scoutStats.averageRating}</p>
-            </div>
-            <Star className="h-6 w-6 text-coral-500" />
-          </div>
+        <Card className="p-3">
+          <div className="text-xs text-muted-foreground">Avg Rating</div>
+          <div className="text-lg font-bold text-yellow-600">{scoutStats.averageRating}</div>
+        </Card>
+        <Card className="p-3">
+          <div className="text-xs text-muted-foreground">Total Views</div>
+          <div className="text-lg font-bold text-purple-600">{scoutStats.totalViews.toLocaleString()}</div>
+        </Card>
+        <Card className="p-3">
+          <div className="text-xs text-muted-foreground">Conversion</div>
+          <div className="text-lg font-bold text-orange-600">{scoutStats.conversionRate}</div>
+        </Card>
+        <Card className="p-3">
+          <div className="text-xs text-muted-foreground">Response Time</div>
+          <div className="text-lg font-bold text-teal-600">{scoutStats.responseTime}</div>
+        </Card>
+        <Card className="p-3">
+          <div className="text-xs text-muted-foreground">Top Category</div>
+          <div className="text-lg font-bold text-indigo-600">{scoutStats.topCategory}</div>
         </Card>
       </div>
 
       <Tabs defaultValue="properties" className="w-full">
-        <TabsList>
-          <TabsTrigger value="properties">Properties ({filteredProperties.length})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="properties">Properties ({filteredAndSortedProperties.length})</TabsTrigger>
           <TabsTrigger value="bookings">Bookings</TabsTrigger>
           <TabsTrigger value="messages">Messages</TabsTrigger>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="properties" className="space-y-4">
-          {/* Advanced Filters and Controls */}
+          {/* Enhanced Filters */}
           <Card className="p-4">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Property Management</h3>
-                <Dialog open={isAddLocationOpen} onOpenChange={setIsAddLocationOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-coral-500 hover:bg-coral-600">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Property
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add New Property</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleAddProperty} className="space-y-4">
-                      <Input name="name" placeholder="Property Name" required />
-                      <Input name="location" placeholder="Location" required />
-                      <Select name="category" required>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Beach">Beach</SelectItem>
-                          <SelectItem value="Mountain">Mountain</SelectItem>
-                          <SelectItem value="Urban">Urban</SelectItem>
-                          <SelectItem value="Nature">Nature</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Input name="price" placeholder="Price" required />
-                      <Input name="description" placeholder="Description" required />
-                      <Button type="submit" className="w-full">Add Property</Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+            <div className="space-y-4">
+              {/* Quick Filters */}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant={quickFilters.highPerforming ? "default" : "outline"}
+                  onClick={() => setQuickFilters(prev => ({ ...prev, highPerforming: !prev.highPerforming }))}
+                >
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  High Performing
+                </Button>
+                <Button
+                  size="sm"
+                  variant={quickFilters.needsAttention ? "default" : "outline"}
+                  onClick={() => setQuickFilters(prev => ({ ...prev, needsAttention: !prev.needsAttention }))}
+                >
+                  <Zap className="h-4 w-4 mr-1" />
+                  Needs Attention
+                </Button>
+                <Button
+                  size="sm"
+                  variant={quickFilters.recentlyAdded ? "default" : "outline"}
+                  onClick={() => setQuickFilters(prev => ({ ...prev, recentlyAdded: !prev.recentlyAdded }))}
+                >
+                  <Clock className="h-4 w-4 mr-1" />
+                  Recently Added
+                </Button>
               </div>
-              
-              <div className="flex flex-col md:flex-row gap-4">
+
+              {/* Main Filters */}
+              <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search properties..."
+                      placeholder="Search properties, locations, tags..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
@@ -614,10 +680,10 @@ const ScoutDashboard = () => {
                   </div>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="Status" />
+                    <SelectTrigger className="w-28">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
@@ -628,8 +694,8 @@ const ScoutDashboard = () => {
                   </Select>
                   
                   <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="Category" />
+                    <SelectTrigger className="w-28">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
@@ -639,17 +705,16 @@ const ScoutDashboard = () => {
                       <SelectItem value="Nature">Nature</SelectItem>
                     </SelectContent>
                   </Select>
-                  
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-32">
+
+                  <Select value={ratingFilter} onValueChange={setRatingFilter}>
+                    <SelectTrigger className="w-28">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="name">Name</SelectItem>
-                      <SelectItem value="location">Location</SelectItem>
-                      <SelectItem value="price">Price</SelectItem>
-                      <SelectItem value="rating">Rating</SelectItem>
-                      <SelectItem value="bookings">Bookings</SelectItem>
+                      <SelectItem value="all">All Ratings</SelectItem>
+                      <SelectItem value="high">4.5+ Stars</SelectItem>
+                      <SelectItem value="medium">3.5-4.5</SelectItem>
+                      <SelectItem value="low">Below 3.5</SelectItem>
                     </SelectContent>
                   </Select>
                   
@@ -658,35 +723,67 @@ const ScoutDashboard = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
                       <SelectItem value="25">25</SelectItem>
                       <SelectItem value="50">50</SelectItem>
                       <SelectItem value="100">100</SelectItem>
+                      <SelectItem value="200">200</SelectItem>
                     </SelectContent>
                   </Select>
-                  
-                  <div className="flex border rounded-md">
-                    <Button
-                      variant={viewMode === "list" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setViewMode("list")}
-                    >
-                      <List className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant={viewMode === "grid" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setViewMode("grid")}
-                    >
-                      <Grid className="h-4 w-4" />
-                    </Button>
-                  </div>
+
+                  <Dialog open={isAddLocationOpen} onOpenChange={setIsAddLocationOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-coral-500 hover:bg-coral-600">
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add New Property</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <Input placeholder="Property Name" />
+                        <Input placeholder="Location" />
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Beach">Beach</SelectItem>
+                            <SelectItem value="Mountain">Mountain</SelectItem>
+                            <SelectItem value="Urban">Urban</SelectItem>
+                            <SelectItem value="Nature">Nature</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input placeholder="Price per day" />
+                        <Button className="w-full">Add Property</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Button
+                    variant="outline"
+                    onClick={handleExport}
+                    disabled={isExporting}
+                  >
+                    {isExporting ? (
+                      <>
+                        <div className="animate-spin h-4 w-4 mr-1 border-2 border-current border-t-transparent rounded-full" />
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4 mr-1" />
+                        Export
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>
           </Card>
 
-          {viewMode === "list" ? <PropertyListView /> : <PropertyGridView />}
+          <PropertyListView />
         </TabsContent>
 
         <TabsContent value="bookings">
@@ -697,14 +794,14 @@ const ScoutDashboard = () => {
           <MessageCenter />
         </TabsContent>
 
-        <TabsContent value="profile">
+        <TabsContent value="analytics">
           <Card>
             <CardHeader>
-              <CardTitle>Professional Profile</CardTitle>
-              <CardDescription>Manage your scout profile and social media presence</CardDescription>
+              <CardTitle>Analytics Dashboard</CardTitle>
+              <CardDescription>Performance metrics and insights</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-center text-gray-500">Profile editing form will be implemented here</p>
+              <p className="text-center text-gray-500">Analytics dashboard will be implemented here</p>
             </CardContent>
           </Card>
         </TabsContent>
