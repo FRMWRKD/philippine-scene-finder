@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -165,34 +166,19 @@ const ScoutDashboard = () => {
     averageRating: 4.7,
   });
 
-  // Enhanced Image Management Functions
-  const handleAddDetailedImage = (propertyId: number, imageData: Omit<PropertyImage, "id">) => {
+  // Image Management Functions
+  const handleAddImage = (propertyId: number, imageData: Omit<PropertyImage, "id">) => {
     setScoutProperties((properties) =>
       properties.map((p) =>
         p.id === propertyId
           ? {
               ...p,
-              images: [
-                ...p.images,
-                {
-                  id: Date.now(),
-                  ...imageData,
-                },
-              ],
+              images: [...p.images, { id: Date.now(), ...imageData }],
             }
           : p
       )
     );
-    toast({ title: "Image Added", description: "Detailed image has been added to the property." });
-  };
-
-  const handleDeleteImage = (propertyId: number, imageId: number) => {
-    setScoutProperties((properties) =>
-      properties.map((p) =>
-        p.id === propertyId ? { ...p, images: p.images.filter((img) => img.id !== imageId) } : p
-      )
-    );
-    toast({ title: "Image Deleted", description: "Image has been removed from the property." });
+    toast({ title: "Image Added", description: "Image has been added to the property." });
   };
 
   const handleUpdateImage = (propertyId: number, imageId: number, updates: Partial<PropertyImage>) => {
@@ -206,6 +192,16 @@ const ScoutDashboard = () => {
     toast({ title: "Image Updated", description: "Image details have been updated." });
   };
 
+  const handleDeleteImage = (propertyId: number, imageId: number) => {
+    setScoutProperties((properties) =>
+      properties.map((p) =>
+        p.id === propertyId ? { ...p, images: p.images.filter((img) => img.id !== imageId) } : p
+      )
+    );
+    toast({ title: "Image Deleted", description: "Image has been removed from the property." });
+  };
+
+  // Tag Management Functions
   const handleAddTag = (propertyId: number, tag: string) => {
     if (!tag.trim()) return;
     setScoutProperties((properties) =>
@@ -234,6 +230,7 @@ const ScoutDashboard = () => {
     toast({ title: "Tag Updated", description: "Tag has been updated." });
   };
 
+  // Property Management Functions
   const handleAddProperty = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget as HTMLFormElement);
@@ -281,40 +278,6 @@ const ScoutDashboard = () => {
       title: "Status Updated",
       description: "Property status has been changed.",
     });
-  };
-
-  const handleAddImage = (propertyId: number, imageData: Omit<PropertyImage, "id">) => {
-    setScoutProperties((properties) =>
-      properties.map((p) =>
-        p.id === propertyId
-          ? {
-              ...p,
-              images: [...p.images, { id: Date.now(), ...imageData }],
-            }
-          : p
-      )
-    );
-    toast({ title: "Image Added", description: "Image has been added to the property." });
-  };
-
-  const handleUpdateImage = (propertyId: number, imageId: number, updates: Partial<PropertyImage>) => {
-    setScoutProperties((properties) =>
-      properties.map((p) =>
-        p.id === propertyId
-          ? { ...p, images: p.images.map((img) => (img.id === imageId ? { ...img, ...updates } : img)) }
-          : p
-      )
-    );
-    toast({ title: "Image Updated", description: "Image details have been updated." });
-  };
-
-  const handleDeleteImage = (propertyId: number, imageId: number) => {
-    setScoutProperties((properties) =>
-      properties.map((p) =>
-        p.id === propertyId ? { ...p, images: p.images.filter((img) => img.id !== imageId) } : p
-      )
-    );
-    toast({ title: "Image Deleted", description: "Image has been removed from the property." });
   };
 
   return (
