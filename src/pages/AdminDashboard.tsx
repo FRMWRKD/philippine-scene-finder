@@ -1,13 +1,31 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
 import UserDashboard from "@/components/admin/UserDashboard";
 import ScoutDashboard from "@/components/admin/ScoutDashboard";
 
 const AdminDashboard = () => {
+  const { isAuthenticated, userRole } = useAuth();
+  const navigate = useNavigate();
   const [userType, setUserType] = useState<"user" | "scout">("user");
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/");
+      return;
+    }
+    
+    if (userRole) {
+      setUserType(userRole);
+    }
+  }, [isAuthenticated, userRole, navigate]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
@@ -21,8 +39,8 @@ const AdminDashboard = () => {
         {/* User Type Selector */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Select Dashboard Type</CardTitle>
-            <CardDescription>Choose your role to access the appropriate dashboard</CardDescription>
+            <CardTitle>Dashboard Type</CardTitle>
+            <CardDescription>Switch between user and scout dashboards</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex gap-4">
