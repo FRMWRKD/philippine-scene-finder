@@ -88,6 +88,11 @@ const ScoutDashboard = () => {
     recentlyAdded: false,
   });
 
+  // Modal management state
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   // Advanced filtering states
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [ratingFilter, setRatingFilter] = useState("all");
