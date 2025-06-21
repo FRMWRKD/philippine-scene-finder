@@ -1,15 +1,13 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Plus, Edit, Trash, Star, Calendar, DollarSign, User, MessageSquare } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { MapPin, Search, Filter, Grid, List, Plus, Calendar, DollarSign, User, MessageSquare, Star, Edit, Trash, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageGallery from "./ImageGallery";
 import PropertyTagManager from "./PropertyTagManager";
@@ -62,9 +60,21 @@ interface Property {
 
 const ScoutDashboard = () => {
   const { toast } = useToast();
-  const [isAddLocationOpen, setIsAddLocationOpen] = useState(false);
-  const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
-  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  
+  // View and pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  // Message pagination
+  const [messageCurrentPage, setMessageCurrentPage] = useState(1);
+  const [messageSearchTerm, setMessageSearchTerm] = useState("");
+  const [messageStatusFilter, setMessageStatusFilter] = useState("all");
 
   const [scoutProfile, setScoutProfile] = useState({
     name: "Maria Santos",
@@ -280,279 +290,374 @@ const ScoutDashboard = () => {
     });
   };
 
+  // Property filtering and pagination
+  const filteredProperties = scoutProperties.filter(property => {
+    const matchesSearch = property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         property.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || property.status === statusFilter;
+    const matchesCategory = categoryFilter === "all" || property.category === categoryFilter;
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
+
+  const sortedProperties = [...filteredProperties].sort((a, b) => {
+    let aValue = a[sortBy as keyof Property];
+    let bValue = b[sortBy as keyof Property];
+    
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    }
+    
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+    }
+    
+    return 0;
+  });
+
+  const totalPages = Math.ceil(sortedProperties.length / itemsPerPage);
+  const paginatedProperties = sortedProperties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const PropertyListView = () => (
+    <div className="space-y-4">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-16">#</TableHead>
+            <TableHead>Property</TableHead>
+            <TableHead>Location</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead>Images</TableHead>
+            <TableHead>Bookings</TableHead>
+            <TableHead>Rating</TableHead>
+            <TableHead className="w-32">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {paginatedProperties.map((property, index) => (
+            <TableRow key={property.id} className="hover:bg-muted/50">
+              <TableCell className="font-mono text-sm">
+                {(currentPage - 1) * itemsPerPage + index + 1}
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={property.images[0]?.url || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4"}
+                    alt={property.name}
+                    className="w-12 h-12 rounded-md object-cover"
+                  />
+                  <div>
+                    <div className="font-medium">{property.name}</div>
+                    <div className="text-sm text-muted-foreground truncate max-w-[200px]">
+                      {property.description}
+                    </div>
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-sm">{property.location}</span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline">{property.category}</Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant={property.status === "active" ? "default" : "secondary"}>
+                  {property.status}
+                </Badge>
+              </TableCell>
+              <TableCell className="font-semibold text-coral-600">
+                {property.price}
+              </TableCell>
+              <TableCell>
+                <span className="text-sm bg-muted px-2 py-1 rounded">
+                  {property.images.length}
+                </span>
+              </TableCell>
+              <TableCell>{property.bookings}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1">
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  <span className="text-sm">{property.rating}</span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1">
+                  <Button size="sm" variant="ghost">
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleDeleteProperty(property.id)}>
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedProperties.length)} of {sortedProperties.length} properties
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                />
+              </PaginationItem>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const page = i + Math.max(1, currentPage - 2);
+                return (
+                  <PaginationItem key={page}>
+                    <PaginationLink 
+                      onClick={() => setCurrentPage(page)}
+                      isActive={currentPage === page}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+    </div>
+  );
+
+  const PropertyGridView = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {paginatedProperties.map((property) => (
+          <Card key={property.id} className="hover:shadow-md transition-shadow">
+            <div className="aspect-video relative">
+              <img
+                src={property.images[0]?.url || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4"}
+                alt={property.name}
+                className="w-full h-full object-cover rounded-t-lg"
+              />
+              <Badge 
+                className={`absolute top-2 right-2 ${property.status === "active" ? "bg-green-500" : "bg-gray-500"}`}
+              >
+                {property.status}
+              </Badge>
+            </div>
+            <CardContent className="p-4">
+              <h3 className="font-semibold truncate">{property.name}</h3>
+              <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                <MapPin className="h-3 w-3" />
+                {property.location}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <span className="font-semibold text-coral-600">{property.price}</span>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>{property.images.length} images</span>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    {property.rating}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+      {totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} />
+              </PaginationItem>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const page = i + Math.max(1, currentPage - 2);
+                return (
+                  <PaginationItem key={page}>
+                    <PaginationLink 
+                      onClick={() => setCurrentPage(page)}
+                      isActive={currentPage === page}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              <PaginationItem>
+                <PaginationNext onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
-      {/* Scout Profile Management */}
-      <Card className="glass bg-white/70 backdrop-blur-sm border border-gray-200/50">
-        <CardHeader>
+      {/* Compact Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="p-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-6 w-6 text-coral-500" />
-              Scout Profile
-            </CardTitle>
-            <Button className="bg-coral-500 hover:bg-coral-600">
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Profile
-            </Button>
+            <div>
+              <p className="text-sm text-muted-foreground">Properties</p>
+              <p className="text-2xl font-bold text-coral-600">{scoutStats.totalProperties}</p>
+            </div>
+            <MapPin className="h-6 w-6 text-coral-500" />
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold text-gray-900">{scoutProfile.name}</h4>
-                <p className="text-sm text-gray-600">{scoutProfile.specialty}</p>
-                <p className="text-sm text-gray-500">{scoutProfile.experience} experience</p>
-              </div>
-              <p className="text-sm text-gray-700">{scoutProfile.bio}</p>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Bookings</p>
+              <p className="text-2xl font-bold text-coral-600">{scoutStats.activeBookings}</p>
             </div>
-            <div className="space-y-3">
-              <div className="text-sm">
-                <strong>Website:</strong> {scoutProfile.website}
-              </div>
-              <div className="text-sm">
-                <strong>Instagram:</strong> {scoutProfile.instagram}
-              </div>
-              <div className="text-sm">
-                <strong>YouTube:</strong> {scoutProfile.youtube}
-              </div>
-            </div>
+            <Calendar className="h-6 w-6 text-coral-500" />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Scout Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="glass bg-white/70 backdrop-blur-sm border border-gray-200/50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Properties</p>
-                <p className="text-2xl font-bold text-coral-600">{scoutStats.totalProperties}</p>
-              </div>
-              <MapPin className="h-8 w-8 text-coral-500" />
-            </div>
-          </CardContent>
         </Card>
-
-        <Card className="glass bg-white/70 backdrop-blur-sm border border-gray-200/50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Active Bookings</p>
-                <p className="text-2xl font-bold text-coral-600">{scoutStats.activeBookings}</p>
-              </div>
-              <Calendar className="h-8 w-8 text-coral-500" />
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Earnings</p>
+              <p className="text-2xl font-bold text-coral-600">{scoutStats.monthlyEarnings}</p>
             </div>
-          </CardContent>
+            <DollarSign className="h-6 w-6 text-coral-500" />
+          </div>
         </Card>
-
-        <Card className="glass bg-white/70 backdrop-blur-sm border border-gray-200/50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Monthly Earnings</p>
-                <p className="text-2xl font-bold text-coral-600">{scoutStats.monthlyEarnings}</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-coral-500" />
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Rating</p>
+              <p className="text-2xl font-bold text-coral-600">{scoutStats.averageRating}</p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass bg-white/70 backdrop-blur-sm border border-gray-200/50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Average Rating</p>
-                <p className="text-2xl font-bold text-coral-600">{scoutStats.averageRating}</p>
-              </div>
-              <Star className="h-8 w-8 text-coral-500" />
-            </div>
-          </CardContent>
+            <Star className="h-6 w-6 text-coral-500" />
+          </div>
         </Card>
       </div>
 
       <Tabs defaultValue="properties" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="properties">Properties</TabsTrigger>
+        <TabsList>
+          <TabsTrigger value="properties">Properties ({filteredProperties.length})</TabsTrigger>
           <TabsTrigger value="bookings">Bookings</TabsTrigger>
           <TabsTrigger value="messages">Messages</TabsTrigger>
           <TabsTrigger value="profile">Profile</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="properties" className="space-y-6">
-          {/* Properties Management */}
-          <Card className="glass bg-white/70 backdrop-blur-sm border border-gray-200/50">
-            <CardHeader>
+        <TabsContent value="properties" className="space-y-4">
+          {/* Advanced Filters and Controls */}
+          <Card className="p-4">
+            <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Property Management</CardTitle>
-                  <CardDescription>Manage your location properties and their details</CardDescription>
+                <h3 className="text-lg font-semibold">Property Management</h3>
+                <Button className="bg-coral-500 hover:bg-coral-600">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Property
+                </Button>
+              </div>
+              
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search properties..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
                 </div>
-                <Dialog open={isAddLocationOpen} onOpenChange={setIsAddLocationOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-coral-500 hover:bg-coral-600">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Property
+                
+                <div className="flex gap-2">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      <SelectItem value="Beach">Beach</SelectItem>
+                      <SelectItem value="Mountain">Mountain</SelectItem>
+                      <SelectItem value="Urban">Urban</SelectItem>
+                      <SelectItem value="Nature">Nature</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="location">Location</SelectItem>
+                      <SelectItem value="price">Price</SelectItem>
+                      <SelectItem value="rating">Rating</SelectItem>
+                      <SelectItem value="bookings">Bookings</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <div className="flex border rounded-md">
+                    <Button
+                      variant={viewMode === "list" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setViewMode("list")}
+                    >
+                      <List className="h-4 w-4" />
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Add New Property</DialogTitle>
-                      <CardDescription>Add a new location to your portfolio</CardDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleAddProperty} className="space-y-4">
-                      <div>
-                        <Label htmlFor="name">Property Name</Label>
-                        <Input id="name" name="name" placeholder="Enter property name" required />
-                      </div>
-                      <div>
-                        <Label htmlFor="location">Location</Label>
-                        <Input id="location" name="location" placeholder="City, Province" required />
-                      </div>
-                      <div>
-                        <Label htmlFor="category">Category</Label>
-                        <Select name="category" required>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Beach">Beach</SelectItem>
-                            <SelectItem value="Mountain">Mountain</SelectItem>
-                            <SelectItem value="Nature">Nature</SelectItem>
-                            <SelectItem value="Urban">Urban</SelectItem>
-                            <SelectItem value="Historic">Historic</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="price">Price per Day</Label>
-                        <Input id="price" name="price" placeholder="₱0,000" required />
-                      </div>
-                      <div>
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea id="description" name="description" placeholder="Describe your property..." required />
-                      </div>
-                      <Button type="submit" className="w-full bg-coral-500 hover:bg-coral-600">
-                        Add Property
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+                    <Button
+                      variant={viewMode === "grid" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setViewMode("grid")}
+                    >
+                      <Grid className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {scoutProperties.map((property) => (
-                  <Card key={property.id} className="border-2 border-gray-200">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <img
-                            src={property.images[0]?.url || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4"}
-                            alt={property.name}
-                            className="w-20 h-20 rounded-lg object-cover"
-                          />
-                          <div>
-                            <h4 className="text-lg font-semibold">{property.name}</h4>
-                            <p className="text-gray-600">{property.location}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant={property.status === "active" ? "default" : "secondary"}>{property.status}</Badge>
-                              <span className="text-coral-600 font-semibold">{property.price}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleToggleStatus(property.id)}>
-                            Toggle Status
-                          </Button>
-                          <Button variant="destructive" size="sm" onClick={() => handleDeleteProperty(property.id)}>
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <Tabs defaultValue="images" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
-                          <TabsTrigger value="images">Images ({property.images.length})</TabsTrigger>
-                          <TabsTrigger value="tags">Tags ({property.tags.length})</TabsTrigger>
-                          <TabsTrigger value="details">Details</TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="images">
-                          <ImageGallery
-                            propertyId={property.id}
-                            images={property.images}
-                            onAddImage={handleAddImage}
-                            onUpdateImage={handleUpdateImage}
-                            onDeleteImage={handleDeleteImage}
-                          />
-                        </TabsContent>
-
-                        <TabsContent value="tags">
-                          <PropertyTagManager
-                            propertyId={property.id}
-                            tags={property.tags}
-                            onAddTag={handleAddTag}
-                            onDeleteTag={handleDeleteTag}
-                            onUpdateTag={handleUpdateTag}
-                          />
-                        </TabsContent>
-
-                        <TabsContent value="details" className="space-y-4">
-                          <div>
-                            <Label>Description</Label>
-                            <Textarea 
-                              defaultValue={property.description}
-                              className="mt-2"
-                              rows={3}
-                            />
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <Label>Features</Label>
-                              <div className="space-y-2 mt-2">
-                                {property.features.map((feature, index) => (
-                                  <div key={index} className="flex items-center gap-2">
-                                    <Input defaultValue={feature} />
-                                    <Button size="sm" variant="destructive">
-                                      <Trash className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                ))}
-                                <Button size="sm" variant="outline">
-                                  <Plus className="h-4 w-4 mr-1" />
-                                  Add Feature
-                                </Button>
-                              </div>
-                            </div>
-                            <div>
-                              <Label>Amenities</Label>
-                              <div className="space-y-2 mt-2">
-                                {property.amenities.map((amenity, index) => (
-                                  <div key={index} className="flex items-center gap-2">
-                                    <Input defaultValue={amenity} />
-                                    <Button size="sm" variant="destructive">
-                                      <Trash className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                ))}
-                                <Button size="sm" variant="outline">
-                                  <Plus className="h-4 w-4 mr-1" />
-                                  Add Amenity
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </TabsContent>
-                      </Tabs>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
+            </div>
           </Card>
+
+          {viewMode === "list" ? <PropertyListView /> : <PropertyGridView />}
         </TabsContent>
 
         <TabsContent value="bookings">
