@@ -10,12 +10,15 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { MapPin, Search, Filter, Grid, List, Plus, Calendar, DollarSign, User, MessageSquare, Star, Edit, Trash, Eye, Download, Upload, MoreHorizontal, Copy, Archive, Zap, TrendingUp, Clock, CheckSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageGallery from "./ImageGallery";
 import PropertyTagManager from "./PropertyTagManager";
 import BookingManager from "./BookingManager";
 import MessageCenter from "./MessageCenter";
+import PropertyEditModal from "./PropertyEditModal";
+import PropertyViewModal from "./PropertyViewModal";
 
 interface PropertyImage {
   id: number;
@@ -333,7 +336,7 @@ const ScoutDashboard = () => {
       location: formData.get("location") as string,
       category: formData.get("category") as string,
       price: formData.get("price") as string,
-      description: formData.get("description") as string,
+      description: formData.get("description") as string || "No description provided",
       status: "pending",
       bookings: 0,
       rating: 0,
@@ -342,35 +345,26 @@ const ScoutDashboard = () => {
       tags: [],
       amenities: [],
       attachedMovies: [],
+      views: 0,
+      revenue: "₱0",
+      lastUpdated: new Date().toISOString().split('T')[0],
     };
 
-    setScoutProperties([...scoutProperties, newProperty]);
+    setScoutProperties(prev => [...prev, newProperty]);
     setIsAddLocationOpen(false);
-    toast({
-      title: "Property Added",
-      description: "Your new property has been added successfully.",
-    });
+    toast({ title: "Property Added", description: "Your new property has been added successfully." });
   };
 
   const handleDeleteProperty = (propertyId: number) => {
-    setScoutProperties((properties) => properties.filter((p) => p.id !== propertyId));
-    toast({
-      title: "Property Deleted",
-      description: "Property has been removed from your listings.",
-      variant: "destructive",
-    });
+    setScoutProperties(props => props.filter(p => p.id !== propertyId));
+    toast({ title: "Property Deleted", description: "Property has been removed.", variant: "destructive" });
   };
 
   const handleToggleStatus = (propertyId: number) => {
-    setScoutProperties((properties) =>
-      properties.map((p) =>
-        p.id === propertyId ? { ...p, status: p.status === "active" ? "inactive" : "active" } : p
-      )
-    );
-    toast({
-      title: "Status Updated",
-      description: "Property status has been changed.",
-    });
+    setScoutProperties(props => props.map(p => 
+      p.id === propertyId ? { ...p, status: p.status === "active" ? "inactive" : "active" } : p
+    ));
+    toast({ title: "Status Updated", description: "Property status has been changed." });
   };
 
   // Property filtering and pagination
@@ -396,10 +390,28 @@ const ScoutDashboard = () => {
                 <Download className="h-4 w-4 mr-1" />
                 Export
               </Button>
-              <Button size="sm" variant="destructive" onClick={() => handleBulkAction("delete")}>
-                <Trash className="h-4 w-4 mr-1" />
-                Delete
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="sm" variant="destructive">
+                    <Trash className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Selected Properties</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete {selectedProperties.length} selected properties? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleBulkAction("delete")}>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </Card>
@@ -508,24 +520,46 @@ const ScoutDashboard = () => {
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
+                  <DropdownMenuContent align="end" className="bg-white">
+                    <DropdownMenuItem onClick={() => handleViewProperty(property)}>
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleEditProperty(property)}>
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDuplicateProperty(property)}>
                       <Copy className="h-4 w-4 mr-2" />
                       Duplicate
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive">
-                      <Trash className="h-4 w-4 mr-2" />
-                      Delete
+                    <DropdownMenuItem onClick={() => handleToggleStatus(property.id)}>
+                      <Archive className="h-4 w-4 mr-2" />
+                      {property.status === "active" ? "Deactivate" : "Activate"}
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                          <Trash className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete "{property.name}"? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteProperty(property.id)}>
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -587,6 +621,38 @@ const ScoutDashboard = () => {
       )}
     </div>
   );
+
+  const handleViewProperty = (property: Property) => {
+    setSelectedProperty(property);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditProperty = (property: Property) => {
+    setSelectedProperty(property);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveProperty = (propertyId: number, updates: Partial<Property>) => {
+    setScoutProperties(props => props.map(p => 
+      p.id === propertyId ? { ...p, ...updates } : p
+    ));
+    setIsEditModalOpen(false);
+  };
+
+  const handleDuplicateProperty = (property: Property) => {
+    const duplicatedProperty: Property = {
+      ...property,
+      id: Date.now(),
+      name: `${property.name} (Copy)`,
+      status: "inactive",
+      bookings: 0,
+      rating: 0,
+      views: 0,
+      revenue: "₱0",
+    };
+    setScoutProperties(props => [...props, duplicatedProperty]);
+    toast({ title: "Property Duplicated", description: "Property has been duplicated successfully." });
+  };
 
   return (
     <div className="space-y-4">
@@ -741,10 +807,10 @@ const ScoutDashboard = () => {
                       <DialogHeader>
                         <DialogTitle>Add New Property</DialogTitle>
                       </DialogHeader>
-                      <div className="space-y-4">
-                        <Input placeholder="Property Name" />
-                        <Input placeholder="Location" />
-                        <Select>
+                      <form onSubmit={handleAddProperty} className="space-y-4">
+                        <Input name="name" placeholder="Property Name" required />
+                        <Input name="location" placeholder="Location" required />
+                        <Select name="category" required>
                           <SelectTrigger>
                             <SelectValue placeholder="Category" />
                           </SelectTrigger>
@@ -755,9 +821,9 @@ const ScoutDashboard = () => {
                             <SelectItem value="Nature">Nature</SelectItem>
                           </SelectContent>
                         </Select>
-                        <Input placeholder="Price per day" />
-                        <Button className="w-full">Add Property</Button>
-                      </div>
+                        <Input name="price" placeholder="Price per day (e.g., ₱5,000)" required />
+                        <Button type="submit" className="w-full">Add Property</Button>
+                      </form>
                     </DialogContent>
                   </Dialog>
 
@@ -806,6 +872,30 @@ const ScoutDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Modals */}
+      <PropertyViewModal
+        property={selectedProperty}
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setSelectedProperty(null);
+        }}
+        onEdit={() => {
+          setIsViewModalOpen(false);
+          setIsEditModalOpen(true);
+        }}
+      />
+      
+      <PropertyEditModal
+        property={selectedProperty}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedProperty(null);
+        }}
+        onSave={handleSaveProperty}
+      />
     </div>
   );
 };
