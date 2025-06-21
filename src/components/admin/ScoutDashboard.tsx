@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MapPin, Search, Filter, Grid, List, Plus, Calendar, DollarSign, User, MessageSquare, Star, Edit, Trash, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageGallery from "./ImageGallery";
@@ -70,6 +71,7 @@ const ScoutDashboard = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isAddLocationOpen, setIsAddLocationOpen] = useState(false);
 
   // Message pagination
   const [messageCurrentPage, setMessageCurrentPage] = useState(1);
@@ -566,10 +568,37 @@ const ScoutDashboard = () => {
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Property Management</h3>
-                <Button className="bg-coral-500 hover:bg-coral-600">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Property
-                </Button>
+                <Dialog open={isAddLocationOpen} onOpenChange={setIsAddLocationOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-coral-500 hover:bg-coral-600">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Property
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add New Property</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleAddProperty} className="space-y-4">
+                      <Input name="name" placeholder="Property Name" required />
+                      <Input name="location" placeholder="Location" required />
+                      <Select name="category" required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Beach">Beach</SelectItem>
+                          <SelectItem value="Mountain">Mountain</SelectItem>
+                          <SelectItem value="Urban">Urban</SelectItem>
+                          <SelectItem value="Nature">Nature</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input name="price" placeholder="Price" required />
+                      <Input name="description" placeholder="Description" required />
+                      <Button type="submit" className="w-full">Add Property</Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </div>
               
               <div className="flex flex-col md:flex-row gap-4">
