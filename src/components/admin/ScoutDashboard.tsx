@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,15 +8,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Plus, Edit, Trash, Star, Calendar, DollarSign, User, Images, Link, Youtube } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MapPin, Plus, Edit, Trash, Star, Calendar, DollarSign, User, Images, Link, Youtube, Film, Tag, X, MoveUp, MoveDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+interface PropertyImage {
+  id: number;
+  url: string;
+  description: string;
+  alt: string;
+}
+
+interface AttachedMovie {
+  id: number;
+  title: string;
+  year: string;
+  role: string;
+  description: string;
+  genre: string;
+  director: string;
+  imdbUrl?: string;
+  trailerUrl?: string;
+}
 
 const ScoutDashboard = () => {
   const { toast } = useToast();
   const [isAddLocationOpen, setIsAddLocationOpen] = useState(false);
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<any>(null);
-  const [editingImages, setEditingImages] = useState<any>(null);
+  const [managingImages, setManagingImages] = useState<any>(null);
+  const [managingTags, setManagingTags] = useState<any>(null);
+  const [managingMovies, setManagingMovies] = useState<any>(null);
   const [editingFeatures, setEditingFeatures] = useState<any>(null);
 
   const [scoutProfile, setScoutProfile] = useState({
@@ -52,14 +73,17 @@ const ScoutDashboard = () => {
       rating: 4.8,
       description: "Beautiful beachfront location perfect for photoshoots and film productions",
       images: [
-        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5",
-        "https://images.unsplash.com/photo-1571501679680-de32f1e7aad4"
-      ],
+        { id: 1, url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4", description: "Main beach view", alt: "Boracay beach main view" },
+        { id: 2, url: "https://images.unsplash.com/photo-1544551763-46a013bb70d5", description: "Sunset angle", alt: "Beautiful sunset at Boracay" },
+        { id: 3, url: "https://images.unsplash.com/photo-1571501679680-de32f1e7aad4", description: "Resort facilities", alt: "Resort amenities and facilities" }
+      ] as PropertyImage[],
       features: ["Beachfront Access", "Sunset Views", "Private Beach", "Water Sports", "Restaurant"],
       tags: ["Beach", "Sunset", "Water", "Tropical", "Resort"],
       amenities: ["Parking", "WiFi", "Restrooms", "Catering Available", "Equipment Rental"],
-      filmAppearances: ["Island Paradise (2023)", "Tropical Dreams (2022)"]
+      attachedMovies: [
+        { id: 1, title: "Island Paradise", year: "2023", role: "Main Location", description: "Primary filming location for beach scenes", genre: "Romance", director: "Juan Dela Cruz", imdbUrl: "https://imdb.com/title/123", trailerUrl: "https://youtube.com/watch?v=123" },
+        { id: 2, title: "Tropical Dreams", year: "2022", role: "Supporting Location", description: "Used for sunset romantic scenes", genre: "Drama", director: "Maria Garcia" }
+      ] as AttachedMovie[]
     },
     {
       id: 2,
@@ -72,13 +96,15 @@ const ScoutDashboard = () => {
       rating: 4.6,
       description: "Scenic mountain views with cool climate and pine forests",
       images: [
-        "https://images.unsplash.com/photo-1464822759844-d150165c4795",
-        "https://images.unsplash.com/photo-1506905925346-21bda4d32df4"
-      ],
+        { id: 4, url: "https://images.unsplash.com/photo-1464822759844-d150165c4795", description: "Mountain panorama", alt: "Baguio mountain view" },
+        { id: 5, url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4", description: "Pine forest area", alt: "Pine trees in Baguio" }
+      ] as PropertyImage[],
       features: ["Mountain Views", "Cool Climate", "Pine Trees", "Hiking Trails"],
       tags: ["Mountain", "Nature", "Cool", "Pine", "Hiking"],
       amenities: ["Parking", "Guide Available", "Camping Allowed"],
-      filmAppearances: ["Mountain Dreams (2022)"]
+      attachedMovies: [
+        { id: 3, title: "Mountain Dreams", year: "2022", role: "Main Location", description: "Featured throughout the film", genre: "Adventure", director: "Pedro Santos" }
+      ] as AttachedMovie[]
     }
   ]);
 
@@ -88,6 +114,134 @@ const ScoutDashboard = () => {
     monthlyEarnings: "₱45,000",
     averageRating: 4.7
   });
+
+  // Image Management Functions
+  const handleAddImage = (propertyId: number, imageData: { url: string; description: string; alt: string }) => {
+    setScoutProperties(properties => 
+      properties.map(p => 
+        p.id === propertyId 
+          ? { ...p, images: [...p.images, { id: Date.now(), ...imageData }] }
+          : p
+      )
+    );
+    toast({ title: "Image Added", description: "New image has been added to the property." });
+  };
+
+  const handleDeleteImage = (propertyId: number, imageId: number) => {
+    setScoutProperties(properties => 
+      properties.map(p => 
+        p.id === propertyId 
+          ? { ...p, images: p.images.filter(img => img.id !== imageId) }
+          : p
+      )
+    );
+    toast({ title: "Image Deleted", description: "Image has been removed from the property." });
+  };
+
+  const handleUpdateImage = (propertyId: number, imageId: number, updates: Partial<PropertyImage>) => {
+    setScoutProperties(properties => 
+      properties.map(p => 
+        p.id === propertyId 
+          ? { ...p, images: p.images.map(img => img.id === imageId ? { ...img, ...updates } : img) }
+          : p
+      )
+    );
+    toast({ title: "Image Updated", description: "Image details have been updated." });
+  };
+
+  const handleMoveImage = (propertyId: number, imageId: number, direction: 'up' | 'down') => {
+    setScoutProperties(properties => 
+      properties.map(p => {
+        if (p.id === propertyId) {
+          const images = [...p.images];
+          const index = images.findIndex(img => img.id === imageId);
+          if (index === -1) return p;
+          
+          const newIndex = direction === 'up' ? index - 1 : index + 1;
+          if (newIndex < 0 || newIndex >= images.length) return p;
+          
+          [images[index], images[newIndex]] = [images[newIndex], images[index]];
+          return { ...p, images };
+        }
+        return p;
+      })
+    );
+    toast({ title: "Image Reordered", description: `Image moved ${direction}.` });
+  };
+
+  // Tag Management Functions
+  const handleAddTag = (propertyId: number, tag: string) => {
+    if (!tag.trim()) return;
+    setScoutProperties(properties => 
+      properties.map(p => 
+        p.id === propertyId 
+          ? { ...p, tags: [...p.tags, tag.trim()] }
+          : p
+      )
+    );
+    toast({ title: "Tag Added", description: `Tag "${tag}" has been added.` });
+  };
+
+  const handleDeleteTag = (propertyId: number, tagIndex: number) => {
+    setScoutProperties(properties => 
+      properties.map(p => 
+        p.id === propertyId 
+          ? { ...p, tags: p.tags.filter((_, index) => index !== tagIndex) }
+          : p
+      )
+    );
+    toast({ title: "Tag Deleted", description: "Tag has been removed." });
+  };
+
+  const handleUpdateTag = (propertyId: number, tagIndex: number, newTag: string) => {
+    setScoutProperties(properties => 
+      properties.map(p => 
+        p.id === propertyId 
+          ? { ...p, tags: p.tags.map((tag, index) => index === tagIndex ? newTag : tag) }
+          : p
+      )
+    );
+    toast({ title: "Tag Updated", description: "Tag has been updated." });
+  };
+
+  // Movie Management Functions
+  const handleAddMovie = (propertyId: number, movieData: Omit<AttachedMovie, 'id'>) => {
+    setScoutProperties(properties => 
+      properties.map(p => 
+        p.id === propertyId 
+          ? { ...p, attachedMovies: [...(p.attachedMovies || []), { id: Date.now(), ...movieData }] }
+          : p
+      )
+    );
+    toast({ title: "Movie Added", description: "Movie has been attached to the property." });
+  };
+
+  const handleDeleteMovie = (propertyId: number, movieId: number) => {
+    setScoutProperties(properties => 
+      properties.map(p => 
+        p.id === propertyId 
+          ? { ...p, attachedMovies: (p.attachedMovies || []).filter(movie => movie.id !== movieId) }
+          : p
+      )
+    );
+    toast({ title: "Movie Removed", description: "Movie has been removed from the property." });
+  };
+
+  const handleUpdateMovie = (propertyId: number, movieId: number, updates: Partial<AttachedMovie>) => {
+    setScoutProperties(properties => 
+      properties.map(p => 
+        p.id === propertyId 
+          ? { 
+              ...p, 
+              attachedMovies: (p.attachedMovies || []).map(movie => 
+                movie.id === movieId ? { ...movie, ...updates } : movie
+              ) 
+            }
+          : p
+      )
+    );
+    toast({ title: "Movie Updated", description: "Movie details have been updated." });
+  };
 
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -394,13 +548,13 @@ const ScoutDashboard = () => {
         </Card>
       </div>
 
-      {/* Properties Management */}
+      {/* Enhanced Properties Management */}
       <Card className="glass bg-white/70 backdrop-blur-sm border border-gray-200/50">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Properties Management</CardTitle>
-              <CardDescription>Complete control over your property listings</CardDescription>
+              <CardTitle>Advanced Property Management</CardTitle>
+              <CardDescription>Complete control over every property detail</CardDescription>
             </div>
             <Dialog open={isAddLocationOpen} onOpenChange={setIsAddLocationOpen}>
               <DialogTrigger asChild>
@@ -455,257 +609,381 @@ const ScoutDashboard = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Property</TableHead>
-                  <TableHead>Details</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Performance</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {scoutProperties.map((property) => (
-                  <TableRow key={property.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <img 
-                          src={property.images[0]} 
-                          alt={property.name}
-                          className="w-16 h-16 rounded-lg object-cover"
-                        />
-                        <div>
-                          <p className="font-medium">{property.name}</p>
-                          <p className="text-sm text-gray-500">{property.location}</p>
-                          <p className="text-sm font-medium text-coral-600">{property.price}</p>
+          <div className="space-y-6">
+            {scoutProperties.map((property) => (
+              <Card key={property.id} className="border-2 border-gray-200">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={property.images[0]?.url} 
+                        alt={property.name}
+                        className="w-20 h-20 rounded-lg object-cover"
+                      />
+                      <div>
+                        <h4 className="text-lg font-semibold">{property.name}</h4>
+                        <p className="text-gray-600">{property.location}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant={property.status === "active" ? "default" : "secondary"}>
+                            {property.status}
+                          </Badge>
+                          <span className="text-coral-600 font-semibold">{property.price}</span>
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <p className="text-sm"><span className="font-medium">Category:</span> {property.category}</p>
-                        <p className="text-sm"><span className="font-medium">Features:</span> {property.features.length}</p>
-                        <p className="text-sm"><span className="font-medium">Images:</span> {property.images.length}</p>
-                        <p className="text-sm"><span className="font-medium">Tags:</span> {property.tags.length}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant={property.status === "active" ? "default" : "secondary"}
-                        className="cursor-pointer"
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setEditingProperty(property)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit Details
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
                         onClick={() => handleToggleStatus(property.id)}
                       >
-                        {property.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <p className="text-sm">Bookings: {property.bookings}</p>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm">{property.rating}</span>
+                        Toggle Status
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => handleDeleteProperty(property.id)}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="images" className="w-full">
+                    <TabsList className="grid w-full grid-cols-4">
+                      <TabsTrigger value="images">Images ({property.images.length})</TabsTrigger>
+                      <TabsTrigger value="tags">Tags ({property.tags.length})</TabsTrigger>
+                      <TabsTrigger value="movies">Movies ({(property.attachedMovies || []).length})</TabsTrigger>
+                      <TabsTrigger value="features">Features</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="images" className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h5 className="font-medium">Property Images</h5>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm">
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add Image
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add New Image</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={(e) => {
+                              e.preventDefault();
+                              const formData = new FormData(e.target as HTMLFormElement);
+                              handleAddImage(property.id, {
+                                url: formData.get('url') as string,
+                                description: formData.get('description') as string,
+                                alt: formData.get('alt') as string,
+                              });
+                              (e.target as HTMLFormElement).reset();
+                            }} className="space-y-4">
+                              <div>
+                                <Label htmlFor="url">Image URL</Label>
+                                <Input name="url" placeholder="https://..." required />
+                              </div>
+                              <div>
+                                <Label htmlFor="description">Description</Label>
+                                <Input name="description" placeholder="Brief description" required />
+                              </div>
+                              <div>
+                                <Label htmlFor="alt">Alt Text</Label>
+                                <Input name="alt" placeholder="Alt text for accessibility" required />
+                              </div>
+                              <Button type="submit" className="w-full">Add Image</Button>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {property.images.map((image, index) => (
+                          <Card key={image.id} className="p-4">
+                            <img src={image.url} alt={image.alt} className="w-full h-32 object-cover rounded mb-2" />
+                            <div className="space-y-2">
+                              <Input 
+                                defaultValue={image.description}
+                                onBlur={(e) => handleUpdateImage(property.id, image.id, { description: e.target.value })}
+                                placeholder="Image description"
+                              />
+                              <Input 
+                                defaultValue={image.alt}
+                                onBlur={(e) => handleUpdateImage(property.id, image.id, { alt: e.target.value })}
+                                placeholder="Alt text"
+                              />
+                              <div className="flex justify-between items-center">
+                                <div className="flex gap-1">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleMoveImage(property.id, image.id, 'up')}
+                                    disabled={index === 0}
+                                  >
+                                    <MoveUp className="h-3 w-3" />
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleMoveImage(property.id, image.id, 'down')}
+                                    disabled={index === property.images.length - 1}
+                                  >
+                                    <MoveDown className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                                <Button 
+                                  size="sm" 
+                                  variant="destructive"
+                                  onClick={() => handleDeleteImage(property.id, image.id)}
+                                >
+                                  <Trash className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="tags" className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h5 className="font-medium">Property Tags</h5>
+                        <div className="flex gap-2">
+                          <Input 
+                            placeholder="New tag..." 
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                handleAddTag(property.id, e.currentTarget.value);
+                                e.currentTarget.value = '';
+                              }
+                            }}
+                          />
+                          <Button 
+                            size="sm"
+                            onClick={(e) => {
+                              const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                              handleAddTag(property.id, input.value);
+                              input.value = '';
+                            }}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Dialog>
-                          <DialogTrigger asChild>
+                      <div className="flex flex-wrap gap-2">
+                        {property.tags.map((tag, index) => (
+                          <div key={index} className="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1">
+                            <Input 
+                              defaultValue={tag}
+                              className="border-none bg-transparent p-0 h-auto text-sm min-w-0 w-auto"
+                              onBlur={(e) => handleUpdateTag(property.id, index, e.target.value)}
+                            />
                             <Button 
+                              size="sm" 
                               variant="ghost" 
-                              size="sm"
-                              onClick={() => setEditingProperty(property)}
+                              className="h-4 w-4 p-0 hover:bg-red-100"
+                              onClick={() => handleDeleteTag(property.id, index)}
                             >
-                              <Edit className="h-4 w-4" />
+                              <X className="h-3 w-3 text-red-500" />
                             </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-md">
-                            <DialogHeader>
-                              <DialogTitle>Edit Property Details</DialogTitle>
-                            </DialogHeader>
-                            {editingProperty && (
-                              <form onSubmit={handleEditProperty} className="space-y-4">
-                                <div>
-                                  <Label htmlFor="edit-name">Property Name</Label>
-                                  <Input 
-                                    id="edit-name" 
-                                    name="name" 
-                                    defaultValue={editingProperty.name} 
-                                    required 
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-location">Location</Label>
-                                  <Input 
-                                    id="edit-location" 
-                                    name="location" 
-                                    defaultValue={editingProperty.location} 
-                                    required 
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-category">Category</Label>
-                                  <Select name="category" defaultValue={editingProperty.category}>
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="Beach">Beach</SelectItem>
-                                      <SelectItem value="Mountain">Mountain</SelectItem>
-                                      <SelectItem value="Nature">Nature</SelectItem>
-                                      <SelectItem value="Urban">Urban</SelectItem>
-                                      <SelectItem value="Historic">Historic</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-price">Price per Day</Label>
-                                  <Input 
-                                    id="edit-price" 
-                                    name="price" 
-                                    defaultValue={editingProperty.price} 
-                                    required 
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-description">Description</Label>
-                                  <Textarea 
-                                    id="edit-description" 
-                                    name="description" 
-                                    defaultValue={editingProperty.description} 
-                                    required 
-                                  />
-                                </div>
-                                <Button type="submit" className="w-full bg-coral-500 hover:bg-coral-600">
-                                  Update Property
-                                </Button>
-                              </form>
-                            )}
-                          </DialogContent>
-                        </Dialog>
-
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => setEditingImages(property)}
-                            >
-                              <Images className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Manage Property Images</DialogTitle>
-                              <DialogDescription>Add or update property images (one URL per line)</DialogDescription>
-                            </DialogHeader>
-                            {editingImages && (
-                              <form onSubmit={handleUpdateImages} className="space-y-4">
-                                <div>
-                                  <Label htmlFor="images">Image URLs</Label>
-                                  <Textarea 
-                                    id="images" 
-                                    name="images" 
-                                    defaultValue={editingImages.images.join('\n')}
-                                    rows={6}
-                                    placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-                                  />
-                                </div>
-                                <div className="grid grid-cols-3 gap-2">
-                                  {editingImages.images.map((img: string, idx: number) => (
-                                    <img 
-                                      key={idx}
-                                      src={img} 
-                                      alt={`Preview ${idx + 1}`}
-                                      className="w-full h-20 object-cover rounded"
-                                    />
-                                  ))}
-                                </div>
-                                <Button type="submit" className="w-full bg-coral-500 hover:bg-coral-600">
-                                  Update Images
-                                </Button>
-                              </form>
-                            )}
-                          </DialogContent>
-                        </Dialog>
-
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => setEditingFeatures(property)}
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Manage Features & Details</DialogTitle>
-                              <DialogDescription>Update features, tags, amenities, and film appearances</DialogDescription>
-                            </DialogHeader>
-                            {editingFeatures && (
-                              <form onSubmit={handleUpdateFeatures} className="space-y-4">
-                                <div>
-                                  <Label htmlFor="features">Features (comma-separated)</Label>
-                                  <Textarea 
-                                    id="features" 
-                                    name="features" 
-                                    defaultValue={editingFeatures.features.join(', ')}
-                                    placeholder="Beachfront Access, Sunset Views, Private Beach"
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="tags">Tags (comma-separated)</Label>
-                                  <Textarea 
-                                    id="tags" 
-                                    name="tags" 
-                                    defaultValue={editingFeatures.tags.join(', ')}
-                                    placeholder="Beach, Sunset, Water, Tropical"
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="amenities">Amenities (comma-separated)</Label>
-                                  <Textarea 
-                                    id="amenities" 
-                                    name="amenities" 
-                                    defaultValue={editingFeatures.amenities.join(', ')}
-                                    placeholder="Parking, WiFi, Restrooms, Catering Available"
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="filmAppearances">Film Appearances (comma-separated)</Label>
-                                  <Textarea 
-                                    id="filmAppearances" 
-                                    name="filmAppearances" 
-                                    defaultValue={editingFeatures.filmAppearances.join(', ')}
-                                    placeholder="Movie Title (2023), TV Show (2022)"
-                                  />
-                                </div>
-                                <Button type="submit" className="w-full bg-coral-500 hover:bg-coral-600">
-                                  Update Features
-                                </Button>
-                              </form>
-                            )}
-                          </DialogContent>
-                        </Dialog>
-
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleDeleteProperty(property.id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
+                          </div>
+                        ))}
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </TabsContent>
+
+                    <TabsContent value="movies" className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h5 className="font-medium">Attached Movies/Films</h5>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm">
+                              <Film className="h-4 w-4 mr-1" />
+                              Attach Movie
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Attach Movie/Film</DialogTitle>
+                              <DialogDescription>Add details about movies filmed at this location</DialogDescription>
+                            </DialogHeader>
+                            <form onSubmit={(e) => {
+                              e.preventDefault();
+                              const formData = new FormData(e.target as HTMLFormElement);
+                              handleAddMovie(property.id, {
+                                title: formData.get('title') as string,
+                                year: formData.get('year') as string,
+                                role: formData.get('role') as string,
+                                description: formData.get('description') as string,
+                                genre: formData.get('genre') as string,
+                                director: formData.get('director') as string,
+                                imdbUrl: formData.get('imdbUrl') as string,
+                                trailerUrl: formData.get('trailerUrl') as string,
+                              });
+                              (e.target as HTMLFormElement).reset();
+                            }} className="space-y-4 grid grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="title">Movie Title</Label>
+                                <Input name="title" required />
+                              </div>
+                              <div>
+                                <Label htmlFor="year">Release Year</Label>
+                                <Input name="year" required />
+                              </div>
+                              <div>
+                                <Label htmlFor="director">Director</Label>
+                                <Input name="director" required />
+                              </div>
+                              <div>
+                                <Label htmlFor="genre">Genre</Label>
+                                <Input name="genre" required />
+                              </div>
+                              <div>
+                                <Label htmlFor="role">Location Role</Label>
+                                <Select name="role" required>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select role" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Main Location">Main Location</SelectItem>
+                                    <SelectItem value="Supporting Location">Supporting Location</SelectItem>
+                                    <SelectItem value="Background Location">Background Location</SelectItem>
+                                    <SelectItem value="Cameo Appearance">Cameo Appearance</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label htmlFor="imdbUrl">IMDB URL (Optional)</Label>
+                                <Input name="imdbUrl" placeholder="https://imdb.com/..." />
+                              </div>
+                              <div className="col-span-2">
+                                <Label htmlFor="description">Description</Label>
+                                <Textarea name="description" placeholder="How was this location used in the film?" required />
+                              </div>
+                              <div className="col-span-2">
+                                <Label htmlFor="trailerUrl">Trailer URL (Optional)</Label>
+                                <Input name="trailerUrl" placeholder="https://youtube.com/..." />
+                              </div>
+                              <Button type="submit" className="col-span-2">Attach Movie</Button>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                      <div className="space-y-3">
+                        {(property.attachedMovies || []).map((movie) => (
+                          <Card key={movie.id} className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-2 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h6 className="font-semibold text-lg">{movie.title} ({movie.year})</h6>
+                                  <Badge variant="outline">{movie.role}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-600"><strong>Director:</strong> {movie.director}</p>
+                                <p className="text-sm text-gray-600"><strong>Genre:</strong> {movie.genre}</p>
+                                <p className="text-sm">{movie.description}</p>
+                                {movie.imdbUrl && (
+                                  <a href={movie.imdbUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-sm hover:underline">
+                                    View on IMDB
+                                  </a>
+                                )}
+                                {movie.trailerUrl && (
+                                  <a href={movie.trailerUrl} target="_blank" rel="noopener noreferrer" className="text-red-500 text-sm hover:underline ml-4">
+                                    Watch Trailer
+                                  </a>
+                                )}
+                              </div>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => handleDeleteMovie(property.id, movie.id)}
+                              >
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="features" className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <Label>Features</Label>
+                          <div className="space-y-2 mt-2">
+                            {property.features.map((feature, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <Input 
+                                  defaultValue={feature}
+                                  onBlur={(e) => {
+                                    const newFeatures = [...property.features];
+                                    newFeatures[index] = e.target.value;
+                                    setScoutProperties(props => 
+                                      props.map(p => p.id === property.id ? { ...p, features: newFeatures } : p)
+                                    );
+                                  }}
+                                />
+                                <Button 
+                                  size="sm" 
+                                  variant="destructive"
+                                  onClick={() => {
+                                    const newFeatures = property.features.filter((_, i) => i !== index);
+                                    setScoutProperties(props => 
+                                      props.map(p => p.id === property.id ? { ...p, features: newFeatures } : p)
+                                    );
+                                  }}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Amenities</Label>
+                          <div className="space-y-2 mt-2">
+                            {property.amenities.map((amenity, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <Input 
+                                  defaultValue={amenity}
+                                  onBlur={(e) => {
+                                    const newAmenities = [...property.amenities];
+                                    newAmenities[index] = e.target.value;
+                                    setScoutProperties(props => 
+                                      props.map(p => p.id === property.id ? { ...p, amenities: newAmenities } : p)
+                                    );
+                                  }}
+                                />
+                                <Button 
+                                  size="sm" 
+                                  variant="destructive"
+                                  onClick={() => {
+                                    const newAmenities = property.amenities.filter((_, i) => i !== index);
+                                    setScoutProperties(props => 
+                                      props.map(p => p.id === property.id ? { ...p, amenities: newAmenities } : p)
+                                    );
+                                  }}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </CardContent>
       </Card>
