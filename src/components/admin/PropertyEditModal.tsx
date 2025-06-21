@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ImageGallery from "./ImageGallery";
 
 interface Property {
   id: number;
@@ -20,6 +21,14 @@ interface Property {
   features: string[];
   tags: string[];
   amenities: string[];
+  images: PropertyImage[];
+}
+
+interface PropertyImage {
+  id: number;
+  propertyId: number;
+  url: string;
+  alt: string;
 }
 
 interface PropertyEditModalProps {
@@ -27,9 +36,12 @@ interface PropertyEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (propertyId: number, updates: Partial<Property>) => void;
+  onAddImage: (propertyId: number, imageData: Omit<PropertyImage, "id">) => void;
+  onUpdateImage: (propertyId: number, imageId: number, updates: Partial<PropertyImage>) => void;
+  onDeleteImage: (propertyId: number, imageId: number) => void;
 }
 
-const PropertyEditModal = ({ property, isOpen, onClose, onSave }: PropertyEditModalProps) => {
+const PropertyEditModal = ({ property, isOpen, onClose, onSave, onAddImage, onUpdateImage, onDeleteImage }: PropertyEditModalProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState<Partial<Property>>({});
   const [newFeature, setNewFeature] = useState("");
@@ -68,97 +80,114 @@ const PropertyEditModal = ({ property, isOpen, onClose, onSave }: PropertyEditMo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Property: {property.name}</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Property Name</label>
-              <Input
-                defaultValue={property.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Location</label>
-              <Input
-                defaultValue={property.location}
-                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-              />
-            </div>
-          </div>
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details">Property Details</TabsTrigger>
+            <TabsTrigger value="images">Images ({property.images.length})</TabsTrigger>
+          </TabsList>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Category</label>
-              <Select
-                defaultValue={property.category}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Beach">Beach</SelectItem>
-                  <SelectItem value="Mountain">Mountain</SelectItem>
-                  <SelectItem value="Urban">Urban</SelectItem>
-                  <SelectItem value="Nature">Nature</SelectItem>
-                  <SelectItem value="Historical">Historical</SelectItem>
-                </SelectContent>
-              </Select>
+          <TabsContent value="details" className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Property Name</label>
+                <Input
+                  defaultValue={property.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Location</label>
+                <Input
+                  defaultValue={property.location}
+                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                />
+              </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <Select
+                  defaultValue={property.category}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Beach">Beach</SelectItem>
+                    <SelectItem value="Mountain">Mountain</SelectItem>
+                    <SelectItem value="Urban">Urban</SelectItem>
+                    <SelectItem value="Nature">Nature</SelectItem>
+                    <SelectItem value="Historical">Historical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Price per Day</label>
+                <Input
+                  defaultValue={property.price}
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                />
+              </div>
+            </div>
+
             <div>
-              <label className="text-sm font-medium">Price per Day</label>
-              <Input
-                defaultValue={property.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+              <label className="text-sm font-medium">Description</label>
+              <Textarea
+                defaultValue={property.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                rows={3}
               />
             </div>
-          </div>
 
-          <div>
-            <label className="text-sm font-medium">Description</label>
-            <Textarea
-              defaultValue={property.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              rows={3}
+            <div>
+              <label className="text-sm font-medium">Features</label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  placeholder="Add feature"
+                  value={newFeature}
+                  onChange={(e) => setNewFeature(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && addFeature()}
+                />
+                <Button size="sm" onClick={addFeature}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {currentFeatures.map((feature, index) => (
+                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    {feature}
+                    <X
+                      className="h-3 w-3 cursor-pointer hover:text-red-500"
+                      onClick={() => removeFeature(index)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <Button onClick={handleSave}>Save Changes</Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="images">
+            <ImageGallery
+              propertyId={property.id}
+              images={property.images}
+              onAddImage={onAddImage}
+              onUpdateImage={onUpdateImage}
+              onDeleteImage={onDeleteImage}
             />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Features</label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                placeholder="Add feature"
-                value={newFeature}
-                onChange={(e) => setNewFeature(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && addFeature()}
-              />
-              <Button size="sm" onClick={addFeature}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {currentFeatures.map((feature, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                  {feature}
-                  <X
-                    className="h-3 w-3 cursor-pointer hover:text-red-500"
-                    onClick={() => removeFeature(index)}
-                  />
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSave}>Save Changes</Button>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

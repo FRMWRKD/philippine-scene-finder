@@ -890,6 +890,9 @@ const ScoutDashboard = () => {
           setIsViewModalOpen(false);
           setIsEditModalOpen(true);
         }}
+        onAddImage={handleAddImage}
+        onUpdateImage={handleUpdateImage}
+        onDeleteImage={handleDeleteImage}
       />
       
       <PropertyEditModal
@@ -900,6 +903,9 @@ const ScoutDashboard = () => {
           setSelectedProperty(null);
         }}
         onSave={handleSaveProperty}
+        onAddImage={handleAddImage}
+        onUpdateImage={handleUpdateImage}
+        onDeleteImage={handleDeleteImage}
       />
     </div>
   );

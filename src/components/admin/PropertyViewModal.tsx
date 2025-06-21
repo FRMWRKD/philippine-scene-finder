@@ -1,8 +1,36 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Calendar, DollarSign, Eye, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, Star, Edit, Calendar, DollarSign, Eye } from "lucide-react";
+import ImageGallery from "./ImageGallery";
+
+interface PropertyImage {
+  id: number;
+  url: string;
+  title: string;
+  description: string;
+  alt: string;
+  category: string;
+  lighting: string;
+  season: string;
+  weather: string;
+  colors: string[];
+  metaTags: string[];
+  isPrimary: boolean;
+}
+
+interface AttachedMovie {
+  id: number;
+  title: string;
+  year: string;
+  role: string;
+  description: string;
+  genre: string;
+  director: string;
+  imdbUrl?: string;
+  trailerUrl?: string;
+}
 
 interface Property {
   id: number;
@@ -14,12 +42,14 @@ interface Property {
   bookings: number;
   rating: number;
   description: string;
+  images: PropertyImage[];
   features: string[];
   tags: string[];
   amenities: string[];
+  attachedMovies: AttachedMovie[];
+  lastUpdated?: string;
   views?: number;
   revenue?: string;
-  lastUpdated?: string;
 }
 
 interface PropertyViewModalProps {
@@ -27,114 +57,114 @@ interface PropertyViewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onEdit: () => void;
+  onAddImage: (propertyId: number, imageData: Omit<PropertyImage, "id">) => void;
+  onUpdateImage: (propertyId: number, imageId: number, updates: Partial<PropertyImage>) => void;
+  onDeleteImage: (propertyId: number, imageId: number) => void;
 }
 
-const PropertyViewModal = ({ property, isOpen, onClose, onEdit }: PropertyViewModalProps) => {
+const PropertyViewModal = ({ property, isOpen, onClose, onEdit, onAddImage, onUpdateImage, onDeleteImage }: PropertyViewModalProps) => {
   if (!property) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>{property.name}</span>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-coral-500" />
+              {property.name}
+            </DialogTitle>
+            <Button onClick={onEdit} className="bg-coral-500 hover:bg-coral-600">
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Property
+            </Button>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Property Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Location</span>
+                </div>
+                <p className="text-lg">{property.location}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Price</span>
+                </div>
+                <p className="text-lg font-bold text-coral-600">{property.price}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Rating</span>
+                </div>
+                <p className="text-lg">{property.rating}/5</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Status and Metrics */}
+          <div className="flex flex-wrap gap-4">
             <Badge variant={property.status === "active" ? "default" : "secondary"}>
               {property.status}
             </Badge>
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-6">
-          {/* Basic Info */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{property.location}</span>
+            <Badge variant="outline">{property.category}</Badge>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <Eye className="h-4 w-4" />
+              {property.views?.toLocaleString() || 0} views
             </div>
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{property.price}/day</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{property.bookings} bookings</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm">{property.rating} rating</span>
-            </div>
-          </div>
-
-          {/* Performance Metrics */}
-          <div className="grid grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{property.revenue}</div>
-              <div className="text-xs text-muted-foreground">Total Revenue</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{property.views?.toLocaleString()}</div>
-              <div className="text-xs text-muted-foreground">Total Views</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{((property.bookings / (property.views || 1)) * 100).toFixed(1)}%</div>
-              <div className="text-xs text-muted-foreground">Conversion Rate</div>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              {property.bookings} bookings
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <h3 className="font-medium mb-2">Description</h3>
-            <p className="text-sm text-muted-foreground">{property.description}</p>
-          </div>
-
-          {/* Category & Tags */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-medium mb-2">Category</h3>
-              <Badge variant="outline">{property.category}</Badge>
-            </div>
-            <div>
-              <h3 className="font-medium mb-2">Tags</h3>
-              <div className="flex flex-wrap gap-1">
-                {property.tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+            <h3 className="text-lg font-semibold mb-2">Description</h3>
+            <p className="text-muted-foreground">{property.description}</p>
           </div>
 
           {/* Features */}
           <div>
-            <h3 className="font-medium mb-2">Features</h3>
-            <div className="grid grid-cols-2 gap-2">
+            <h3 className="text-lg font-semibold mb-2">Features</h3>
+            <div className="flex flex-wrap gap-2">
               {property.features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2 text-sm">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                  {feature}
-                </div>
+                <Badge key={index} variant="outline">{feature}</Badge>
               ))}
             </div>
           </div>
 
-          {/* Amenities */}
+          {/* Tags */}
           <div>
-            <h3 className="font-medium mb-2">Amenities</h3>
-            <div className="flex flex-wrap gap-1">
-              {property.amenities.map((amenity, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {amenity}
-                </Badge>
+            <h3 className="text-lg font-semibold mb-2">Tags</h3>
+            <div className="flex flex-wrap gap-2">
+              {property.tags.map((tag, index) => (
+                <Badge key={index} variant="secondary">{tag}</Badge>
               ))}
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="outline" onClick={onClose}>Close</Button>
-            <Button onClick={onEdit}>Edit Property</Button>
-          </div>
+          {/* Image Gallery */}
+          <ImageGallery
+            propertyId={property.id}
+            images={property.images}
+            onAddImage={onAddImage}
+            onUpdateImage={onUpdateImage}
+            onDeleteImage={onDeleteImage}
+          />
         </div>
       </DialogContent>
     </Dialog>
