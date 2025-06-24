@@ -401,7 +401,7 @@ class MockDataService {
           return metadataValue === value;
         }
         
-        if (typeof value === 'number') {
+        if (typeof value === 'number' && typeof metadataValue === 'number') {
           return metadataValue >= value;
         }
         

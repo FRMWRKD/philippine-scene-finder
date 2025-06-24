@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import UserDashboard from "@/components/admin/UserDashboard";
 import ScoutDashboard from "@/components/admin/ScoutDashboard";
+import mockDataService from "@/services/mockDataService";
 
 const AdminDashboard = () => {
   const { isAuthenticated, userRole } = useAuth();
