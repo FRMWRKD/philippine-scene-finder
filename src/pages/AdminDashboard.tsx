@@ -11,12 +11,17 @@ const AdminDashboard = () => {
   const { isAuthenticated, userRole } = useAuth();
   const navigate = useNavigate();
   const [userType, setUserType] = useState<"user" | "scout">("user");
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/");
       return;
     }
+    
+    // Mock current user data - in real app this would come from auth context
+    const mockCurrentUser = mockDataService.getUser(1);
+    setCurrentUser(mockCurrentUser);
     
     if (userRole) {
       setUserType(userRole);
@@ -32,8 +37,15 @@ const AdminDashboard = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-          <p className="text-gray-600">Manage your account and activities</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {userType === 'user' ? 'My Dashboard' : 'Location Scout Dashboard'}
+          </h1>
+          <p className="text-gray-600">
+            {userType === 'user' 
+              ? 'Manage your bookings, saved properties, and profile'
+              : 'Manage your properties, bookings, and client communications'
+            }
+          </p>
         </div>
 
         {/* User Type Selector */}

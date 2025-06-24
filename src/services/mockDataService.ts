@@ -172,6 +172,10 @@ class MockDataService {
   private bookings: Booking[] = mockBookings as Booking[];
   private conversations: Conversation[] = mockMessages as Conversation[];
   private stats = mockStats;
+  private userSavedProperties: Record<number, number[]> = {
+    1: [1, 2], // User 1 has saved properties 1 and 2
+    2: [1, 3], // User 2 has saved properties 1 and 3
+  };
 
   // Properties
   getProperties(): Property[] {
@@ -217,6 +221,31 @@ class MockDataService {
 
   getScouts(): User[] {
     return this.users.filter(u => u.role === 'scout');
+  }
+
+  // User Preferences and Saved Properties
+  getUserSavedProperties(userId: number): Property[] {
+    const savedIds = this.userSavedProperties[userId] || [];
+    return this.properties.filter(p => savedIds.includes(p.id));
+  }
+
+  savePropertyForUser(userId: number, propertyId: number): void {
+    if (!this.userSavedProperties[userId]) {
+      this.userSavedProperties[userId] = [];
+    }
+    if (!this.userSavedProperties[userId].includes(propertyId)) {
+      this.userSavedProperties[userId].push(propertyId);
+    }
+  }
+
+  unsavePropertyForUser(userId: number, propertyId: number): void {
+    if (this.userSavedProperties[userId]) {
+      this.userSavedProperties[userId] = this.userSavedProperties[userId].filter(id => id !== propertyId);
+    }
+  }
+
+  isPropertySavedByUser(userId: number, propertyId: number): boolean {
+    return this.userSavedProperties[userId]?.includes(propertyId) || false;
   }
 
   // Bookings
@@ -294,6 +323,110 @@ class MockDataService {
   // Stats
   getStats() {
     return this.stats;
+  }
+
+  // Search and Filter Properties
+  searchProperties(query: string, filters?: {
+    category?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    location?: string;
+    tags?: string[];
+    features?: string[];
+  }): Property[] {
+    let results = this.properties;
+
+    // Text search
+    if (query) {
+      const lowercaseQuery = query.toLowerCase();
+      results = results.filter(p => 
+        p.name.toLowerCase().includes(lowercaseQuery) ||
+        p.location.toLowerCase().includes(lowercaseQuery) ||
+        p.description.toLowerCase().includes(lowercaseQuery) ||
+        p.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+      );
+    }
+
+    // Category filter
+    if (filters?.category) {
+      results = results.filter(p => p.category === filters.category);
+    }
+
+    // Price range filter
+    if (filters?.minPrice !== undefined) {
+      results = results.filter(p => {
+        const price = parseInt(p.price.replace(/[^\d]/g, ''));
+        return price >= filters.minPrice!;
+      });
+    }
+
+    if (filters?.maxPrice !== undefined) {
+      results = results.filter(p => {
+        const price = parseInt(p.price.replace(/[^\d]/g, ''));
+        return price <= filters.maxPrice!;
+      });
+    }
+
+    // Location filter
+    if (filters?.location) {
+      results = results.filter(p => 
+        p.location.toLowerCase().includes(filters.location!.toLowerCase())
+      );
+    }
+
+    // Tags filter
+    if (filters?.tags && filters.tags.length > 0) {
+      results = results.filter(p => 
+        filters.tags!.some(tag => p.tags.includes(tag))
+      );
+    }
+
+    // Features filter
+    if (filters?.features && filters.features.length > 0) {
+      results = results.filter(p => 
+        filters.features!.some(feature => p.features.includes(feature))
+      );
+    }
+
+    return results;
+  }
+
+  // Get properties by metadata criteria
+  getPropertiesByMetadata(criteria: Partial<Property['metadata']>): Property[] {
+    return this.properties.filter(property => {
+      return Object.entries(criteria).every(([key, value]) => {
+        const metadataValue = property.metadata[key as keyof typeof property.metadata];
+        
+        if (typeof value === 'boolean') {
+          return metadataValue === value;
+        }
+        
+        if (typeof value === 'number') {
+          return metadataValue >= value;
+        }
+        
+        return true;
+      });
+    });
+  }
+
+  // Analytics and Insights
+  getPropertyAnalytics(propertyId: number) {
+    const property = this.getProperty(propertyId);
+    if (!property) return null;
+
+    const bookings = this.getBookingsByProperty(propertyId);
+    const totalRevenue = bookings.reduce((sum, booking) => sum + booking.totalAmount, 0);
+    const averageBookingValue = bookings.length > 0 ? totalRevenue / bookings.length : 0;
+    
+    return {
+      totalBookings: bookings.length,
+      totalRevenue,
+      averageBookingValue,
+      viewCount: property.views || 0,
+      rating: property.rating,
+      occupancyRate: bookings.length > 0 ? (bookings.filter(b => b.status === 'completed').length / bookings.length) * 100 : 0
+    };
   }
 
   // Image Management
