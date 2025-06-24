@@ -228,7 +228,7 @@ const ScoutDashboard = () => {
   const handleAddProperty = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget as HTMLFormElement);
-    const newProperty = {
+    const newPropertyData = {
       name: formData.get("name") as string,
       location: formData.get("location") as string,
       category: formData.get("category") as string,
@@ -251,11 +251,21 @@ const ScoutDashboard = () => {
         powerAmps: 30,
         maxCrew: 10,
         parking: true,
-        coordinates: { lat: 0, lng: 0 }
+        coordinates: { lat: 0, lng: 0 },
+        ceilingHeight: 3,
+        naturalLight: true,
+        soundProofing: false,
+        loadingAccess: true,
+        greenScreen: false,
+        cyc: false,
+        grip: true,
+        catering: false,
+        makeupRoom: false,
+        clientArea: false
       }
     };
 
-    mockDataService.addProperty(newProperty);
+    mockDataService.addProperty(newPropertyData);
     setScoutProperties(mockDataService.getProperties());
     setIsAddLocationOpen(false);
     toast({ title: "Property Added", description: "Your new property has been added successfully." });
@@ -551,7 +561,7 @@ const ScoutDashboard = () => {
   };
 
   const handleDuplicateProperty = (property: Property) => {
-    const duplicatedProperty = {
+    const duplicatedPropertyData = {
       ...property,
       name: `${property.name} (Copy)`,
       status: "inactive" as const,
@@ -560,8 +570,9 @@ const ScoutDashboard = () => {
       views: 0,
       revenue: "₱0",
     };
-    delete (duplicatedProperty as any).id;
-    mockDataService.addProperty(duplicatedProperty);
+    // Remove id so the service will assign a new one
+    const { id, ...propertyWithoutId } = duplicatedPropertyData;
+    mockDataService.addProperty(propertyWithoutId);
     setScoutProperties(mockDataService.getProperties());
     toast({ title: "Property Duplicated", description: "Property has been duplicated successfully." });
   };

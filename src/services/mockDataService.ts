@@ -1,7 +1,9 @@
+
 import mockProperties from '../data/mockProperties.json';
 import mockUsers from '../data/mockUsers.json';
 import mockBookings from '../data/mockBookings.json';
 import mockMessages from '../data/mockMessages.json';
+import mockStats from '../data/mockStats.json';
 
 export interface Property {
   id: number;
@@ -34,6 +36,9 @@ export interface Image {
   tags: string[];
   isPrimary: boolean;
 }
+
+// Add PropertyImage alias for backward compatibility
+export type PropertyImage = Image;
 
 export interface Movie {
   id: number;
@@ -119,6 +124,7 @@ class MockDataService {
   private users: User[] = [];
   private bookings: Booking[] = [];
   private messages: Message[] = [];
+  private nextId = 1000;
 
   constructor() {
     this.loadMockData();
@@ -127,9 +133,34 @@ class MockDataService {
   private loadMockData() {
     // Load properties from JSON
     this.properties = mockProperties;
-    this.users = mockUsers;
+    
+    // Load users and ensure they have savedProperties
+    this.users = mockUsers.map(user => ({
+      ...user,
+      savedProperties: user.savedProperties || []
+    }));
+    
     this.bookings = mockBookings;
-    this.messages = mockMessages;
+    
+    // Transform messages to match our simple Message interface
+    this.messages = mockMessages.flatMap(conversation => 
+      conversation.messages.map(msg => ({
+        id: msg.id,
+        senderId: msg.senderId,
+        receiverId: msg.receiverId,
+        propertyId: conversation.propertyId,
+        timestamp: msg.timestamp,
+        content: msg.content
+      }))
+    );
+    
+    // Set next ID based on existing data
+    this.nextId = Math.max(
+      ...this.properties.map(p => p.id),
+      ...this.users.map(u => u.id),
+      ...this.bookings.map(b => b.id),
+      ...this.messages.map(m => m.id)
+    ) + 1;
   }
 
   // Property methods
@@ -141,19 +172,47 @@ class MockDataService {
     return this.properties.find(p => p.id === id);
   }
 
-  addProperty(property: Property): void {
-    this.properties.push(property);
+  addProperty(property: Omit<Property, 'id'>): Property {
+    const newProperty = { ...property, id: this.nextId++ };
+    this.properties.push(newProperty);
+    return newProperty;
   }
 
-  updateProperty(id: number, updatedProperty: Property): void {
+  updateProperty(id: number, updates: Partial<Property>): void {
     const index = this.properties.findIndex(p => p.id === id);
     if (index !== -1) {
-      this.properties[index] = { ...this.properties[index], ...updatedProperty };
+      this.properties[index] = { ...this.properties[index], ...updates };
     }
   }
 
   deleteProperty(id: number): void {
     this.properties = this.properties.filter(p => p.id !== id);
+  }
+
+  // Image management methods
+  addImageToProperty(propertyId: number, imageData: Omit<Image, "id">): void {
+    const property = this.getProperty(propertyId);
+    if (property) {
+      const newImage = { ...imageData, id: this.nextId++ };
+      property.images.push(newImage);
+    }
+  }
+
+  updatePropertyImage(propertyId: number, imageId: number, updates: Partial<Image>): void {
+    const property = this.getProperty(propertyId);
+    if (property) {
+      const imageIndex = property.images.findIndex(img => img.id === imageId);
+      if (imageIndex !== -1) {
+        property.images[imageIndex] = { ...property.images[imageIndex], ...updates };
+      }
+    }
+  }
+
+  deletePropertyImage(propertyId: number, imageId: number): void {
+    const property = this.getProperty(propertyId);
+    if (property) {
+      property.images = property.images.filter(img => img.id !== imageId);
+    }
   }
 
   // User methods
@@ -240,7 +299,7 @@ class MockDataService {
     return user.savedProperties.map(propertyId => {
       const property = this.getProperty(propertyId);
       return property!;
-    });
+    }).filter(Boolean);
   }
 
   savePropertyForUser(userId: number, propertyId: number): void {
@@ -266,7 +325,11 @@ class MockDataService {
     return user.savedProperties.includes(propertyId);
   }
 
-  // Stats methods (example)
+  // Stats methods
+  getStats(): any {
+    return mockStats;
+  }
+
   getPropertyStats(propertyId: number): any {
     const property = this.getProperty(propertyId);
     if (!property) return null;
