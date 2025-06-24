@@ -38,6 +38,7 @@ const Index = () => {
   };
 
   const filteredLocations = useMemo(() => {
+    console.log('Filtering locations...', mockLocations.length, 'total locations');
     return mockLocations.filter((location) => {
       const matchesSearch = !searchTerm || location.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         location.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -113,6 +114,7 @@ const Index = () => {
   }, [allImages, searchTerm, selectedFilters, priceRange, currentLocation]);
 
   const handleImageClick = (imageData: any) => {
+    console.log('Navigating to image detail:', imageData.locationId, imageData.imageIndex);
     navigate(`/image/${imageData.locationId}/${imageData.imageIndex}`);
   };
 
@@ -127,6 +129,8 @@ const Index = () => {
       setSearchParams(newSearchParams);
     }
   };
+
+  console.log('Rendering Index page with', filteredLocations.length, 'filtered locations');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">

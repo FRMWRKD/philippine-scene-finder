@@ -2,29 +2,6 @@ import mockProperties from '../data/mockProperties.json';
 import mockUsers from '../data/mockUsers.json';
 import mockBookings from '../data/mockBookings.json';
 import mockMessages from '../data/mockMessages.json';
-import mockStats from '../data/mockStats.json';
-
-export interface PropertyImage {
-  id: number;
-  url: string;
-  title: string;
-  description: string;
-  alt: string;
-  tags: string[]; // Combined all lighting, season, weather, colors, metaTags into one tags array
-  isPrimary: boolean;
-}
-
-export interface AttachedMovie {
-  id: number;
-  title: string;
-  year: string;
-  role: string;
-  description: string;
-  genre: string;
-  director: string;
-  imdbUrl?: string;
-  trailerUrl?: string;
-}
 
 export interface Property {
   id: number;
@@ -36,148 +13,126 @@ export interface Property {
   bookings: number;
   rating: number;
   description: string;
-  lastUpdated?: string;
-  views?: number;
-  revenue?: string;
+  lastUpdated: string;
+  views: number;
+  revenue: string;
   ownerId: number;
-  images: PropertyImage[];
+  images: Image[];
   features: string[];
   tags: string[];
   amenities: string[];
-  attachedMovies: AttachedMovie[];
-  metadata: {
-    sizeM2: number;
-    powerAmps: number;
-    maxCrew: number;
-    parking: boolean;
-    coordinates: { lat: number; lng: number };
-    // Film/Photo specific metadata
-    ceilingHeight?: number;
-    naturalLight?: boolean;
-    soundProofing?: boolean;
-    loadingAccess?: boolean;
-    greenScreen?: boolean;
-    cyc?: boolean;
-    grip?: boolean;
-    catering?: boolean;
-    makeupRoom?: boolean;
-    clientArea?: boolean;
-  };
+  attachedMovies: Movie[];
+  metadata: Metadata;
+}
+
+export interface Image {
+  id: number;
+  url: string;
+  title: string;
+  description: string;
+  alt: string;
+  tags: string[];
+  isPrimary: boolean;
+}
+
+export interface Movie {
+  id: number;
+  title: string;
+  year: string;
+  role: string;
+  description: string;
+  genre: string;
+  director: string;
+  imdbUrl: string;
+  trailerUrl: string;
+}
+
+export interface Metadata {
+  sizeM2: number;
+  powerAmps: number;
+  maxCrew: number;
+  parking: boolean;
+  coordinates: Coordinates;
+  ceilingHeight: number;
+  naturalLight: boolean;
+  soundProofing: boolean;
+  loadingAccess: boolean;
+  greenScreen: boolean;
+  cyc: boolean;
+  grip: boolean;
+  catering: boolean;
+  makeupRoom: boolean;
+  clientArea: boolean;
+}
+
+export interface Coordinates {
+  lat: number;
+  lng: number;
 }
 
 export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'user' | 'scout';
   avatar: string;
   joinDate: string;
   isVerified: boolean;
-  profile: {
-    bio: string;
-    location: string;
-    company: string;
-    website: string;
-    socialMedia: Record<string, string>;
-  };
-  preferences?: {
-    favoriteCategories: string[];
-    budget: { min: number; max: number };
-    notifications: {
-      email: boolean;
-      sms: boolean;
-      push: boolean;
-    };
-  };
-  scoutProfile?: {
-    experience: string;
-    specialties: string[];
-    certifications: string[];
-    languages: string[];
-    responseTime: string;
-    successRate: string;
-  };
-  stats: {
-    totalBookings?: number;
-    totalSpent?: string;
-    favoriteLocations?: number;
-    reviewsGiven?: number;
-    propertiesListed?: number;
-    totalEarnings?: string;
-    averageRating?: number;
-    responseRate?: string;
-  };
+  profile: Profile;
+  stats: Stats;
+  savedProperties: number[];
+}
+
+export interface Profile {
+  bio: string;
+  location: string;
+  company: string;
+}
+
+export interface Stats {
+  totalBookings: number;
+  reviewsGiven: number;
+  totalSpent: string;
 }
 
 export interface Booking {
   id: number;
   propertyId: number;
   userId: number;
-  scoutId: number;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   startDate: string;
   endDate: string;
   totalDays: number;
-  pricePerDay: number;
   totalAmount: number;
-  bookingDate: string;
-  purpose: string;
-  crewSize: number;
-  specialRequests: string;
-  equipment: string[];
-  paymentStatus: 'pending' | 'paid' | 'refunded';
-  paymentMethod: string;
-  contact: {
-    phone: string;
-    email: string;
-  };
-  cancellationPolicy: string;
-  insurance: boolean;
-  notes: string;
+  status: string;
 }
 
 export interface Message {
   id: number;
   senderId: number;
   receiverId: number;
-  content: string;
+  propertyId: number;
   timestamp: string;
-  isRead: boolean;
-  attachments: Array<{
-    id: number;
-    name: string;
-    type: string;
-    size: number;
-    url: string;
-  }>;
-}
-
-export interface Conversation {
-  id: number;
-  conversationId: string;
-  participants: number[];
-  propertyId?: number;
-  bookingId?: number;
-  subject: string;
-  messages: Message[];
-  status: 'active' | 'archived' | 'closed';
-  priority: 'low' | 'normal' | 'high';
-  lastActivity: string;
-  tags: string[];
+  content: string;
 }
 
 class MockDataService {
-  private properties: Property[] = mockProperties as Property[];
-  private users: User[] = mockUsers as User[];
-  private bookings: Booking[] = mockBookings as Booking[];
-  private conversations: Conversation[] = mockMessages as Conversation[];
-  private stats = mockStats;
-  private userSavedProperties: Record<number, number[]> = {
-    1: [1, 2], // User 1 has saved properties 1 and 2
-    2: [1, 3], // User 2 has saved properties 1 and 3
-  };
+  private properties: Property[] = [];
+  private users: User[] = [];
+  private bookings: Booking[] = [];
+  private messages: Message[] = [];
 
-  // Properties
+  constructor() {
+    this.loadMockData();
+  }
+
+  private loadMockData() {
+    // Load properties from JSON
+    this.properties = mockProperties;
+    this.users = mockUsers;
+    this.bookings = mockBookings;
+    this.messages = mockMessages;
+  }
+
+  // Property methods
   getProperties(): Property[] {
     return this.properties;
   }
@@ -186,27 +141,22 @@ class MockDataService {
     return this.properties.find(p => p.id === id);
   }
 
-  updateProperty(id: number, updates: Partial<Property>): void {
-    const index = this.properties.findIndex(p => p.id === id);
-    if (index !== -1) {
-      this.properties[index] = { ...this.properties[index], ...updates };
-    }
+  addProperty(property: Property): void {
+    this.properties.push(property);
   }
 
-  addProperty(property: Omit<Property, 'id'>): Property {
-    const newProperty: Property = {
-      ...property,
-      id: Math.max(...this.properties.map(p => p.id)) + 1
-    };
-    this.properties.push(newProperty);
-    return newProperty;
+  updateProperty(id: number, updatedProperty: Property): void {
+    const index = this.properties.findIndex(p => p.id === id);
+    if (index !== -1) {
+      this.properties[index] = { ...this.properties[index], ...updatedProperty };
+    }
   }
 
   deleteProperty(id: number): void {
     this.properties = this.properties.filter(p => p.id !== id);
   }
 
-  // Users
+  // User methods
   getUsers(): User[] {
     return this.users;
   }
@@ -215,40 +165,22 @@ class MockDataService {
     return this.users.find(u => u.id === id);
   }
 
-  getUserByEmail(email: string): User | undefined {
-    return this.users.find(u => u.email === email);
+  addUser(user: User): void {
+    this.users.push(user);
   }
 
-  getScouts(): User[] {
-    return this.users.filter(u => u.role === 'scout');
-  }
-
-  // User Preferences and Saved Properties
-  getUserSavedProperties(userId: number): Property[] {
-    const savedIds = this.userSavedProperties[userId] || [];
-    return this.properties.filter(p => savedIds.includes(p.id));
-  }
-
-  savePropertyForUser(userId: number, propertyId: number): void {
-    if (!this.userSavedProperties[userId]) {
-      this.userSavedProperties[userId] = [];
-    }
-    if (!this.userSavedProperties[userId].includes(propertyId)) {
-      this.userSavedProperties[userId].push(propertyId);
+  updateUser(id: number, updatedUser: User): void {
+    const index = this.users.findIndex(u => u.id === id);
+    if (index !== -1) {
+      this.users[index] = { ...this.users[index], ...updatedUser };
     }
   }
 
-  unsavePropertyForUser(userId: number, propertyId: number): void {
-    if (this.userSavedProperties[userId]) {
-      this.userSavedProperties[userId] = this.userSavedProperties[userId].filter(id => id !== propertyId);
-    }
+  deleteUser(id: number): void {
+    this.users = this.users.filter(u => u.id !== id);
   }
 
-  isPropertySavedByUser(userId: number, propertyId: number): boolean {
-    return this.userSavedProperties[userId]?.includes(propertyId) || false;
-  }
-
-  // Bookings
+  // Booking methods
   getBookings(): Booking[] {
     return this.bookings;
   }
@@ -257,207 +189,175 @@ class MockDataService {
     return this.bookings.find(b => b.id === id);
   }
 
-  getBookingsByUser(userId: number): Booking[] {
-    return this.bookings.filter(b => b.userId === userId);
+   getBookingsByUser(userId: number): Booking[] {
+    return this.bookings.filter(booking => booking.userId === userId);
   }
 
-  getBookingsByScout(scoutId: number): Booking[] {
-    return this.bookings.filter(b => b.scoutId === scoutId);
+  addBooking(booking: Booking): void {
+    this.bookings.push(booking);
   }
 
-  getBookingsByProperty(propertyId: number): Booking[] {
-    return this.bookings.filter(b => b.propertyId === propertyId);
-  }
-
-  updateBooking(id: number, updates: Partial<Booking>): void {
+  updateBooking(id: number, updatedBooking: Booking): void {
     const index = this.bookings.findIndex(b => b.id === id);
     if (index !== -1) {
-      this.bookings[index] = { ...this.bookings[index], ...updates };
+      this.bookings[index] = { ...this.bookings[index], ...updatedBooking };
     }
   }
 
-  addBooking(booking: Omit<Booking, 'id'>): Booking {
-    const newBooking: Booking = {
-      ...booking,
-      id: Math.max(...this.bookings.map(b => b.id)) + 1
-    };
-    this.bookings.push(newBooking);
-    return newBooking;
+  deleteBooking(id: number): void {
+    this.bookings = this.bookings.filter(b => b.id !== id);
   }
 
-  // Messages
-  getConversations(): Conversation[] {
-    return this.conversations;
+  // Message methods
+  getMessages(): Message[] {
+    return this.messages;
   }
 
-  getConversation(id: number): Conversation | undefined {
-    return this.conversations.find(c => c.id === id);
+  getMessage(id: number): Message | undefined {
+    return this.messages.find(m => m.id === id);
   }
 
-  getConversationsByUser(userId: number): Conversation[] {
-    return this.conversations.filter(c => c.participants.includes(userId));
+  addMessage(message: Message): void {
+    this.messages.push(message);
   }
 
-  addMessage(conversationId: number, message: Omit<Message, 'id'>): void {
-    const conversation = this.conversations.find(c => c.id === conversationId);
-    if (conversation) {
-      const newMessage: Message = {
-        ...message,
-        id: Math.max(...conversation.messages.map(m => m.id)) + 1
-      };
-      conversation.messages.push(newMessage);
-      conversation.lastActivity = new Date().toISOString();
+  updateMessage(id: number, updatedMessage: Message): void {
+    const index = this.messages.findIndex(m => m.id === id);
+    if (index !== -1) {
+      this.messages[index] = { ...this.messages[index], ...updatedMessage };
     }
   }
 
-  markMessageAsRead(conversationId: number, messageId: number): void {
-    const conversation = this.conversations.find(c => c.id === conversationId);
-    if (conversation) {
-      const message = conversation.messages.find(m => m.id === messageId);
-      if (message) {
-        message.isRead = true;
-      }
-    }
+  deleteMessage(id: number): void {
+    this.messages = this.messages.filter(m => m.id !== id);
   }
 
-  // Stats
-  getStats() {
-    return this.stats;
-  }
+  // User saved properties
+  getUserSavedProperties(userId: number): Property[] {
+    const user = this.getUser(userId);
+    if (!user) return [];
 
-  // Search and Filter Properties
-  searchProperties(query: string, filters?: {
-    category?: string;
-    minPrice?: number;
-    maxPrice?: number;
-    location?: string;
-    tags?: string[];
-    features?: string[];
-  }): Property[] {
-    let results = this.properties;
-
-    // Text search
-    if (query) {
-      const lowercaseQuery = query.toLowerCase();
-      results = results.filter(p => 
-        p.name.toLowerCase().includes(lowercaseQuery) ||
-        p.location.toLowerCase().includes(lowercaseQuery) ||
-        p.description.toLowerCase().includes(lowercaseQuery) ||
-        p.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
-      );
-    }
-
-    // Category filter
-    if (filters?.category) {
-      results = results.filter(p => p.category === filters.category);
-    }
-
-    // Price range filter
-    if (filters?.minPrice !== undefined) {
-      results = results.filter(p => {
-        const price = parseInt(p.price.replace(/[^\d]/g, ''));
-        return price >= filters.minPrice!;
-      });
-    }
-
-    if (filters?.maxPrice !== undefined) {
-      results = results.filter(p => {
-        const price = parseInt(p.price.replace(/[^\d]/g, ''));
-        return price <= filters.maxPrice!;
-      });
-    }
-
-    // Location filter
-    if (filters?.location) {
-      results = results.filter(p => 
-        p.location.toLowerCase().includes(filters.location!.toLowerCase())
-      );
-    }
-
-    // Tags filter
-    if (filters?.tags && filters.tags.length > 0) {
-      results = results.filter(p => 
-        filters.tags!.some(tag => p.tags.includes(tag))
-      );
-    }
-
-    // Features filter
-    if (filters?.features && filters.features.length > 0) {
-      results = results.filter(p => 
-        filters.features!.some(feature => p.features.includes(feature))
-      );
-    }
-
-    return results;
-  }
-
-  // Get properties by metadata criteria
-  getPropertiesByMetadata(criteria: Partial<Property['metadata']>): Property[] {
-    return this.properties.filter(property => {
-      return Object.entries(criteria).every(([key, value]) => {
-        const metadataValue = property.metadata[key as keyof typeof property.metadata];
-        
-        if (typeof value === 'boolean') {
-          return metadataValue === value;
-        }
-        
-        if (typeof value === 'number' && typeof metadataValue === 'number') {
-          return metadataValue >= value;
-        }
-        
-        return true;
-      });
+    return user.savedProperties.map(propertyId => {
+      const property = this.getProperty(propertyId);
+      return property!;
     });
   }
 
-  // Analytics and Insights
-  getPropertyAnalytics(propertyId: number) {
+  savePropertyForUser(userId: number, propertyId: number): void {
+    const user = this.getUser(userId);
+    if (!user) return;
+
+    if (!user.savedProperties.includes(propertyId)) {
+      user.savedProperties.push(propertyId);
+    }
+  }
+
+  unsavePropertyForUser(userId: number, propertyId: number): void {
+    const user = this.getUser(userId);
+    if (!user) return;
+
+    user.savedProperties = user.savedProperties.filter(id => id !== propertyId);
+  }
+
+  isPropertySavedByUser(userId: number, propertyId: number): boolean {
+    const user = this.getUser(userId);
+    if (!user) return false;
+
+    return user.savedProperties.includes(propertyId);
+  }
+
+  // Stats methods (example)
+  getPropertyStats(propertyId: number): any {
     const property = this.getProperty(propertyId);
     if (!property) return null;
 
-    const bookings = this.getBookingsByProperty(propertyId);
-    const totalRevenue = bookings.reduce((sum, booking) => sum + booking.totalAmount, 0);
-    const averageBookingValue = bookings.length > 0 ? totalRevenue / bookings.length : 0;
-    
     return {
-      totalBookings: bookings.length,
-      totalRevenue,
-      averageBookingValue,
-      viewCount: property.views || 0,
-      rating: property.rating,
-      occupancyRate: bookings.length > 0 ? (bookings.filter(b => b.status === 'completed').length / bookings.length) * 100 : 0
+      views: property.views,
+      bookings: property.bookings,
+      revenue: property.revenue
     };
   }
 
-  // Image Management
-  addImageToProperty(propertyId: number, imageData: Omit<PropertyImage, 'id'>): void {
-    const property = this.getProperty(propertyId);
-    if (property) {
-      const newImage: PropertyImage = {
-        ...imageData,
-        id: Math.max(...property.images.map(img => img.id), 0) + 1
-      };
-      property.images.push(newImage);
-    }
+  searchProperties(query: string): Property[] {
+    if (!query.trim()) return this.properties;
+    
+    const lowerQuery = query.toLowerCase();
+    return this.properties.filter(property => 
+      property.name.toLowerCase().includes(lowerQuery) ||
+      property.location.toLowerCase().includes(lowerQuery) ||
+      property.description.toLowerCase().includes(lowerQuery) ||
+      property.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+    );
   }
 
-  updatePropertyImage(propertyId: number, imageId: number, updates: Partial<PropertyImage>): void {
-    const property = this.getProperty(propertyId);
-    if (property) {
-      const imageIndex = property.images.findIndex(img => img.id === imageId);
-      if (imageIndex !== -1) {
-        property.images[imageIndex] = { ...property.images[imageIndex], ...updates };
-      }
-    }
+  filterPropertiesByTags(tags: string[]): Property[] {
+    if (tags.length === 0) return this.properties;
+    
+    return this.properties.filter(property =>
+      tags.some(tag => 
+        property.tags.some(propertyTag => 
+          propertyTag.toLowerCase().includes(tag.toLowerCase())
+        )
+      )
+    );
   }
 
-  deletePropertyImage(propertyId: number, imageId: number): void {
-    const property = this.getProperty(propertyId);
-    if (property) {
-      property.images = property.images.filter(img => img.id !== imageId);
+  filterPropertiesByPriceRange(minPrice: number, maxPrice: number): Property[] {
+    return this.properties.filter(property => {
+      const price = parseInt(property.price.replace(/[^\d]/g, ''));
+      return price >= minPrice && price <= maxPrice;
+    });
+  }
+
+  filterPropertiesByLocation(location: string): Property[] {
+    if (!location.trim()) return this.properties;
+    
+    const lowerLocation = location.toLowerCase();
+    return this.properties.filter(property =>
+      property.location.toLowerCase().includes(lowerLocation)
+    );
+  }
+
+  filterProperties(filters: {
+    query?: string;
+    tags?: string[];
+    priceRange?: [number, number];
+    location?: string;
+  }): Property[] {
+    let result = this.properties;
+
+    if (filters.query) {
+      result = this.searchProperties(filters.query);
     }
+
+    if (filters.tags && filters.tags.length > 0) {
+      result = result.filter(property =>
+        filters.tags!.some(tag => 
+          property.tags.some(propertyTag => 
+            propertyTag.toLowerCase().includes(tag.toLowerCase())
+          )
+        )
+      );
+    }
+
+    if (filters.priceRange) {
+      const [minPrice, maxPrice] = filters.priceRange;
+      result = result.filter(property => {
+        const price = parseInt(property.price.replace(/[^\d]/g, ''));
+        return price >= minPrice && price <= maxPrice;
+      });
+    }
+
+    if (filters.location) {
+      const lowerLocation = filters.location.toLowerCase();
+      result = result.filter(property =>
+        property.location.toLowerCase().includes(lowerLocation)
+      );
+    }
+
+    return result;
   }
 }
 
-export const mockDataService = new MockDataService();
+const mockDataService = new MockDataService();
 export default mockDataService;
