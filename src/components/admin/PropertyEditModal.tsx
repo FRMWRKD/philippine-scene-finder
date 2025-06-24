@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageGallery from "./ImageGallery";
@@ -85,11 +86,22 @@ const PropertyEditModal = ({ property, isOpen, onClose, onSave, onAddImage, onUp
     }));
   };
 
+  const updateMetadata = (key: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      metadata: {
+        ...(prev.metadata || property?.metadata),
+        [key]: value
+      }
+    }));
+  };
+
   if (!property) return null;
 
   const currentFeatures = formData.features || property.features;
   const currentTags = formData.tags || property.tags;
   const currentAmenities = formData.amenities || property.amenities;
+  const currentMetadata = { ...property.metadata, ...formData.metadata };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -99,8 +111,9 @@ const PropertyEditModal = ({ property, isOpen, onClose, onSave, onAddImage, onUp
         </DialogHeader>
         
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details">Property Details</TabsTrigger>
+            <TabsTrigger value="technical">Technical Specs</TabsTrigger>
             <TabsTrigger value="images">Images ({property.images.length})</TabsTrigger>
           </TabsList>
 
@@ -133,11 +146,15 @@ const PropertyEditModal = ({ property, isOpen, onClose, onSave, onAddImage, onUp
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="Studio">Studio</SelectItem>
+                    <SelectItem value="Location">Location</SelectItem>
                     <SelectItem value="Beach">Beach</SelectItem>
                     <SelectItem value="Mountain">Mountain</SelectItem>
                     <SelectItem value="Urban">Urban</SelectItem>
                     <SelectItem value="Nature">Nature</SelectItem>
                     <SelectItem value="Historical">Historical</SelectItem>
+                    <SelectItem value="Industrial">Industrial</SelectItem>
+                    <SelectItem value="Residential">Residential</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -236,10 +253,132 @@ const PropertyEditModal = ({ property, isOpen, onClose, onSave, onAddImage, onUp
                 ))}
               </div>
             </div>
+          </TabsContent>
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={onClose}>Cancel</Button>
-              <Button onClick={handleSave}>Save Changes</Button>
+          <TabsContent value="technical" className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Space Size (m²)</label>
+                <Input
+                  type="number"
+                  value={currentMetadata.sizeM2}
+                  onChange={(e) => updateMetadata('sizeM2', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Power Supply (Amps)</label>
+                <Input
+                  type="number"
+                  value={currentMetadata.powerAmps}
+                  onChange={(e) => updateMetadata('powerAmps', parseInt(e.target.value) || 0)}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Max Crew Size</label>
+                <Input
+                  type="number"
+                  value={currentMetadata.maxCrew}
+                  onChange={(e) => updateMetadata('maxCrew', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Ceiling Height (m)</label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={currentMetadata.ceilingHeight || 0}
+                  onChange={(e) => updateMetadata('ceilingHeight', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-medium">Studio Features</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="parking"
+                    checked={currentMetadata.parking}
+                    onCheckedChange={(checked) => updateMetadata('parking', checked)}
+                  />
+                  <label htmlFor="parking" className="text-sm">Parking Available</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="naturalLight"
+                    checked={currentMetadata.naturalLight}
+                    onCheckedChange={(checked) => updateMetadata('naturalLight', checked)}
+                  />
+                  <label htmlFor="naturalLight" className="text-sm">Natural Light</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="soundProofing"
+                    checked={currentMetadata.soundProofing}
+                    onCheckedChange={(checked) => updateMetadata('soundProofing', checked)}
+                  />
+                  <label htmlFor="soundProofing" className="text-sm">Sound Proofing</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="loadingAccess"
+                    checked={currentMetadata.loadingAccess}
+                    onCheckedChange={(checked) => updateMetadata('loadingAccess', checked)}
+                  />
+                  <label htmlFor="loadingAccess" className="text-sm">Loading Access</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="greenScreen"
+                    checked={currentMetadata.greenScreen}
+                    onCheckedChange={(checked) => updateMetadata('greenScreen', checked)}
+                  />
+                  <label htmlFor="greenScreen" className="text-sm">Green Screen</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="cyc"
+                    checked={currentMetadata.cyc}
+                    onCheckedChange={(checked) => updateMetadata('cyc', checked)}
+                  />
+                  <label htmlFor="cyc" className="text-sm">Cyc Wall</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="grip"
+                    checked={currentMetadata.grip}
+                    onCheckedChange={(checked) => updateMetadata('grip', checked)}
+                  />
+                  <label htmlFor="grip" className="text-sm">Grip Equipment</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="catering"
+                    checked={currentMetadata.catering}
+                    onCheckedChange={(checked) => updateMetadata('catering', checked)}
+                  />
+                  <label htmlFor="catering" className="text-sm">Catering Area</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="makeupRoom"
+                    checked={currentMetadata.makeupRoom}
+                    onCheckedChange={(checked) => updateMetadata('makeupRoom', checked)}
+                  />
+                  <label htmlFor="makeupRoom" className="text-sm">Makeup Room</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="clientArea"
+                    checked={currentMetadata.clientArea}
+                    onCheckedChange={(checked) => updateMetadata('clientArea', checked)}
+                  />
+                  <label htmlFor="clientArea" className="text-sm">Client Area</label>
+                </div>
+              </div>
             </div>
           </TabsContent>
 
@@ -253,6 +392,11 @@ const PropertyEditModal = ({ property, isOpen, onClose, onSave, onAddImage, onUp
             />
           </TabsContent>
         </Tabs>
+
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>Save Changes</Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

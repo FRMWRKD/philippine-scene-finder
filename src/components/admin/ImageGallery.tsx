@@ -1,30 +1,16 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Camera, Edit, Trash, Plus, Star } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Edit, Trash, X, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface PropertyImage {
-  id: number;
-  url: string;
-  title: string;
-  description: string;
-  alt: string;
-  category: string;
-  lighting: string;
-  season: string;
-  weather: string;
-  colors: string[];
-  metaTags: string[];
-  isPrimary: boolean;
-}
+import { PropertyImage } from "@/services/mockDataService";
 
 interface ImageGalleryProps {
   propertyId: number;
@@ -34,328 +20,287 @@ interface ImageGalleryProps {
   onDeleteImage: (propertyId: number, imageId: number) => void;
 }
 
+const FILM_PHOTO_TAGS = [
+  // Lighting
+  "natural-light", "artificial-light", "golden-hour", "blue-hour", "dramatic-lighting", "soft-light", "hard-light", "backlit", "rim-light", "fill-light",
+  // Shot Types
+  "wide-angle", "close-up", "medium-shot", "establishing-shot", "aerial", "drone", "handheld", "tripod", "steadicam",
+  // Seasons/Weather
+  "spring", "summer", "autumn", "winter", "sunny", "cloudy", "overcast", "rainy", "stormy", "foggy", "misty",
+  // Location Types
+  "interior", "exterior", "urban", "rural", "industrial", "residential", "commercial", "historic", "modern", "vintage",
+  // Colors
+  "monochrome", "high-contrast", "saturated", "desaturated", "warm-tones", "cool-tones", "blue", "red", "green", "yellow", "orange", "purple", "black", "white", "gray",
+  // Technical
+  "4k", "8k", "raw", "log", "hdr", "low-key", "high-key", "shallow-dof", "deep-focus", "bokeh",
+  // Production
+  "commercial", "documentary", "narrative", "music-video", "corporate", "wedding", "fashion", "portrait", "landscape", "architecture"
+];
+
 const ImageGallery = ({ propertyId, images, onAddImage, onUpdateImage, onDeleteImage }: ImageGalleryProps) => {
   const { toast } = useToast();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingImage, setEditingImage] = useState<PropertyImage | null>(null);
-  const [isAddImageOpen, setIsAddImageOpen] = useState(false);
+  const [newImageData, setNewImageData] = useState({
+    url: "",
+    title: "",
+    description: "",
+    alt: "",
+    tags: [] as string[],
+    isPrimary: false
+  });
 
-  const handleAddImage = (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    onAddImage(propertyId, {
-      url: formData.get("url") as string,
-      title: formData.get("title") as string,
-      description: formData.get("description") as string,
-      alt: formData.get("alt") as string,
-      category: formData.get("category") as string,
-      lighting: formData.get("lighting") as string,
-      season: formData.get("season") as string,
-      weather: formData.get("weather") as string,
-      colors: (formData.get("colors") as string).split(",").map((c) => c.trim()).filter(Boolean),
-      metaTags: (formData.get("metaTags") as string).split(",").map((t) => t.trim()).filter(Boolean),
-      isPrimary: formData.get("isPrimary") === "on",
-    });
-    setIsAddImageOpen(false);
-    (e.target as HTMLFormElement).reset();
+  const handleAddImage = () => {
+    if (!newImageData.url || !newImageData.title) {
+      toast({ title: "Missing Information", description: "Please provide at least URL and title.", variant: "destructive" });
+      return;
+    }
+
+    onAddImage(propertyId, newImageData);
+    setNewImageData({ url: "", title: "", description: "", alt: "", tags: [], isPrimary: false });
+    setIsAddModalOpen(false);
+    toast({ title: "Image Added", description: "New image has been added to the property." });
   };
 
-  const handleUpdateImage = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleUpdateImage = () => {
     if (!editingImage) return;
     
-    const formData = new FormData(e.target as HTMLFormElement);
-    onUpdateImage(propertyId, editingImage.id, {
-      title: formData.get("title") as string,
-      description: formData.get("description") as string,
-      alt: formData.get("alt") as string,
-      category: formData.get("category") as string,
-      lighting: formData.get("lighting") as string,
-      season: formData.get("season") as string,
-      weather: formData.get("weather") as string,
-      colors: (formData.get("colors") as string).split(",").map((c) => c.trim()).filter(Boolean),
-      metaTags: (formData.get("metaTags") as string).split(",").map((t) => t.trim()).filter(Boolean),
-      isPrimary: formData.get("isPrimary") === "on",
-    });
+    onUpdateImage(propertyId, editingImage.id, editingImage);
     setEditingImage(null);
+    toast({ title: "Image Updated", description: "Image has been updated successfully." });
+  };
+
+  const handleDeleteImage = (imageId: number, imageTitle: string) => {
+    onDeleteImage(propertyId, imageId);
+    toast({ title: "Image Deleted", description: `"${imageTitle}" has been removed.`, variant: "destructive" });
+  };
+
+  const addTag = (tag: string, isNewImage: boolean = false) => {
+    if (isNewImage) {
+      if (!newImageData.tags.includes(tag)) {
+        setNewImageData(prev => ({ ...prev, tags: [...prev.tags, tag] }));
+      }
+    } else if (editingImage) {
+      if (!editingImage.tags.includes(tag)) {
+        setEditingImage({ ...editingImage, tags: [...editingImage.tags, tag] });
+      }
+    }
+  };
+
+  const removeTag = (tagIndex: number, isNewImage: boolean = false) => {
+    if (isNewImage) {
+      setNewImageData(prev => ({ ...prev, tags: prev.tags.filter((_, i) => i !== tagIndex) }));
+    } else if (editingImage) {
+      setEditingImage({ ...editingImage, tags: editingImage.tags.filter((_, i) => i !== tagIndex) });
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Image Gallery ({images.length})</h3>
-        <Dialog open={isAddImageOpen} onOpenChange={setIsAddImageOpen}>
+        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-coral-500 hover:bg-coral-600">
-              <Camera className="h-4 w-4 mr-2" />
+            <Button size="sm">
+              <Plus className="h-4 w-4 mr-1" />
               Add Image
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add New Image</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAddImage} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="url">Image URL</Label>
-                  <Input name="url" placeholder="https://..." required />
-                </div>
-                <div>
-                  <Label htmlFor="title">Title</Label>
-                  <Input name="title" placeholder="Image title" required />
-                </div>
-              </div>
-
+            <div className="space-y-4">
+              <Input
+                placeholder="Image URL"
+                value={newImageData.url}
+                onChange={(e) => setNewImageData(prev => ({ ...prev, url: e.target.value }))}
+              />
+              <Input
+                placeholder="Title"
+                value={newImageData.title}
+                onChange={(e) => setNewImageData(prev => ({ ...prev, title: e.target.value }))}
+              />
+              <Textarea
+                placeholder="Description"
+                value={newImageData.description}
+                onChange={(e) => setNewImageData(prev => ({ ...prev, description: e.target.value }))}
+              />
+              <Input
+                placeholder="Alt text"
+                value={newImageData.alt}
+                onChange={(e) => setNewImageData(prev => ({ ...prev, alt: e.target.value }))}
+              />
+              
               <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea name="description" placeholder="Detailed description" required />
-              </div>
-
-              <div>
-                <Label htmlFor="alt">Alt Text</Label>
-                <Input name="alt" placeholder="Alt text for accessibility" required />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label>Category</Label>
-                  <Select name="category" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="exterior">Exterior</SelectItem>
-                      <SelectItem value="interior">Interior</SelectItem>
-                      <SelectItem value="aerial">Aerial</SelectItem>
-                      <SelectItem value="detail">Detail</SelectItem>
-                      <SelectItem value="panoramic">Panoramic</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <label className="text-sm font-medium mb-2 block">Tags (Film/Photo specific)</label>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {FILM_PHOTO_TAGS.map(tag => (
+                    <Badge 
+                      key={tag} 
+                      variant={newImageData.tags.includes(tag) ? "default" : "outline"}
+                      className="cursor-pointer text-xs"
+                      onClick={() => addTag(tag, true)}
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
                 </div>
-
-                <div>
-                  <Label>Lighting</Label>
-                  <Select name="lighting" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Lighting" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="golden-hour">Golden Hour</SelectItem>
-                      <SelectItem value="blue-hour">Blue Hour</SelectItem>
-                      <SelectItem value="daylight">Daylight</SelectItem>
-                      <SelectItem value="overcast">Overcast</SelectItem>
-                      <SelectItem value="night">Night</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="flex flex-wrap gap-1">
+                  {newImageData.tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      {tag}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(index, true)} />
+                    </Badge>
+                  ))}
                 </div>
-
-                <div>
-                  <Label>Season</Label>
-                  <Select name="season" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Season" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="spring">Spring</SelectItem>
-                      <SelectItem value="summer">Summer</SelectItem>
-                      <SelectItem value="autumn">Autumn</SelectItem>
-                      <SelectItem value="winter">Winter</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="weather">Weather</Label>
-                  <Select name="weather" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Weather" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sunny">Sunny</SelectItem>
-                      <SelectItem value="cloudy">Cloudy</SelectItem>
-                      <SelectItem value="rainy">Rainy</SelectItem>
-                      <SelectItem value="foggy">Foggy</SelectItem>
-                      <SelectItem value="stormy">Stormy</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="colors">Colors (comma-separated)</Label>
-                  <Input name="colors" placeholder="blue, white, green" />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="metaTags">Meta Tags (comma-separated)</Label>
-                <Input name="metaTags" placeholder="romantic, sunset, beach, tropical" />
               </div>
 
               <div className="flex items-center space-x-2">
-                <input type="checkbox" name="isPrimary" id="isPrimary" />
-                <Label htmlFor="isPrimary">Set as Primary Image</Label>
+                <Checkbox
+                  id="primary"
+                  checked={newImageData.isPrimary}
+                  onCheckedChange={(checked) => setNewImageData(prev => ({ ...prev, isPrimary: !!checked }))}
+                />
+                <label htmlFor="primary" className="text-sm">Set as Primary Image</label>
               </div>
-
-              <Button type="submit" className="w-full bg-coral-500 hover:bg-coral-600">
-                Add Image
-              </Button>
-            </form>
+              
+              <div className="flex gap-2">
+                <Button onClick={handleAddImage} className="flex-1">Add Image</Button>
+                <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {images.map((image) => (
-          <Card key={image.id} className="group relative overflow-hidden">
-            <div className="aspect-video relative">
+          <Card key={image.id} className="overflow-hidden">
+            <div className="relative">
               <img 
                 src={image.url} 
                 alt={image.alt} 
-                className="w-full h-full object-cover"
+                className="w-full h-48 object-cover"
               />
               {image.isPrimary && (
-                <Badge className="absolute top-2 left-2 bg-coral-500">
-                  <Star className="h-3 w-3 mr-1" />
-                  Primary
-                </Badge>
+                <Star className="absolute top-2 left-2 h-5 w-5 fill-yellow-400 text-yellow-400" />
               )}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="secondary" onClick={() => setEditingImage(image)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Edit Image</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleUpdateImage} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="title">Title</Label>
-                          <Input name="title" defaultValue={image.title} required />
-                        </div>
-                        <div>
-                          <Label>Category</Label>
-                          <Select name="category" defaultValue={image.category} required>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="exterior">Exterior</SelectItem>
-                              <SelectItem value="interior">Interior</SelectItem>
-                              <SelectItem value="aerial">Aerial</SelectItem>
-                              <SelectItem value="detail">Detail</SelectItem>
-                              <SelectItem value="panoramic">Panoramic</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea name="description" defaultValue={image.description} required />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="alt">Alt Text</Label>
-                        <Input name="alt" defaultValue={image.alt} required />
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <Label>Lighting</Label>
-                          <Select name="lighting" defaultValue={image.lighting} required>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="golden-hour">Golden Hour</SelectItem>
-                              <SelectItem value="blue-hour">Blue Hour</SelectItem>
-                              <SelectItem value="daylight">Daylight</SelectItem>
-                              <SelectItem value="overcast">Overcast</SelectItem>
-                              <SelectItem value="night">Night</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label>Season</Label>
-                          <Select name="season" defaultValue={image.season} required>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="spring">Spring</SelectItem>
-                              <SelectItem value="summer">Summer</SelectItem>
-                              <SelectItem value="autumn">Autumn</SelectItem>
-                              <SelectItem value="winter">Winter</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label>Weather</Label>
-                          <Select name="weather" defaultValue={image.weather} required>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="sunny">Sunny</SelectItem>
-                              <SelectItem value="cloudy">Cloudy</SelectItem>
-                              <SelectItem value="rainy">Rainy</SelectItem>
-                              <SelectItem value="foggy">Foggy</SelectItem>
-                              <SelectItem value="stormy">Stormy</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="colors">Colors (comma-separated)</Label>
-                          <Input name="colors" defaultValue={image.colors.join(", ")} />
-                        </div>
-                        <div>
-                          <Label htmlFor="metaTags">Meta Tags (comma-separated)</Label>
-                          <Input name="metaTags" defaultValue={image.metaTags.join(", ")} />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <input type="checkbox" name="isPrimary" id="isPrimary" defaultChecked={image.isPrimary} />
-                        <Label htmlFor="isPrimary">Set as Primary Image</Label>
-                      </div>
-
-                      <Button type="submit" className="w-full bg-coral-500 hover:bg-coral-600">
-                        Update Image
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-                <Button 
-                  size="sm" 
-                  variant="destructive" 
-                  onClick={() => onDeleteImage(propertyId, image.id)}
+              <div className="absolute top-2 right-2 flex gap-1">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setEditingImage(image)}
                 >
-                  <Trash className="h-4 w-4" />
+                  <Edit className="h-3 w-3" />
                 </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="destructive">
+                      <Trash className="h-3 w-3" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Image</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{image.title}"? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => handleDeleteImage(image.id, image.title)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
             <CardContent className="p-3">
-              <h4 className="font-medium text-sm truncate">{image.title}</h4>
-              <p className="text-xs text-gray-500 line-clamp-2">{image.description}</p>
+              <h4 className="font-medium truncate">{image.title}</h4>
+              <p className="text-sm text-muted-foreground line-clamp-2">{image.description}</p>
               <div className="flex flex-wrap gap-1 mt-2">
-                <Badge variant="outline" className="text-xs">{image.category}</Badge>
-                <Badge variant="outline" className="text-xs">{image.lighting}</Badge>
+                {image.tags.slice(0, 3).map((tag, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">{tag}</Badge>
+                ))}
+                {image.tags.length > 3 && (
+                  <Badge variant="outline" className="text-xs">+{image.tags.length - 3}</Badge>
+                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* Edit Image Modal */}
+      <Dialog open={!!editingImage} onOpenChange={() => setEditingImage(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Image</DialogTitle>
+          </DialogHeader>
+          {editingImage && (
+            <div className="space-y-4">
+              <Input
+                placeholder="Title"
+                value={editingImage.title}
+                onChange={(e) => setEditingImage({ ...editingImage, title: e.target.value })}
+              />
+              <Textarea
+                placeholder="Description"
+                value={editingImage.description}
+                onChange={(e) => setEditingImage({ ...editingImage, description: e.target.value })}
+              />
+              <Input
+                placeholder="Alt text"
+                value={editingImage.alt}
+                onChange={(e) => setEditingImage({ ...editingImage, alt: e.target.value })}
+              />
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Tags (Film/Photo specific)</label>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {FILM_PHOTO_TAGS.map(tag => (
+                    <Badge 
+                      key={tag} 
+                      variant={editingImage.tags.includes(tag) ? "default" : "outline"}
+                      className="cursor-pointer text-xs"
+                      onClick={() => addTag(tag)}
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {editingImage.tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      {tag}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(index)} />
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="edit-primary"
+                  checked={editingImage.isPrimary}
+                  onCheckedChange={(checked) => setEditingImage({ ...editingImage, isPrimary: !!checked })}
+                />
+                <label htmlFor="edit-primary" className="text-sm">Set as Primary Image</label>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button onClick={handleUpdateImage} className="flex-1">Update Image</Button>
+                <Button variant="outline" onClick={() => setEditingImage(null)}>Cancel</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

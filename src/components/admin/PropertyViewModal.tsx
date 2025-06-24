@@ -1,56 +1,11 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Star, Edit, Calendar, DollarSign, Eye } from "lucide-react";
+import { MapPin, Star, Edit, Calendar, DollarSign, Eye, Zap, Users, Square, Lightbulb, Volume2, Truck, Camera, Palette, Wrench, Coffee, Brush, Sofa } from "lucide-react";
 import ImageGallery from "./ImageGallery";
-
-interface PropertyImage {
-  id: number;
-  url: string;
-  title: string;
-  description: string;
-  alt: string;
-  category: string;
-  lighting: string;
-  season: string;
-  weather: string;
-  colors: string[];
-  metaTags: string[];
-  isPrimary: boolean;
-}
-
-interface AttachedMovie {
-  id: number;
-  title: string;
-  year: string;
-  role: string;
-  description: string;
-  genre: string;
-  director: string;
-  imdbUrl?: string;
-  trailerUrl?: string;
-}
-
-interface Property {
-  id: number;
-  name: string;
-  location: string;
-  category: string;
-  price: string;
-  status: string;
-  bookings: number;
-  rating: number;
-  description: string;
-  images: PropertyImage[];
-  features: string[];
-  tags: string[];
-  amenities: string[];
-  attachedMovies: AttachedMovie[];
-  lastUpdated?: string;
-  views?: number;
-  revenue?: string;
-}
+import { Property, PropertyImage } from "@/services/mockDataService";
 
 interface PropertyViewModalProps {
   property: Property | null;
@@ -64,6 +19,22 @@ interface PropertyViewModalProps {
 
 const PropertyViewModal = ({ property, isOpen, onClose, onEdit, onAddImage, onUpdateImage, onDeleteImage }: PropertyViewModalProps) => {
   if (!property) return null;
+
+  const getFeatureIcon = (feature: string) => {
+    const featureMap: Record<string, JSX.Element> = {
+      'naturalLight': <Lightbulb className="h-4 w-4" />,
+      'soundProofing': <Volume2 className="h-4 w-4" />,
+      'loadingAccess': <Truck className="h-4 w-4" />,
+      'greenScreen': <Camera className="h-4 w-4" />,
+      'cyc': <Palette className="h-4 w-4" />,
+      'grip': <Wrench className="h-4 w-4" />,
+      'catering': <Coffee className="h-4 w-4" />,
+      'makeupRoom': <Brush className="h-4 w-4" />,
+      'clientArea': <Sofa className="h-4 w-4" />,
+      'parking': <Square className="h-4 w-4" />
+    };
+    return featureMap[feature] || <Square className="h-4 w-4" />;
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -83,7 +54,7 @@ const PropertyViewModal = ({ property, isOpen, onClose, onEdit, onAddImage, onUp
 
         <div className="space-y-6">
           {/* Property Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -113,6 +84,51 @@ const PropertyViewModal = ({ property, isOpen, onClose, onEdit, onAddImage, onUp
                 <p className="text-lg">{property.rating}/5</p>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Max Crew</span>
+                </div>
+                <p className="text-lg">{property.metadata.maxCrew} people</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Technical Specifications */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Square className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Space Size</span>
+                </div>
+                <p className="text-lg">{property.metadata.sizeM2} m²</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Power Supply</span>
+                </div>
+                <p className="text-lg">{property.metadata.powerAmps} Amps</p>
+              </CardContent>
+            </Card>
+
+            {property.metadata.ceilingHeight && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Square className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Ceiling Height</span>
+                  </div>
+                  <p className="text-lg">{property.metadata.ceilingHeight}m</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Status and Metrics */}
@@ -135,6 +151,39 @@ const PropertyViewModal = ({ property, isOpen, onClose, onEdit, onAddImage, onUp
           <div>
             <h3 className="text-lg font-semibold mb-2">Description</h3>
             <p className="text-muted-foreground">{property.description}</p>
+          </div>
+
+          {/* Studio Features Grid */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Studio Features</h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[
+                { key: 'naturalLight', label: 'Natural Light', icon: <Lightbulb className="h-4 w-4" /> },
+                { key: 'soundProofing', label: 'Sound Proofing', icon: <Volume2 className="h-4 w-4" /> },
+                { key: 'loadingAccess', label: 'Loading Access', icon: <Truck className="h-4 w-4" /> },
+                { key: 'greenScreen', label: 'Green Screen', icon: <Camera className="h-4 w-4" /> },
+                { key: 'cyc', label: 'Cyc Wall', icon: <Palette className="h-4 w-4" /> },
+                { key: 'grip', label: 'Grip Equipment', icon: <Wrench className="h-4 w-4" /> },
+                { key: 'catering', label: 'Catering Area', icon: <Coffee className="h-4 w-4" /> },
+                { key: 'makeupRoom', label: 'Makeup Room', icon: <Brush className="h-4 w-4" /> },
+                { key: 'clientArea', label: 'Client Area', icon: <Sofa className="h-4 w-4" /> },
+                { key: 'parking', label: 'Parking', icon: <Square className="h-4 w-4" /> }
+              ].map(({ key, label, icon }) => (
+                <Card key={key} className={`p-3 ${property.metadata[key as keyof typeof property.metadata] ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}>
+                  <div className="flex items-center gap-2">
+                    {icon}
+                    <span className="text-sm font-medium">{label}</span>
+                  </div>
+                  <div className="mt-1">
+                    {property.metadata[key as keyof typeof property.metadata] ? (
+                      <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">Available</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">Not Available</Badge>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
           </div>
 
           {/* Features */}

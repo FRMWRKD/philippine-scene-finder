@@ -21,12 +21,7 @@
         "title": "Main Beach View",
         "description": "Stunning beachfront view with crystal clear waters",
         "alt": "Boracay beach resort main view",
-        "category": "exterior",
-        "lighting": "natural",
-        "season": "summer",
-        "weather": "sunny",
-        "colors": ["blue", "white", "sand"],
-        "metaTags": ["beach", "resort", "tropical"],
+        "tags": ["exterior", "natural-light", "summer", "sunny", "blue", "white", "sand", "beach", "resort", "tropical", "golden-hour", "wide-angle"],
         "isPrimary": true
       },
       {
@@ -35,17 +30,12 @@
         "title": "Beach Sunset",
         "description": "Beautiful sunset view from the beach",
         "alt": "Boracay sunset view",
-        "category": "exterior",
-        "lighting": "golden hour",
-        "season": "summer",
-        "weather": "clear",
-        "colors": ["orange", "yellow", "purple"],
-        "metaTags": ["sunset", "beach", "golden hour"],
+        "tags": ["exterior", "golden-hour", "summer", "clear", "orange", "yellow", "purple", "sunset", "beach", "dramatic-lighting"],
         "isPrimary": false
       }
     ],
     "features": ["Beachfront Access", "Sunset Views", "Private Beach", "Water Sports", "Restaurant"],
-    "tags": ["Beach", "Sunset", "Water", "Tropical", "Resort"],
+    "tags": ["Beach", "Sunset", "Water", "Tropical", "Resort", "Natural Light", "Golden Hour"],
     "amenities": ["Parking", "WiFi", "Restrooms", "Catering Available", "Equipment Rental"],
     "attachedMovies": [
       {
@@ -65,7 +55,17 @@
       "powerAmps": 50,
       "maxCrew": 15,
       "parking": true,
-      "coordinates": { "lat": 11.9674, "lng": 121.9248 }
+      "coordinates": { "lat": 11.9674, "lng": 121.9248 },
+      "ceilingHeight": 0,
+      "naturalLight": true,
+      "soundProofing": false,
+      "loadingAccess": true,
+      "greenScreen": false,
+      "cyc": false,
+      "grip": false,
+      "catering": true,
+      "makeupRoom": false,
+      "clientArea": true
     }
   },
   {
@@ -85,21 +85,16 @@
     "images": [
       {
         "id": 3,
-        "url": "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&h=600&fit=crop",
+        "url": "https://images.unsplash.com/photo-1506197603052-3cc9c3201bd?w=800&h=600&fit=crop",
         "title": "Mountain Vista",
         "description": "Panoramic mountain view with pine trees",
         "alt": "Baguio mountain view",
-        "category": "landscape",
-        "lighting": "natural",
-        "season": "all",
-        "weather": "clear",
-        "colors": ["green", "blue", "brown"],
-        "metaTags": ["mountain", "nature", "pine"],
+        "tags": ["landscape", "natural-light", "all-season", "clear", "green", "blue", "brown", "mountain", "nature", "pine", "wide-angle", "aerial"],
         "isPrimary": true
       }
     ],
     "features": ["Mountain Views", "Cool Climate", "Pine Trees", "Hiking Trails"],
-    "tags": ["Mountain", "Nature", "Cool", "Pine", "Hiking"],
+    "tags": ["Mountain", "Nature", "Cool", "Pine", "Hiking", "Natural Light", "Aerial Views"],
     "amenities": ["Parking", "Guide Available", "Camping Allowed"],
     "attachedMovies": [],
     "metadata": {
@@ -107,7 +102,17 @@
       "powerAmps": 30,
       "maxCrew": 12,
       "parking": true,
-      "coordinates": { "lat": 16.4023, "lng": 120.5960 }
+      "coordinates": { "lat": 16.4023, "lng": 120.5960 },
+      "ceilingHeight": 0,
+      "naturalLight": true,
+      "soundProofing": false,
+      "loadingAccess": false,
+      "greenScreen": false,
+      "cyc": false,
+      "grip": false,
+      "catering": false,
+      "makeupRoom": false,
+      "clientArea": false
     }
   },
   {
@@ -131,17 +136,12 @@
         "title": "Urban Loft Interior",
         "description": "Modern loft with industrial design elements",
         "alt": "Manila urban loft interior",
-        "category": "interior",
-        "lighting": "artificial",
-        "season": "all",
-        "weather": "indoor",
-        "colors": ["gray", "black", "white"],
-        "metaTags": ["urban", "loft", "modern"],
+        "tags": ["interior", "artificial-light", "all-season", "indoor", "gray", "black", "white", "urban", "loft", "modern", "high-ceiling", "industrial"],
         "isPrimary": true
       }
     ],
     "features": ["City Views", "Modern Design", "High Ceilings", "Natural Light"],
-    "tags": ["Urban", "Modern", "Loft", "City", "Contemporary"],
+    "tags": ["Urban", "Modern", "Loft", "City", "Contemporary", "High Ceiling", "Industrial"],
     "amenities": ["Parking", "WiFi", "Air Conditioning", "Security", "Elevator"],
     "attachedMovies": [],
     "metadata": {
@@ -149,7 +149,17 @@
       "powerAmps": 60,
       "maxCrew": 25,
       "parking": true,
-      "coordinates": { "lat": 14.5515, "lng": 121.0508 }
+      "coordinates": { "lat": 14.5515, "lng": 121.0508 },
+      "ceilingHeight": 4.5,
+      "naturalLight": true,
+      "soundProofing": true,
+      "loadingAccess": true,
+      "greenScreen": false,
+      "cyc": false,
+      "grip": true,
+      "catering": false,
+      "makeupRoom": true,
+      "clientArea": true
     }
   }
 ]

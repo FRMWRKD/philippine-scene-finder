@@ -1,4 +1,3 @@
-
 import mockProperties from '../data/mockProperties.json';
 import mockUsers from '../data/mockUsers.json';
 import mockBookings from '../data/mockBookings.json';
@@ -11,12 +10,7 @@ export interface PropertyImage {
   title: string;
   description: string;
   alt: string;
-  category: string;
-  lighting: string;
-  season: string;
-  weather: string;
-  colors: string[];
-  metaTags: string[];
+  tags: string[]; // Combined all lighting, season, weather, colors, metaTags into one tags array
   isPrimary: boolean;
 }
 
@@ -57,6 +51,17 @@ export interface Property {
     maxCrew: number;
     parking: boolean;
     coordinates: { lat: number; lng: number };
+    // Film/Photo specific metadata
+    ceilingHeight?: number;
+    naturalLight?: boolean;
+    soundProofing?: boolean;
+    loadingAccess?: boolean;
+    greenScreen?: boolean;
+    cyc?: boolean;
+    grip?: boolean;
+    catering?: boolean;
+    makeupRoom?: boolean;
+    clientArea?: boolean;
   };
 }
 
