@@ -1,0 +1,93 @@
+
+[
+  {
+    "id": 1,
+    "conversationId": "conv_1",
+    "participants": [1, 2],
+    "propertyId": 1,
+    "bookingId": 1,
+    "subject": "Booking Inquiry - Boracay Beach Resort",
+    "messages": [
+      {
+        "id": 1,
+        "senderId": 1,
+        "receiverId": 2,
+        "content": "Hi Maria! I'm interested in booking your Boracay Beach Resort for a commercial photoshoot. The dates we're looking at are February 15-17. Could you please confirm availability?",
+        "timestamp": "2024-01-20T10:30:00Z",
+        "isRead": true,
+        "attachments": []
+      },
+      {
+        "id": 2,
+        "senderId": 2,
+        "receiverId": 1,
+        "content": "Hello Juan! Yes, those dates are available. The property is perfect for commercial shoots. We have all the necessary permits and can provide additional support if needed. The rate is ₱5,000 per day. Would you like to proceed?",
+        "timestamp": "2024-01-20T11:15:00Z",
+        "isRead": true,
+        "attachments": []
+      },
+      {
+        "id": 3,
+        "senderId": 1,
+        "receiverId": 2,
+        "content": "Perfect! We'll need early morning access for sunrise shots. Is that possible? Also, do you have drone filming permits for the area?",
+        "timestamp": "2024-01-20T14:20:00Z",
+        "isRead": true,
+        "attachments": []
+      },
+      {
+        "id": 4,
+        "senderId": 2,
+        "receiverId": 1,
+        "content": "Absolutely! We can arrange access from 5:00 AM. We have all drone permits and can provide a local coordinator to assist with logistics. I'll send over the booking agreement.",
+        "timestamp": "2024-01-20T15:45:00Z",
+        "isRead": true,
+        "attachments": [
+          {
+            "id": 1,
+            "name": "booking_agreement.pdf",
+            "type": "document",
+            "size": 245632,
+            "url": "/documents/booking_agreement_1.pdf"
+          }
+        ]
+      }
+    ],
+    "status": "active",
+    "priority": "normal",
+    "lastActivity": "2024-01-20T15:45:00Z",
+    "tags": ["booking", "commercial", "confirmed"]
+  },
+  {
+    "id": 2,
+    "conversationId": "conv_2",
+    "participants": [1, 2],
+    "propertyId": 2,
+    "bookingId": 2,
+    "subject": "Documentary Filming - Mountain Location",
+    "messages": [
+      {
+        "id": 5,
+        "senderId": 1,
+        "receiverId": 2,
+        "content": "Hi Maria, I'm planning a documentary about mountain culture and would love to use your Baguio location. We're looking at March 1-3. Can you help us connect with local cultural guides?",
+        "timestamp": "2024-01-25T09:00:00Z",
+        "isRead": true,
+        "attachments": []
+      },
+      {
+        "id": 6,
+        "senderId": 2,
+        "receiverId": 1,
+        "content": "Hello Juan! That sounds like a wonderful project. I have connections with several cultural guides and elders in the community. The location is available for those dates. Let me know more about your documentary focus.",
+        "timestamp": "2024-01-25T10:30:00Z",
+        "isRead": false,
+        "attachments": []
+      }
+    ],
+    "status": "active",
+    "priority": "normal",
+    "lastActivity": "2024-01-25T10:30:00Z",
+    "tags": ["booking", "documentary", "pending"]
+  }
+]

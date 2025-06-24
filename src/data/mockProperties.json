@@ -1,0 +1,155 @@
+
+[
+  {
+    "id": 1,
+    "name": "Boracay Beach Resort",
+    "location": "Boracay, Aklan",
+    "category": "Beach",
+    "price": "₱5,000",
+    "status": "active",
+    "bookings": 156,
+    "rating": 4.8,
+    "description": "Beautiful beachfront location perfect for photoshoots and film productions with crystal clear waters and white sand beaches.",
+    "lastUpdated": "2024-01-15",
+    "views": 2847,
+    "revenue": "₱780,000",
+    "ownerId": 1,
+    "images": [
+      {
+        "id": 1,
+        "url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop",
+        "title": "Main Beach View",
+        "description": "Stunning beachfront view with crystal clear waters",
+        "alt": "Boracay beach resort main view",
+        "category": "exterior",
+        "lighting": "natural",
+        "season": "summer",
+        "weather": "sunny",
+        "colors": ["blue", "white", "sand"],
+        "metaTags": ["beach", "resort", "tropical"],
+        "isPrimary": true
+      },
+      {
+        "id": 2,
+        "url": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop",
+        "title": "Beach Sunset",
+        "description": "Beautiful sunset view from the beach",
+        "alt": "Boracay sunset view",
+        "category": "exterior",
+        "lighting": "golden hour",
+        "season": "summer",
+        "weather": "clear",
+        "colors": ["orange", "yellow", "purple"],
+        "metaTags": ["sunset", "beach", "golden hour"],
+        "isPrimary": false
+      }
+    ],
+    "features": ["Beachfront Access", "Sunset Views", "Private Beach", "Water Sports", "Restaurant"],
+    "tags": ["Beach", "Sunset", "Water", "Tropical", "Resort"],
+    "amenities": ["Parking", "WiFi", "Restrooms", "Catering Available", "Equipment Rental"],
+    "attachedMovies": [
+      {
+        "id": 1,
+        "title": "Paradise Found",
+        "year": "2023",
+        "role": "Main Location",
+        "description": "Romantic comedy filmed entirely at this beach resort",
+        "genre": "Romance",
+        "director": "Maria Santos",
+        "imdbUrl": "https://imdb.com/title/tt1234567",
+        "trailerUrl": "https://youtube.com/watch?v=sample"
+      }
+    ],
+    "metadata": {
+      "sizeM2": 250,
+      "powerAmps": 50,
+      "maxCrew": 15,
+      "parking": true,
+      "coordinates": { "lat": 11.9674, "lng": 121.9248 }
+    }
+  },
+  {
+    "id": 2,
+    "name": "Baguio Mountain View",
+    "location": "Baguio City",
+    "category": "Mountain",
+    "price": "₱3,500",
+    "status": "active",
+    "bookings": 89,
+    "rating": 4.6,
+    "description": "Scenic mountain views with cool climate and pine forests, perfect for nature documentaries and outdoor shoots.",
+    "lastUpdated": "2024-01-10",
+    "views": 1453,
+    "revenue": "₱311,500",
+    "ownerId": 2,
+    "images": [
+      {
+        "id": 3,
+        "url": "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&h=600&fit=crop",
+        "title": "Mountain Vista",
+        "description": "Panoramic mountain view with pine trees",
+        "alt": "Baguio mountain view",
+        "category": "landscape",
+        "lighting": "natural",
+        "season": "all",
+        "weather": "clear",
+        "colors": ["green", "blue", "brown"],
+        "metaTags": ["mountain", "nature", "pine"],
+        "isPrimary": true
+      }
+    ],
+    "features": ["Mountain Views", "Cool Climate", "Pine Trees", "Hiking Trails"],
+    "tags": ["Mountain", "Nature", "Cool", "Pine", "Hiking"],
+    "amenities": ["Parking", "Guide Available", "Camping Allowed"],
+    "attachedMovies": [],
+    "metadata": {
+      "sizeM2": 180,
+      "powerAmps": 30,
+      "maxCrew": 12,
+      "parking": true,
+      "coordinates": { "lat": 16.4023, "lng": 120.5960 }
+    }
+  },
+  {
+    "id": 3,
+    "name": "Manila Urban Loft",
+    "location": "BGC, Taguig",
+    "category": "Urban",
+    "price": "₱7,000",
+    "status": "active",
+    "bookings": 234,
+    "rating": 4.7,
+    "description": "Modern urban loft with city skyline views, perfect for contemporary film productions and commercial shoots.",
+    "lastUpdated": "2024-01-20",
+    "views": 3421,
+    "revenue": "₱1,638,000",
+    "ownerId": 3,
+    "images": [
+      {
+        "id": 4,
+        "url": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop",
+        "title": "Urban Loft Interior",
+        "description": "Modern loft with industrial design elements",
+        "alt": "Manila urban loft interior",
+        "category": "interior",
+        "lighting": "artificial",
+        "season": "all",
+        "weather": "indoor",
+        "colors": ["gray", "black", "white"],
+        "metaTags": ["urban", "loft", "modern"],
+        "isPrimary": true
+      }
+    ],
+    "features": ["City Views", "Modern Design", "High Ceilings", "Natural Light"],
+    "tags": ["Urban", "Modern", "Loft", "City", "Contemporary"],
+    "amenities": ["Parking", "WiFi", "Air Conditioning", "Security", "Elevator"],
+    "attachedMovies": [],
+    "metadata": {
+      "sizeM2": 150,
+      "powerAmps": 60,
+      "maxCrew": 25,
+      "parking": true,
+      "coordinates": { "lat": 14.5515, "lng": 121.0508 }
+    }
+  }
+]

@@ -19,53 +19,7 @@ import BookingManager from "./BookingManager";
 import MessageCenter from "./MessageCenter";
 import PropertyEditModal from "./PropertyEditModal";
 import PropertyViewModal from "./PropertyViewModal";
-
-interface PropertyImage {
-  id: number;
-  url: string;
-  title: string;
-  description: string;
-  alt: string;
-  category: string;
-  lighting: string;
-  season: string;
-  weather: string;
-  colors: string[];
-  metaTags: string[];
-  isPrimary: boolean;
-}
-
-interface AttachedMovie {
-  id: number;
-  title: string;
-  year: string;
-  role: string;
-  description: string;
-  genre: string;
-  director: string;
-  imdbUrl?: string;
-  trailerUrl?: string;
-}
-
-interface Property {
-  id: number;
-  name: string;
-  location: string;
-  category: string;
-  price: string;
-  status: string;
-  bookings: number;
-  rating: number;
-  description: string;
-  images: PropertyImage[];
-  features: string[];
-  tags: string[];
-  amenities: string[];
-  attachedMovies: AttachedMovie[];
-  lastUpdated?: string;
-  views?: number;
-  revenue?: string;
-}
+import mockDataService, { Property, PropertyImage } from "@/services/mockDataService";
 
 const ScoutDashboard = () => {
   const { toast } = useToast();
@@ -104,88 +58,9 @@ const ScoutDashboard = () => {
   const [messageSearchTerm, setMessageSearchTerm] = useState("");
   const [messageStatusFilter, setMessageStatusFilter] = useState("all");
 
-  // Enhanced mock data with performance metrics
-  const [scoutProperties, setScoutProperties] = useState<Property[]>([
-    {
-      id: 1,
-      name: "Boracay Beach Resort",
-      location: "Boracay, Aklan",
-      category: "Beach",
-      price: "₱5,000",
-      status: "active",
-      bookings: 156,
-      rating: 4.8,
-      description: "Beautiful beachfront location perfect for photoshoots and film productions",
-      lastUpdated: "2024-01-15",
-      views: 2847,
-      revenue: "₱780,000",
-      images: [
-        {
-          id: 1,
-          url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
-          title: "Main Beach View",
-          description: "Stunning beachfront view with crystal clear waters",
-          alt: "Boracay beach resort main view",
-          category: "exterior",
-          lighting: "natural",
-          season: "summer",
-          weather: "sunny",
-          colors: ["blue", "white", "sand"],
-          metaTags: ["beach", "resort", "tropical"],
-          isPrimary: true
-        }
-      ],
-      features: ["Beachfront Access", "Sunset Views", "Private Beach", "Water Sports", "Restaurant"],
-      tags: ["Beach", "Sunset", "Water", "Tropical", "Resort"],
-      amenities: ["Parking", "WiFi", "Restrooms", "Catering Available", "Equipment Rental"],
-      attachedMovies: [],
-    },
-    {
-      id: 2,
-      name: "Baguio Mountain View",
-      location: "Baguio City",
-      category: "Mountain",
-      price: "₱3,500",
-      status: "active",
-      bookings: 89,
-      rating: 4.6,
-      description: "Scenic mountain views with cool climate and pine forests",
-      lastUpdated: "2024-01-10",
-      views: 1453,
-      revenue: "₱311,500",
-      images: [
-        {
-          id: 2,
-          url: "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd",
-          title: "Mountain Vista",
-          description: "Panoramic mountain view with pine trees",
-          alt: "Baguio mountain view",
-          category: "landscape",
-          lighting: "natural",
-          season: "all",
-          weather: "clear",
-          colors: ["green", "blue", "brown"],
-          metaTags: ["mountain", "nature", "pine"],
-          isPrimary: true
-        }
-      ],
-      features: ["Mountain Views", "Cool Climate", "Pine Trees", "Hiking Trails"],
-      tags: ["Mountain", "Nature", "Cool", "Pine", "Hiking"],
-      amenities: ["Parking", "Guide Available", "Camping Allowed"],
-      attachedMovies: [],
-    },
-  ]);
-
-  const [scoutStats, setScoutStats] = useState({
-    totalProperties: 2847,
-    activeBookings: 423,
-    monthlyEarnings: "₱2,450,000",
-    averageRating: 4.7,
-    totalViews: 156789,
-    conversionRate: "12.3%",
-    responseTime: "2.1 hrs",
-    topCategory: "Beach",
-  });
+  // Get data from service
+  const [scoutProperties, setScoutProperties] = useState<Property[]>(mockDataService.getProperties());
+  const scoutStats = mockDataService.getStats().scout;
 
   // Enhanced filtering with performance optimization
   const filteredAndSortedProperties = useMemo(() => {
@@ -258,19 +133,24 @@ const ScoutDashboard = () => {
 
     switch (action) {
       case "activate":
-        setScoutProperties(props => props.map(p => 
-          selectedProperties.includes(p.id) ? { ...p, status: "active" } : p
-        ));
+        selectedProperties.forEach(id => {
+          mockDataService.updateProperty(id, { status: "active" });
+        });
+        setScoutProperties(mockDataService.getProperties());
         toast({ title: "Bulk Update", description: `${selectedProperties.length} properties activated.` });
         break;
       case "deactivate":
-        setScoutProperties(props => props.map(p => 
-          selectedProperties.includes(p.id) ? { ...p, status: "inactive" } : p
-        ));
+        selectedProperties.forEach(id => {
+          mockDataService.updateProperty(id, { status: "inactive" });
+        });
+        setScoutProperties(mockDataService.getProperties());
         toast({ title: "Bulk Update", description: `${selectedProperties.length} properties deactivated.` });
         break;
       case "delete":
-        setScoutProperties(props => props.filter(p => !selectedProperties.includes(p.id)));
+        selectedProperties.forEach(id => {
+          mockDataService.deleteProperty(id);
+        });
+        setScoutProperties(mockDataService.getProperties());
         toast({ title: "Bulk Delete", description: `${selectedProperties.length} properties deleted.`, variant: "destructive" });
         break;
       case "export":
@@ -298,36 +178,20 @@ const ScoutDashboard = () => {
 
   // Image Management Functions
   const handleAddImage = (propertyId: number, imageData: Omit<PropertyImage, "id">) => {
-    setScoutProperties((properties) =>
-      properties.map((p) =>
-        p.id === propertyId
-          ? {
-              ...p,
-              images: [...p.images, { id: Date.now(), ...imageData }],
-            }
-          : p
-      )
-    );
+    mockDataService.addImageToProperty(propertyId, imageData);
+    setScoutProperties(mockDataService.getProperties());
     toast({ title: "Image Added", description: "Image has been added to the property." });
   };
 
   const handleUpdateImage = (propertyId: number, imageId: number, updates: Partial<PropertyImage>) => {
-    setScoutProperties((properties) =>
-      properties.map((p) =>
-        p.id === propertyId
-          ? { ...p, images: p.images.map((img) => (img.id === imageId ? { ...img, ...updates } : img)) }
-          : p
-      )
-    );
+    mockDataService.updatePropertyImage(propertyId, imageId, updates);
+    setScoutProperties(mockDataService.getProperties());
     toast({ title: "Image Updated", description: "Image details have been updated." });
   };
 
   const handleDeleteImage = (propertyId: number, imageId: number) => {
-    setScoutProperties((properties) =>
-      properties.map((p) =>
-        p.id === propertyId ? { ...p, images: p.images.filter((img) => img.id !== imageId) } : p
-      )
-    );
+    mockDataService.deletePropertyImage(propertyId, imageId);
+    setScoutProperties(mockDataService.getProperties());
     toast({ title: "Image Deleted", description: "Image has been removed from the property." });
   };
 
@@ -364,41 +228,54 @@ const ScoutDashboard = () => {
   const handleAddProperty = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget as HTMLFormElement);
-    const newProperty: Property = {
-      id: Date.now(),
+    const newProperty = {
       name: formData.get("name") as string,
       location: formData.get("location") as string,
       category: formData.get("category") as string,
       price: formData.get("price") as string,
       description: formData.get("description") as string || "No description provided",
-      status: "pending",
+      status: "pending" as const,
       bookings: 0,
       rating: 0,
+      views: 0,
+      revenue: "₱0",
+      lastUpdated: new Date().toISOString().split('T')[0],
+      ownerId: 1, // Current scout ID
       images: [],
       features: [],
       tags: [],
       amenities: [],
       attachedMovies: [],
-      views: 0,
-      revenue: "₱0",
-      lastUpdated: new Date().toISOString().split('T')[0],
+      metadata: {
+        sizeM2: 100,
+        powerAmps: 30,
+        maxCrew: 10,
+        parking: true,
+        coordinates: { lat: 0, lng: 0 }
+      }
     };
 
-    setScoutProperties(prev => [...prev, newProperty]);
+    mockDataService.addProperty(newProperty);
+    setScoutProperties(mockDataService.getProperties());
     setIsAddLocationOpen(false);
     toast({ title: "Property Added", description: "Your new property has been added successfully." });
   };
 
   const handleDeleteProperty = (propertyId: number) => {
-    setScoutProperties(props => props.filter(p => p.id !== propertyId));
+    mockDataService.deleteProperty(propertyId);
+    setScoutProperties(mockDataService.getProperties());
     toast({ title: "Property Deleted", description: "Property has been removed.", variant: "destructive" });
   };
 
   const handleToggleStatus = (propertyId: number) => {
-    setScoutProperties(props => props.map(p => 
-      p.id === propertyId ? { ...p, status: p.status === "active" ? "inactive" : "active" } : p
-    ));
-    toast({ title: "Status Updated", description: "Property status has been changed." });
+    const property = mockDataService.getProperty(propertyId);
+    if (property) {
+      mockDataService.updateProperty(propertyId, { 
+        status: property.status === "active" ? "inactive" : "active" 
+      });
+      setScoutProperties(mockDataService.getProperties());
+      toast({ title: "Status Updated", description: "Property status has been changed." });
+    }
   };
 
   // Property filtering and pagination
@@ -667,24 +544,25 @@ const ScoutDashboard = () => {
   };
 
   const handleSaveProperty = (propertyId: number, updates: Partial<Property>) => {
-    setScoutProperties(props => props.map(p => 
-      p.id === propertyId ? { ...p, ...updates } : p
-    ));
+    mockDataService.updateProperty(propertyId, updates);
+    setScoutProperties(mockDataService.getProperties());
     setIsEditModalOpen(false);
+    toast({ title: "Property Updated", description: "Changes have been saved successfully." });
   };
 
   const handleDuplicateProperty = (property: Property) => {
-    const duplicatedProperty: Property = {
+    const duplicatedProperty = {
       ...property,
-      id: Date.now(),
       name: `${property.name} (Copy)`,
-      status: "inactive",
+      status: "inactive" as const,
       bookings: 0,
       rating: 0,
       views: 0,
       revenue: "₱0",
     };
-    setScoutProperties(props => [...props, duplicatedProperty]);
+    delete (duplicatedProperty as any).id;
+    mockDataService.addProperty(duplicatedProperty);
+    setScoutProperties(mockDataService.getProperties());
     toast({ title: "Property Duplicated", description: "Property has been duplicated successfully." });
   };
 
@@ -694,23 +572,23 @@ const ScoutDashboard = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
         <Card className="p-3">
           <div className="text-xs text-muted-foreground">Properties</div>
-          <div className="text-lg font-bold text-coral-600">{scoutStats.totalProperties.toLocaleString()}</div>
+          <div className="text-lg font-bold text-coral-600">{scoutStats.totalProperties}</div>
         </Card>
         <Card className="p-3">
           <div className="text-xs text-muted-foreground">Active Bookings</div>
-          <div className="text-lg font-bold text-green-600">{scoutStats.activeBookings}</div>
+          <div className="text-lg font-bold text-green-600">{scoutStats.totalBookings}</div>
         </Card>
         <Card className="p-3">
-          <div className="text-xs text-muted-foreground">Monthly Revenue</div>
-          <div className="text-lg font-bold text-blue-600">{scoutStats.monthlyEarnings}</div>
+          <div className="text-xs text-muted-foreground">Total Earnings</div>
+          <div className="text-lg font-bold text-blue-600">{scoutStats.totalEarnings}</div>
         </Card>
         <Card className="p-3">
           <div className="text-xs text-muted-foreground">Avg Rating</div>
           <div className="text-lg font-bold text-yellow-600">{scoutStats.averageRating}</div>
         </Card>
         <Card className="p-3">
-          <div className="text-xs text-muted-foreground">Total Views</div>
-          <div className="text-lg font-bold text-purple-600">{scoutStats.totalViews.toLocaleString()}</div>
+          <div className="text-xs text-muted-foreground">Response Rate</div>
+          <div className="text-lg font-bold text-purple-600">{scoutStats.responseRate}</div>
         </Card>
         <Card className="p-3">
           <div className="text-xs text-muted-foreground">Conversion</div>

@@ -1,0 +1,48 @@
+
+{
+  "platform": {
+    "totalUsers": 15847,
+    "totalScouts": 2341,
+    "totalProperties": 8924,
+    "totalBookings": 12456,
+    "totalRevenue": "₱45,670,000",
+    "growthRate": "+23.5%",
+    "activeBookings": 423,
+    "completedBookings": 11234,
+    "averageRating": 4.6,
+    "topCategories": ["Beach", "Urban", "Mountain", "Nature"],
+    "monthlyStats": {
+      "january": { "bookings": 890, "revenue": "₱3,200,000" },
+      "february": { "bookings": 1245, "revenue": "₱4,100,000" },
+      "march": { "bookings": 1156, "revenue": "₱3,800,000" }
+    }
+  },
+  "user": {
+    "totalBookings": 12,
+    "totalSpent": "₱84,000",
+    "favoriteLocations": 8,
+    "reviewsGiven": 10,
+    "averageBookingValue": "₱7,000",
+    "preferredCategories": ["Beach", "Urban"],
+    "bookingHistory": [
+      { "month": "Jan", "bookings": 2, "spent": "₱14,000" },
+      { "month": "Feb", "bookings": 1, "spent": "₱7,000" },
+      { "month": "Mar", "bookings": 3, "spent": "₱21,000" }
+    ]
+  },
+  "scout": {
+    "totalProperties": 15,
+    "totalEarnings": "₱450,000",
+    "averageRating": 4.8,
+    "totalBookings": 89,
+    "responseRate": "100%",
+    "responseTime": "2.1 hrs",
+    "conversionRate": "12.3%",
+    "topCategory": "Beach",
+    "monthlyEarnings": [
+      { "month": "Jan", "earnings": "₱125,000", "bookings": 25 },
+      { "month": "Feb", "earnings": "₱165,000", "bookings": 32 },
+      { "month": "Mar", "earnings": "₱160,000", "bookings": 32 }
+    ]
+  }
+}

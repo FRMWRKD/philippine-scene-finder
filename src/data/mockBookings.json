@@ -1,0 +1,81 @@
+
+[
+  {
+    "id": 1,
+    "propertyId": 1,
+    "userId": 1,
+    "scoutId": 2,
+    "status": "confirmed",
+    "startDate": "2024-02-15",
+    "endDate": "2024-02-17",
+    "totalDays": 3,
+    "pricePerDay": 5000,
+    "totalAmount": 15000,
+    "bookingDate": "2024-01-20",
+    "purpose": "Commercial photoshoot for tourism campaign",
+    "crewSize": 12,
+    "specialRequests": "Need early morning access for sunrise shots",
+    "equipment": ["Cameras", "Lighting", "Drone"],
+    "paymentStatus": "paid",
+    "paymentMethod": "bank_transfer",
+    "contact": {
+      "phone": "+63 917 123 4567",
+      "email": "juan@example.com"
+    },
+    "cancellationPolicy": "flexible",
+    "insurance": true,
+    "notes": "Professional crew with experience in beach photography"
+  },
+  {
+    "id": 2,
+    "propertyId": 2,
+    "userId": 1,
+    "scoutId": 2,
+    "status": "pending",
+    "startDate": "2024-03-01",
+    "endDate": "2024-03-03",
+    "totalDays": 3,
+    "pricePerDay": 3500,
+    "totalAmount": 10500,
+    "bookingDate": "2024-01-25",
+    "purpose": "Documentary filming about mountain culture",
+    "crewSize": 8,
+    "specialRequests": "Local guide needed for cultural context",
+    "equipment": ["Cameras", "Audio equipment"],
+    "paymentStatus": "pending",
+    "paymentMethod": "gcash",
+    "contact": {
+      "phone": "+63 917 123 4567",
+      "email": "juan@example.com"
+    },
+    "cancellationPolicy": "moderate",
+    "insurance": false,
+    "notes": "Documentary crew focusing on indigenous culture"
+  },
+  {
+    "id": 3,
+    "propertyId": 3,
+    "userId": 2,
+    "scoutId": 3,
+    "status": "completed",
+    "startDate": "2024-01-10",
+    "endDate": "2024-01-12",
+    "totalDays": 3,
+    "pricePerDay": 7000,
+    "totalAmount": 21000,
+    "bookingDate": "2023-12-20",
+    "purpose": "Corporate video production",
+    "crewSize": 15,
+    "specialRequests": "Need conference room setup",
+    "equipment": ["Professional cameras", "Lighting setup", "Audio"],
+    "paymentStatus": "paid",
+    "paymentMethod": "bank_transfer",
+    "contact": {
+      "phone": "+63 918 987 6543",
+      "email": "maria@example.com"
+    },
+    "cancellationPolicy": "strict",
+    "insurance": true,
+    "notes": "High-end corporate production with full crew"
+  }
+]

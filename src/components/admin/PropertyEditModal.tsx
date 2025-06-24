@@ -10,35 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageGallery from "./ImageGallery";
-
-interface PropertyImage {
-  id: number;
-  url: string;
-  title: string;
-  description: string;
-  alt: string;
-  category: string;
-  lighting: string;
-  season: string;
-  weather: string;
-  colors: string[];
-  metaTags: string[];
-  isPrimary: boolean;
-}
-
-interface Property {
-  id: number;
-  name: string;
-  location: string;
-  category: string;
-  price: string;
-  status: string;
-  description: string;
-  features: string[];
-  tags: string[];
-  amenities: string[];
-  images: PropertyImage[];
-}
+import { Property, PropertyImage } from "@/services/mockDataService";
 
 interface PropertyEditModalProps {
   property: Property | null;
@@ -78,6 +50,38 @@ const PropertyEditModal = ({ property, isOpen, onClose, onSave, onAddImage, onUp
     setFormData(prev => ({
       ...prev,
       features: (prev.features || property?.features || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const addTag = () => {
+    if (!newTag.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      tags: [...(prev.tags || property?.tags || []), newTag.trim()]
+    }));
+    setNewTag("");
+  };
+
+  const removeTag = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: (prev.tags || property?.tags || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const addAmenity = () => {
+    if (!newAmenity.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      amenities: [...(prev.amenities || property?.amenities || []), newAmenity.trim()]
+    }));
+    setNewAmenity("");
+  };
+
+  const removeAmenity = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      amenities: (prev.amenities || property?.amenities || []).filter((_, i) => i !== index)
     }));
   };
 
@@ -175,6 +179,58 @@ const PropertyEditModal = ({ property, isOpen, onClose, onSave, onAddImage, onUp
                     <X
                       className="h-3 w-3 cursor-pointer hover:text-red-500"
                       onClick={() => removeFeature(index)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Tags</label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  placeholder="Add tag"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && addTag()}
+                />
+                <Button size="sm" onClick={addTag}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {currentTags.map((tag, index) => (
+                  <Badge key={index} variant="outline" className="flex items-center gap-1">
+                    {tag}
+                    <X
+                      className="h-3 w-3 cursor-pointer hover:text-red-500"
+                      onClick={() => removeTag(index)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Amenities</label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  placeholder="Add amenity"
+                  value={newAmenity}
+                  onChange={(e) => setNewAmenity(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && addAmenity()}
+                />
+                <Button size="sm" onClick={addAmenity}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {currentAmenities.map((amenity, index) => (
+                  <Badge key={index} variant="default" className="flex items-center gap-1">
+                    {amenity}
+                    <X
+                      className="h-3 w-3 cursor-pointer hover:text-red-500"
+                      onClick={() => removeAmenity(index)}
                     />
                   </Badge>
                 ))}
