@@ -174,7 +174,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
                         {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 z-[60] bg-white" align="start">
                       <CalendarComponent
                         mode="single"
                         selected={selectedDate}
