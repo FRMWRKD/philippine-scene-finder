@@ -6,7 +6,7 @@ export const mockLocations = mockDataService.getProperties().map(property => ({
   id: property.id.toString(),
   title: property.name,
   heroImage: property.images[0]?.url || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop",
-  gallery: property.images.map(img => img.url),
+  gallery: property.images.slice(1).map(img => img.url),
   tags: property.tags,
   price: parseInt(property.price.replace(/[^\d]/g, '')),
   location: property.location,
@@ -19,6 +19,9 @@ export const mockLocations = mockDataService.getProperties().map(property => ({
     parking: property.metadata.parking
   }
 }));
+
+// Debug log to check data
+console.log('Mock locations:', mockLocations);
 
 // Export the service for direct access
 export { default as mockDataService } from '../services/mockDataService';

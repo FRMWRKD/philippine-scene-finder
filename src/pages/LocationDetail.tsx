@@ -163,9 +163,9 @@ const LocationDetail = () => {
         </div>
       </div>
 
-      {/* Image Gallery */}
+      {/* Hero Image - Reduced height */}
       <div className="relative">
-        <div className="aspect-[16/9] md:aspect-[5/2] bg-gray-100">
+        <div className="aspect-[16/9] md:aspect-[3/1] bg-gray-100">
           <img
             src={allImages[currentImageIndex]}
             alt={location.title}
@@ -221,9 +221,9 @@ const LocationDetail = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Content - 3 columns */}
+          <div className="lg:col-span-3">
             {/* Title & Location */}
             <div className="mb-8">
               <div className="flex items-center gap-2 text-gray-600 mb-2">
@@ -250,25 +250,6 @@ const LocationDetail = () => {
               <p className="text-gray-700 text-lg leading-relaxed mb-6">
                 {locationDetails.description}
               </p>
-
-              {/* Clickable Tags */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Tag className="h-5 w-5" />
-                  Tags & Categories
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {location.tags.map((tag, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleTagClick(tag)}
-                      className="px-4 py-2 bg-coral-50 text-coral-700 rounded-full text-sm font-medium hover:bg-coral-100 transition-colors border border-coral-200"
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Technical Specifications */}
@@ -394,9 +375,28 @@ const LocationDetail = () => {
             )}
           </div>
 
-          {/* Booking Sidebar */}
+          {/* Right Sidebar - 1 column */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
+              {/* Tags & Categories - Moved to right sidebar */}
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-xl">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Tag className="h-5 w-5" />
+                  Tags & Categories
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {location.tags.map((tag, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleTagClick(tag)}
+                      className="px-3 py-2 bg-coral-50 text-coral-700 rounded-full text-sm font-medium hover:bg-coral-100 transition-colors border border-coral-200"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Booking Card */}
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-shadow">
                 <div className="mb-6">
