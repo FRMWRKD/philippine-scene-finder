@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { MapPin, Map } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -39,6 +38,8 @@ const Index = () => {
 
   const filteredLocations = useMemo(() => {
     console.log('Filtering locations...', mockLocations.length, 'total locations');
+    console.log('Current filters:', { searchTerm, selectedFilters, priceRange, currentLocation });
+    
     return mockLocations.filter((location) => {
       const matchesSearch = !searchTerm || location.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         location.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -49,7 +50,20 @@ const Index = () => {
       );
 
       const matchesPrice = location.price >= priceRange[0] && location.price <= priceRange[1];
-      const matchesLocation = location.location.toLowerCase().includes(currentLocation.toLowerCase());
+      
+      // More flexible location matching - if "Metro Manila" is selected, show all locations
+      // Otherwise, check if the location contains the search term
+      const matchesLocation = currentLocation === "Metro Manila" || 
+        !currentLocation.trim() || 
+        location.location.toLowerCase().includes(currentLocation.toLowerCase());
+
+      console.log(`Location ${location.title}:`, {
+        matchesSearch,
+        matchesFilters,
+        matchesPrice,
+        matchesLocation,
+        passed: matchesSearch && matchesFilters && matchesPrice && matchesLocation
+      });
 
       return matchesSearch && matchesFilters && matchesPrice && matchesLocation;
     });
@@ -107,7 +121,9 @@ const Index = () => {
 
       const matchesPrice = imageData.location.price >= priceRange[0] && imageData.location.price <= priceRange[1];
       
-      const matchesLocation = imageData.location.location.toLowerCase().includes(currentLocation.toLowerCase());
+      const matchesLocation = currentLocation === "Metro Manila" || 
+        !currentLocation.trim() || 
+        imageData.location.location.toLowerCase().includes(currentLocation.toLowerCase());
 
       return matchesSearch && matchesFilters && matchesPrice && matchesLocation;
     });
@@ -287,6 +303,7 @@ const Index = () => {
                   setSelectedFilters([]);
                   setSearchTerm("");
                   setPriceRange([0, 50000]);
+                  setCurrentLocation("Metro Manila");
                   setShowFilters(false);
                   const newSearchParams = new URLSearchParams();
                   setSearchParams(newSearchParams);
