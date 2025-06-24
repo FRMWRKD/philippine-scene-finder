@@ -6,12 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, MapPin, Star, Heart, Settings, User, CreditCard, Eye, MessageSquare, Bookmark } from "lucide-react";
+import { Calendar, MapPin, Star, Heart, Settings, User, CreditCard, Eye, MessageSquare, Bookmark, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import mockDataService, { Property, User as UserType, Booking } from "@/services/mockDataService";
 
 const UserDashboard = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [userBookings, setUserBookings] = useState<Booking[]>([]);
   const [savedProperties, setSavedProperties] = useState<Property[]>([]);
@@ -23,26 +25,37 @@ const UserDashboard = () => {
     if (user) {
       setCurrentUser(user);
       setUserBookings(mockDataService.getBookingsByUser(1));
-      
-      // Mock saved properties - in real app this would be stored in user preferences
-      const savedIds = [1, 2]; // Mock saved property IDs
-      setSavedProperties(allProperties.filter(p => savedIds.includes(p.id)));
+      setSavedProperties(mockDataService.getUserSavedProperties(1));
     }
-  }, [allProperties]);
+  }, []);
 
   const toggleSaveProperty = (propertyId: number) => {
     const property = allProperties.find(p => p.id === propertyId);
-    if (!property) return;
+    if (!property || !currentUser) return;
 
-    const isSaved = savedProperties.some(p => p.id === propertyId);
+    const isSaved = mockDataService.isPropertySavedByUser(currentUser.id, propertyId);
     
     if (isSaved) {
+      mockDataService.unsavePropertyForUser(currentUser.id, propertyId);
       setSavedProperties(prev => prev.filter(p => p.id !== propertyId));
       toast({ title: "Property Removed", description: `Removed ${property.name} from saved properties.` });
     } else {
+      mockDataService.savePropertyForUser(currentUser.id, propertyId);
       setSavedProperties(prev => [...prev, property]);
       toast({ title: "Property Saved", description: `Added ${property.name} to saved properties.` });
     }
+  };
+
+  const handleViewProperty = (propertyId: number) => {
+    navigate(`/location/${propertyId}`);
+  };
+
+  const handleViewImages = (propertyId: number) => {
+    navigate(`/image/${propertyId}/0`);
+  };
+
+  const handleBrowseLocations = () => {
+    navigate('/');
   };
 
   if (!currentUser) {
@@ -149,27 +162,49 @@ const UserDashboard = () => {
             </CardHeader>
             <CardContent>
               {userBookings.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No bookings yet. Start exploring properties!</p>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground mb-4">No bookings yet. Start exploring properties!</p>
+                  <Button onClick={handleBrowseLocations} className="bg-coral-500 hover:bg-coral-600">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Browse Locations
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-4">
                   {userBookings.map((booking) => {
                     const property = allProperties.find(p => p.id === booking.propertyId);
                     return (
-                      <Card key={booking.id}>
+                      <Card key={booking.id} className="cursor-pointer hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-semibold">{property?.name || "Unknown Property"}</h4>
-                              <p className="text-sm text-muted-foreground">{property?.location}</p>
+                            <div className="flex-1">
+                              <h4 className="font-semibold hover:text-coral-600 transition-colors">
+                                {property?.name || "Unknown Property"}
+                              </h4>
+                              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {property?.location}
+                              </p>
                               <div className="flex items-center gap-4 mt-2 text-sm">
                                 <span>{new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}</span>
                                 <span>{booking.totalDays} days</span>
                                 <span className="font-semibold">₱{booking.totalAmount.toLocaleString()}</span>
                               </div>
                             </div>
-                            <Badge variant={booking.status === 'confirmed' ? 'default' : booking.status === 'completed' ? 'secondary' : 'outline'}>
-                              {booking.status}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={booking.status === 'confirmed' ? 'default' : booking.status === 'completed' ? 'secondary' : 'outline'}>
+                                {booking.status}
+                              </Badge>
+                              {property && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleViewProperty(property.id)}
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -184,33 +219,69 @@ const UserDashboard = () => {
         <TabsContent value="saved" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Saved Properties</CardTitle>
-              <CardDescription>Properties you've saved for later</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Saved Properties</CardTitle>
+                  <CardDescription>Properties you've saved for later</CardDescription>
+                </div>
+                <Button onClick={handleBrowseLocations} variant="outline">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Browse More
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {savedProperties.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No saved properties yet. Browse and save properties you're interested in!</p>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground mb-4">No saved properties yet. Browse and save properties you're interested in!</p>
+                  <Button onClick={handleBrowseLocations} className="bg-coral-500 hover:bg-coral-600">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Browse Locations
+                  </Button>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {savedProperties.map((property) => (
-                    <Card key={property.id}>
+                    <Card key={property.id} className="group hover:shadow-lg transition-shadow">
                       <div className="relative">
                         <img 
                           src={property.images[0]?.url || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop"} 
                           alt={property.name} 
-                          className="w-full h-48 object-cover rounded-t-lg"
+                          className="w-full h-48 object-cover rounded-t-lg cursor-pointer"
+                          onClick={() => handleViewProperty(property.id)}
                         />
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="absolute top-2 right-2"
-                          onClick={() => toggleSaveProperty(property.id)}
-                        >
-                          <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-                        </Button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="opacity-90 hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewImages(property.id);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="opacity-90 hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSaveProperty(property.id);
+                            }}
+                          >
+                            <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                          </Button>
+                        </div>
                       </div>
                       <CardContent className="p-4">
-                        <h4 className="font-semibold">{property.name}</h4>
+                        <h4 
+                          className="font-semibold cursor-pointer hover:text-coral-600 transition-colors"
+                          onClick={() => handleViewProperty(property.id)}
+                        >
+                          {property.name}
+                        </h4>
                         <p className="text-sm text-muted-foreground flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {property.location}
@@ -227,6 +298,24 @@ const UserDashboard = () => {
                             <Badge key={index} variant="outline" className="text-xs">{tag}</Badge>
                           ))}
                         </div>
+                        <div className="flex gap-2 mt-3">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={() => handleViewProperty(property.id)}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleViewImages(property.id)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -239,30 +328,60 @@ const UserDashboard = () => {
         <TabsContent value="browse" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Browse Properties</CardTitle>
-              <CardDescription>Discover amazing filming and photography locations</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Browse Properties</CardTitle>
+                  <CardDescription>Discover amazing filming and photography locations</CardDescription>
+                </div>
+                <Button onClick={handleBrowseLocations} className="bg-coral-500 hover:bg-coral-600">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  View All Locations
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {allProperties.map((property) => (
-                  <Card key={property.id}>
+                {allProperties.slice(0, 6).map((property) => (
+                  <Card key={property.id} className="group hover:shadow-lg transition-shadow">
                     <div className="relative">
                       <img 
                         src={property.images[0]?.url || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop"} 
                         alt={property.name} 
-                        className="w-full h-48 object-cover rounded-t-lg"
+                        className="w-full h-48 object-cover rounded-t-lg cursor-pointer"
+                        onClick={() => handleViewProperty(property.id)}
                       />
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="absolute top-2 right-2"
-                        onClick={() => toggleSaveProperty(property.id)}
-                      >
-                        <Heart className={`h-4 w-4 ${savedProperties.some(p => p.id === property.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                      </Button>
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="opacity-90 hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewImages(property.id);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="opacity-90 hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSaveProperty(property.id);
+                          }}
+                        >
+                          <Heart className={`h-4 w-4 ${savedProperties.some(p => p.id === property.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                        </Button>
+                      </div>
                     </div>
                     <CardContent className="p-4">
-                      <h4 className="font-semibold">{property.name}</h4>
+                      <h4 
+                        className="font-semibold cursor-pointer hover:text-coral-600 transition-colors"
+                        onClick={() => handleViewProperty(property.id)}
+                      >
+                        {property.name}
+                      </h4>
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         {property.location}
@@ -278,6 +397,24 @@ const UserDashboard = () => {
                         {property.tags.slice(0, 2).map((tag, index) => (
                           <Badge key={index} variant="outline" className="text-xs">{tag}</Badge>
                         ))}
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => handleViewProperty(property.id)}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleViewImages(property.id)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
