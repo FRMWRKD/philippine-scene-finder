@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -51,6 +51,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-md">
+          <DialogTitle className="sr-only">Booking Confirmation</DialogTitle>
           <div className="text-center space-y-6">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle className="h-8 w-8 text-green-600" />
@@ -83,6 +84,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+        <DialogTitle className="sr-only">Book Location - {location.title}</DialogTitle>
         {/* Header */}
         <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
           <div>
@@ -174,14 +176,13 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
                         {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[60] bg-white" align="start">
+                    <PopoverContent className="w-auto p-0 z-[100] bg-white border shadow-lg" align="start">
                       <CalendarComponent
                         mode="single"
                         selected={selectedDate}
                         onSelect={setSelectedDate}
                         disabled={(date) => date < new Date()}
                         initialFocus
-                        className="pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
