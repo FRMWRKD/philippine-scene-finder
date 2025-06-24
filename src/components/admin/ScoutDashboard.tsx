@@ -119,7 +119,22 @@ const ScoutDashboard = () => {
       lastUpdated: "2024-01-15",
       views: 2847,
       revenue: "₱780,000",
-      images: [],
+      images: [
+        {
+          id: 1,
+          url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
+          title: "Main Beach View",
+          description: "Stunning beachfront view with crystal clear waters",
+          alt: "Boracay beach resort main view",
+          category: "exterior",
+          lighting: "natural",
+          season: "summer",
+          weather: "sunny",
+          colors: ["blue", "white", "sand"],
+          metaTags: ["beach", "resort", "tropical"],
+          isPrimary: true
+        }
+      ],
       features: ["Beachfront Access", "Sunset Views", "Private Beach", "Water Sports", "Restaurant"],
       tags: ["Beach", "Sunset", "Water", "Tropical", "Resort"],
       amenities: ["Parking", "WiFi", "Restrooms", "Catering Available", "Equipment Rental"],
@@ -138,13 +153,27 @@ const ScoutDashboard = () => {
       lastUpdated: "2024-01-10",
       views: 1453,
       revenue: "₱311,500",
-      images: [],
+      images: [
+        {
+          id: 2,
+          url: "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd",
+          title: "Mountain Vista",
+          description: "Panoramic mountain view with pine trees",
+          alt: "Baguio mountain view",
+          category: "landscape",
+          lighting: "natural",
+          season: "all",
+          weather: "clear",
+          colors: ["green", "blue", "brown"],
+          metaTags: ["mountain", "nature", "pine"],
+          isPrimary: true
+        }
+      ],
       features: ["Mountain Views", "Cool Climate", "Pine Trees", "Hiking Trails"],
       tags: ["Mountain", "Nature", "Cool", "Pine", "Hiking"],
       amenities: ["Parking", "Guide Available", "Camping Allowed"],
       attachedMovies: [],
     },
-    // Add more mock data to simulate thousands of properties
   ]);
 
   const [scoutStats, setScoutStats] = useState({

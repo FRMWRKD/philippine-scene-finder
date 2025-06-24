@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageGallery from "./ImageGallery";
+
+interface PropertyImage {
+  id: number;
+  url: string;
+  title: string;
+  description: string;
+  alt: string;
+  category: string;
+  lighting: string;
+  season: string;
+  weather: string;
+  colors: string[];
+  metaTags: string[];
+  isPrimary: boolean;
+}
 
 interface Property {
   id: number;
@@ -22,13 +38,6 @@ interface Property {
   tags: string[];
   amenities: string[];
   images: PropertyImage[];
-}
-
-interface PropertyImage {
-  id: number;
-  propertyId: number;
-  url: string;
-  alt: string;
 }
 
 interface PropertyEditModalProps {
