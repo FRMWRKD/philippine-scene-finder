@@ -85,6 +85,9 @@ export interface User {
   profile: Profile;
   stats: Stats;
   savedProperties: number[];
+  role?: string;
+  preferences?: any;
+  scoutProfile?: any;
 }
 
 export interface Profile {
@@ -97,6 +100,11 @@ export interface Stats {
   totalBookings: number;
   reviewsGiven: number;
   totalSpent: string;
+  // Optional scout-specific stats
+  propertiesListed?: number;
+  totalEarnings?: string;
+  averageRating?: number;
+  responseRate?: string;
 }
 
 export interface Booking {
@@ -134,10 +142,29 @@ class MockDataService {
     // Load properties from JSON
     this.properties = mockProperties;
     
-    // Load users and ensure they have savedProperties
-    this.users = mockUsers.map(user => ({
-      ...user,
-      savedProperties: user.savedProperties || []
+    // Load users and normalize their data structure
+    this.users = mockUsers.map((user: any) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      joinDate: user.joinDate,
+      isVerified: user.isVerified,
+      profile: user.profile,
+      savedProperties: user.savedProperties || [],
+      role: user.role,
+      preferences: user.preferences,
+      scoutProfile: user.scoutProfile,
+      stats: {
+        totalBookings: user.stats.totalBookings || 0,
+        reviewsGiven: user.stats.reviewsGiven || 0,
+        totalSpent: user.stats.totalSpent || "₱0",
+        // Scout-specific stats (optional)
+        propertiesListed: user.stats.propertiesListed,
+        totalEarnings: user.stats.totalEarnings,
+        averageRating: user.stats.averageRating,
+        responseRate: user.stats.responseRate
+      }
     }));
     
     this.bookings = mockBookings;
