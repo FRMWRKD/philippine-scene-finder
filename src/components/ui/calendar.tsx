@@ -36,10 +36,10 @@ function Calendar({
     }
     
     // If using mode="single" and onSelect is provided, call it
-    if (props.mode === 'single' && props.onSelect) {
+    if (props.mode === 'single' && 'onSelect' in props && props.onSelect) {
       props.onSelect(day);
     }
-  }, [onDayClick, props.mode, props.onSelect]);
+  }, [onDayClick, props]);
 
   return (
     <DayPicker
