@@ -18,26 +18,22 @@ function Calendar({
   ...props
 }: CalendarProps) {
   const handleDayClick: DayClickEventHandler = React.useCallback((day, modifiers, e) => {
-    console.log('Day clicked:', day, 'Modifiers:', modifiers);
+    console.log('Calendar: Day clicked:', day, 'Modifiers:', modifiers);
     
-    // Prevent default behavior
     e.preventDefault();
     e.stopPropagation();
     
-    // Don't process disabled days
     if (modifiers.disabled) {
-      console.log('Day is disabled, ignoring click');
+      console.log('Calendar: Day is disabled, ignoring click');
       return;
     }
     
-    // Call the provided handler
     if (onDayClick) {
       onDayClick(day, modifiers, e);
     }
     
-    // If using mode="single" and onSelect is provided, call it with proper signature
+    // Handle single mode selection
     if (props.mode === 'single' && 'onSelect' in props && props.onSelect) {
-      // For single mode, onSelect expects (date, selectedDate, modifiers, e)
       props.onSelect(day, day, modifiers, e);
     }
   }, [onDayClick, props]);
@@ -61,12 +57,10 @@ function Calendar({
         nav_button_next: "absolute right-1",
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
         row: "flex w-full mt-2",
         cell: cn(
-          "h-9 w-9 text-center text-sm p-0 relative",
-          "pointer-events-auto cursor-pointer z-10",
+          "h-9 w-9 text-center text-sm p-0 relative pointer-events-auto cursor-pointer z-10",
           "[&:has([aria-selected].day-range-end)]:rounded-r-md",
           "[&:has([aria-selected].day-outside)]:bg-accent/50",
           "[&:has([aria-selected])]:bg-accent",
@@ -76,22 +70,16 @@ function Calendar({
         ),
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
-          "pointer-events-auto cursor-pointer z-10",
-          "hover:bg-accent hover:text-accent-foreground",
-          "focus:bg-accent focus:text-accent-foreground focus:outline-none",
-          "transition-colors duration-200",
-          "active:bg-accent active:text-accent-foreground"
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 pointer-events-auto cursor-pointer z-10",
+          "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none",
+          "transition-colors duration-200 active:bg-accent active:text-accent-foreground"
         ),
         day_range_end: "day-range-end",
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
         day_today: "bg-accent text-accent-foreground font-semibold",
-        day_outside:
-          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+        day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
         day_disabled: "text-muted-foreground opacity-50 cursor-not-allowed pointer-events-none",
-        day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
         ...classNames,
       }}

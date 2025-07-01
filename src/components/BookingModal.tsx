@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { validateBookingForm, sanitizeInput } from "@/utils/validation";
@@ -55,7 +55,6 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
     clearError();
     setValidationErrors([]);
 
-    // Validate form
     const validation = validateBookingForm({
       selectedDate,
       timeSlot,
@@ -67,16 +66,8 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
       return;
     }
 
-    // Simulate booking submission with loading state
     const result = await withLoading(async () => {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Simulate potential error (uncomment to test error handling)
-      // if (Math.random() > 0.8) {
-      //   throw new Error('Booking failed. Please try again.');
-      // }
-      
       return { success: true };
     });
 
@@ -94,6 +85,9 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-md">
           <DialogTitle className="sr-only">Booking Confirmation</DialogTitle>
+          <DialogDescription className="sr-only">
+            Your booking request has been successfully sent and is being processed.
+          </DialogDescription>
           <div className="text-center space-y-6">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle className="h-8 w-8 text-green-600" />
@@ -127,6 +121,10 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-0">
         <DialogTitle className="sr-only">Book Location - {location.title}</DialogTitle>
+        <DialogDescription className="sr-only">
+          Complete your booking for {location.title}. Choose between virtual tour or on-site visit, select your preferred date and time, and provide project details.
+        </DialogDescription>
+        
         {/* Header */}
         <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center z-10">
           <div>
