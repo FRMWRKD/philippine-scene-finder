@@ -35,9 +35,10 @@ function Calendar({
       onDayClick(day, modifiers, e);
     }
     
-    // If using mode="single" and onSelect is provided, call it
+    // If using mode="single" and onSelect is provided, call it with proper signature
     if (props.mode === 'single' && 'onSelect' in props && props.onSelect) {
-      props.onSelect(day);
+      // For single mode, onSelect expects (date, selectedDate, modifiers, e)
+      props.onSelect(day, day, modifiers, e);
     }
   }, [onDayClick, props]);
 
