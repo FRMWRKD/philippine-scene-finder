@@ -1,17 +1,16 @@
 
 import { useState } from "react";
-import { X, Calendar, Clock, MapPin, Users, Video, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { X, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import { validateBookingForm, sanitizeInput } from "@/utils/validation";
 import { useLoading } from "@/hooks/useLoading";
+import BookingTypeSelector from "./booking/BookingTypeSelector";
+import DateTimeSelector from "./booking/DateTimeSelector";
+import OnSiteOptions from "./booking/OnSiteOptions";
+import BookingConfirmation from "./booking/BookingConfirmation";
 
 interface Location {
   id: string;
@@ -37,11 +36,6 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   
   const { isLoading, error, withLoading, clearError } = useLoading();
-
-  const timeSlots = [
-    "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-    "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"
-  ];
 
   const handleDateSelect = (date: Date | undefined) => {
     console.log('Date selected:', date);
@@ -82,38 +76,15 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
 
   if (step === "confirmation") {
     return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-md">
-          <DialogTitle className="sr-only">Booking Confirmation</DialogTitle>
-          <DialogDescription className="sr-only">
-            Your booking request has been successfully sent and is being processed.
-          </DialogDescription>
-          <div className="text-center space-y-6">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Booking Request Sent!</h2>
-              <p className="text-gray-600">
-                Your {bookingType === "virtual" ? "virtual tour" : "on-site visit"} request has been sent to the location scout. 
-                You'll receive a confirmation within 24 hours.
-              </p>
-            </div>
-            <Card>
-              <CardContent className="p-4 text-left space-y-2 text-sm">
-                <div><strong>Location:</strong> {location.title}</div>
-                <div><strong>Date:</strong> {selectedDate?.toLocaleDateString()}</div>
-                <div><strong>Time:</strong> {timeSlot}</div>
-                <div><strong>Type:</strong> {bookingType === "virtual" ? "Virtual Tour" : "On-Site Visit"}</div>
-                <div><strong>Total:</strong> ₱{totalCost.toLocaleString()}</div>
-              </CardContent>
-            </Card>
-            <Button onClick={onClose} className="w-full bg-coral-500 hover:bg-coral-600">
-              Done
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <BookingConfirmation
+        isOpen={isOpen}
+        onClose={onClose}
+        location={location}
+        selectedDate={selectedDate}
+        timeSlot={timeSlot}
+        bookingType={bookingType}
+        totalCost={totalCost}
+      />
     );
   }
 
@@ -157,161 +128,27 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
             </Card>
           )}
 
-          {/* Booking Type */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Choose Your Experience</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card 
-                className={cn(
-                  "cursor-pointer transition-all hover:shadow-md",
-                  bookingType === "virtual" ? "ring-2 ring-coral-500 bg-coral-50" : "hover:border-coral-300"
-                )}
-                onClick={() => setBookingType("virtual")}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-coral-100 rounded-xl flex items-center justify-center">
-                      <Video className="h-6 w-6 text-coral-600" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-gray-900 text-lg">Virtual Tour</div>
-                      <div className="text-sm text-gray-500">Live video walkthrough</div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    30-minute live video walkthrough with the scout
-                  </p>
-                  <div className="text-2xl font-bold text-coral-600">₱500</div>
-                </CardContent>
-              </Card>
+          <BookingTypeSelector
+            bookingType={bookingType}
+            onBookingTypeChange={setBookingType}
+            location={location}
+          />
 
-              <Card 
-                className={cn(
-                  "cursor-pointer transition-all hover:shadow-md",
-                  bookingType === "onsite" ? "ring-2 ring-coral-500 bg-coral-50" : "hover:border-coral-300"
-                )}
-                onClick={() => setBookingType("onsite")}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-coral-100 rounded-xl flex items-center justify-center">
-                      <MapPin className="h-6 w-6 text-coral-600" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-gray-900 text-lg">On-Site Visit</div>
-                      <div className="text-sm text-gray-500">Physical scouting</div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Physical location scouting with professional guidance
-                  </p>
-                  <div className="text-2xl font-bold text-coral-600">
-                    ₱{(location.price / 8).toLocaleString()}/hr
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <DateTimeSelector
+            selectedDate={selectedDate}
+            onDateSelect={handleDateSelect}
+            timeSlot={timeSlot}
+            onTimeSlotChange={setTimeSlot}
+          />
 
-          {/* Date and Time Selection */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Date Selection */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Select Date
-              </h3>
-              <Card>
-                <CardContent className="p-4">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !selectedDate && "text-muted-foreground"
-                        )}
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={handleDateSelect}
-                        disabled={(date) => {
-                          const today = new Date();
-                          today.setHours(0, 0, 0, 0);
-                          return date < today;
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Time and Options */}
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Preferred Time
-                </h3>
-                <Select value={timeSlot} onValueChange={setTimeSlot}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeSlots.map(time => (
-                      <SelectItem key={time} value={time}>{time}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {bookingType === "onsite" && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Duration
-                    </label>
-                    <Select value={duration} onValueChange={setDuration}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="2">2 hours</SelectItem>
-                        <SelectItem value="4">4 hours</SelectItem>
-                        <SelectItem value="8">Full day</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      Crew Size
-                    </label>
-                    <Select value={crewSize} onValueChange={setCrewSize}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1-2">1-2 people</SelectItem>
-                        <SelectItem value="3-5">3-5 people</SelectItem>
-                        <SelectItem value="6-10">6-10 people</SelectItem>
-                        <SelectItem value="10+">10+ people</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          {bookingType === "onsite" && (
+            <OnSiteOptions
+              duration={duration}
+              onDurationChange={setDuration}
+              crewSize={crewSize}
+              onCrewSizeChange={setCrewSize}
+            />
+          )}
 
           {/* Project Description */}
           <div className="space-y-4">
