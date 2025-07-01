@@ -1,9 +1,9 @@
 
 import mockDataService from '../services/mockDataService';
 
-// Export the original mockLocations for backward compatibility
+// Export the original mockLocations with consistent string IDs for backward compatibility
 export const mockLocations = mockDataService.getProperties().map(property => ({
-  id: property.id.toString(),
+  id: property.id.toString(), // Convert to string for consistency
   title: property.name,
   heroImage: property.images[0]?.url || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop",
   gallery: property.images.slice(1).map(img => img.url),

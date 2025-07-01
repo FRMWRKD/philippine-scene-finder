@@ -139,19 +139,22 @@ class MockDataService {
   }
 
   private loadMockData() {
-    // Load properties from JSON
-    this.properties = mockProperties;
+    // Load properties from JSON - ensure consistent ID types
+    this.properties = mockProperties.map(property => ({
+      ...property,
+      id: Number(property.id) // Ensure IDs are numbers
+    }));
     
     // Load users and normalize their data structure
     this.users = mockUsers.map((user: any) => ({
-      id: user.id,
+      id: Number(user.id), // Ensure IDs are numbers
       name: user.name,
       email: user.email,
       avatar: user.avatar,
       joinDate: user.joinDate,
       isVerified: user.isVerified,
       profile: user.profile,
-      savedProperties: user.savedProperties || [],
+      savedProperties: (user.savedProperties || []).map((id: any) => Number(id)), // Ensure saved property IDs are numbers
       role: user.role,
       preferences: user.preferences,
       scoutProfile: user.scoutProfile,
@@ -167,15 +170,21 @@ class MockDataService {
       }
     }));
     
-    this.bookings = mockBookings;
+    // Ensure booking IDs are consistent
+    this.bookings = mockBookings.map(booking => ({
+      ...booking,
+      id: Number(booking.id),
+      propertyId: Number(booking.propertyId),
+      userId: Number(booking.userId)
+    }));
     
     // Transform messages to match our simple Message interface
     this.messages = mockMessages.flatMap(conversation => 
       conversation.messages.map(msg => ({
-        id: msg.id,
-        senderId: msg.senderId,
-        receiverId: msg.receiverId,
-        propertyId: conversation.propertyId,
+        id: Number(msg.id),
+        senderId: Number(msg.senderId),
+        receiverId: Number(msg.receiverId),
+        propertyId: Number(conversation.propertyId),
         timestamp: msg.timestamp,
         content: msg.content
       }))

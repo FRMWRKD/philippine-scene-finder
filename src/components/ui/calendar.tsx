@@ -1,23 +1,51 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, DayClickEventHandler } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  onDayClick?: DayClickEventHandler;
+};
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  onDayClick,
   ...props
 }: CalendarProps) {
+  const handleDayClick: DayClickEventHandler = React.useCallback((day, modifiers, e) => {
+    console.log('Day clicked:', day, 'Modifiers:', modifiers);
+    
+    // Prevent default behavior
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Don't process disabled days
+    if (modifiers.disabled) {
+      console.log('Day is disabled, ignoring click');
+      return;
+    }
+    
+    // Call the provided handler
+    if (onDayClick) {
+      onDayClick(day, modifiers, e);
+    }
+    
+    // If using mode="single" and onSelect is provided, call it
+    if (props.mode === 'single' && props.onSelect) {
+      props.onSelect(day);
+    }
+  }, [onDayClick, props.mode, props.onSelect]);
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn("p-3 pointer-events-auto", className)}
+      onDayClick={handleDayClick}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
@@ -26,7 +54,7 @@ function Calendar({
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 pointer-events-auto"
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 pointer-events-auto z-10"
         ),
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
@@ -37,7 +65,7 @@ function Calendar({
         row: "flex w-full mt-2",
         cell: cn(
           "h-9 w-9 text-center text-sm p-0 relative",
-          "pointer-events-auto cursor-pointer",
+          "pointer-events-auto cursor-pointer z-10",
           "[&:has([aria-selected].day-range-end)]:rounded-r-md",
           "[&:has([aria-selected].day-outside)]:bg-accent/50",
           "[&:has([aria-selected])]:bg-accent",
@@ -48,10 +76,11 @@ function Calendar({
         day: cn(
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
-          "pointer-events-auto cursor-pointer",
+          "pointer-events-auto cursor-pointer z-10",
           "hover:bg-accent hover:text-accent-foreground",
           "focus:bg-accent focus:text-accent-foreground focus:outline-none",
-          "transition-colors duration-200"
+          "transition-colors duration-200",
+          "active:bg-accent active:text-accent-foreground"
         ),
         day_range_end: "day-range-end",
         day_selected:

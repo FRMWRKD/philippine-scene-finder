@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { X, Calendar, Clock, MapPin, Users, Video, CheckCircle } from "lucide-react";
+import { X, Calendar, Clock, MapPin, Users, Video, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { validateBookingForm, sanitizeInput } from "@/utils/validation";
+import { useLoading } from "@/hooks/useLoading";
 
 interface Location {
   id: string;
@@ -32,15 +34,55 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
   const [crewSize, setCrewSize] = useState("3-5");
   const [message, setMessage] = useState("");
   const [step, setStep] = useState<"booking" | "confirmation">("booking");
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  
+  const { isLoading, error, withLoading, clearError } = useLoading();
 
   const timeSlots = [
     "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
     "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleDateSelect = (date: Date | undefined) => {
+    console.log('Date selected:', date);
+    setSelectedDate(date);
+    clearError();
+    setValidationErrors([]);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep("confirmation");
+    clearError();
+    setValidationErrors([]);
+
+    // Validate form
+    const validation = validateBookingForm({
+      selectedDate,
+      timeSlot,
+      message: sanitizeInput(message)
+    });
+
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      return;
+    }
+
+    // Simulate booking submission with loading state
+    const result = await withLoading(async () => {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Simulate potential error (uncomment to test error handling)
+      // if (Math.random() > 0.8) {
+      //   throw new Error('Booking failed. Please try again.');
+      // }
+      
+      return { success: true };
+    });
+
+    if (result) {
+      setStep("confirmation");
+    }
   };
 
   const totalCost = bookingType === "virtual" 
@@ -97,6 +139,26 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          {/* Error Display */}
+          {(error || validationErrors.length > 0) && (
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-red-800 mb-1">Please fix the following errors:</h4>
+                    <ul className="text-sm text-red-700 space-y-1">
+                      {error && <li>{error}</li>}
+                      {validationErrors.map((err, index) => (
+                        <li key={index}>{err}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Booking Type */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Choose Your Experience</h3>
@@ -180,8 +242,12 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
                       <CalendarComponent
                         mode="single"
                         selected={selectedDate}
-                        onSelect={setSelectedDate}
-                        disabled={(date) => date < new Date()}
+                        onSelect={handleDateSelect}
+                        disabled={(date) => {
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          return date < today;
+                        }}
                         initialFocus
                       />
                     </PopoverContent>
@@ -258,7 +324,11 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
               rows={4}
               placeholder="Describe your project, specific requirements, or any questions for the scout..."
               className="resize-none"
+              maxLength={1000}
             />
+            <div className="text-sm text-gray-500 text-right">
+              {message.length}/1000 characters
+            </div>
           </div>
 
           {/* Cost Summary */}
@@ -281,10 +351,17 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
           {/* Submit Button */}
           <Button
             type="submit"
-            disabled={!selectedDate || !timeSlot}
-            className="w-full bg-coral-500 hover:bg-coral-600 text-lg py-6"
+            disabled={isLoading}
+            className="w-full bg-coral-500 hover:bg-coral-600 text-lg py-6 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {bookingType === "virtual" ? "Book Virtual Tour" : "Request On-Site Visit"}
+            {isLoading ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              bookingType === "virtual" ? "Book Virtual Tour" : "Request On-Site Visit"
+            )}
           </Button>
         </form>
       </DialogContent>
