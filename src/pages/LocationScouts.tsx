@@ -218,8 +218,18 @@ const LocationScouts = () => {
               >
                 Browse Locations
               </button>
-              <a href="#" className="text-gray-600 hover:text-coral-600 transition-colors">How it works</a>
-              <a href="#" className="text-gray-600 hover:text-coral-600 transition-colors">Support</a>
+              <button 
+                onClick={() => navigate("/how-it-works")}
+                className="text-gray-600 hover:text-coral-600 transition-colors"
+              >
+                How it works
+              </button>
+              <button 
+                onClick={() => navigate("/support")}
+                className="text-gray-600 hover:text-coral-600 transition-colors"
+              >
+                Support
+              </button>
               <div className="h-4 w-px bg-gray-300"></div>
               <button className="text-coral-600 hover:text-coral-700 font-medium transition-colors">
                 Sign In

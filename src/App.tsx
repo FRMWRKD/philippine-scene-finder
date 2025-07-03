@@ -15,6 +15,8 @@ import ScoutProfile from "./pages/ScoutProfile";
 import UploadLocation from "./pages/UploadLocation";
 import HowItWorks from "./pages/HowItWorks";
 import Support from "./pages/Support";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +49,8 @@ const App = () => (
                     <Route path="/upload" element={<UploadLocation />} />
                     <Route path="/how-it-works" element={<HowItWorks />} />
                     <Route path="/support" element={<Support />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/terms" element={<Terms />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>

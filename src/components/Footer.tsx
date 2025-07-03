@@ -66,18 +66,18 @@ const Footer = () => {
                 <Heart className="h-4 w-4" />
                 Support Center
               </Link>
-              <a href="#" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
+              <Link to="/?category=photography" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
                 Photography Locations
-              </a>
-              <a href="#" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
+              </Link>
+              <Link to="/?category=film" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
                 Film Locations
-              </a>
-              <a href="#" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
+              </Link>
+              <Link to="/?category=virtual" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
                 Virtual Tours
-              </a>
-              <a href="#" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
+              </Link>
+              <Link to="/support" className="block text-gray-300 hover:text-coral-400 transition-colors text-sm">
                 Permit Assistance
-              </a>
+              </Link>
             </div>
           </div>
 
