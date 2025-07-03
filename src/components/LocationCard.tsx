@@ -95,12 +95,14 @@ const LocationCard = ({ location }: LocationCardProps) => {
               <button
                 onClick={prevImage}
                 className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 hover:scale-110"
+                aria-label="Previous image"
               >
                 ‹
               </button>
               <button
                 onClick={nextImage}
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 hover:scale-110"
+                aria-label="Next image"
               >
                 ›
               </button>
@@ -127,6 +129,7 @@ const LocationCard = ({ location }: LocationCardProps) => {
           <button
             className="absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all hover:scale-110"
             onClick={handleLikeToggle}
+            aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
           >
             <svg
               className={`h-5 w-5 transition-colors ${isLiked ? 'text-coral-500 fill-current' : 'text-gray-600 hover:text-coral-500'}`}
@@ -225,6 +228,7 @@ const LocationCard = ({ location }: LocationCardProps) => {
             <button 
               className="flex-1 bg-coral-500 text-white py-2 px-4 rounded-xl font-medium hover:bg-coral-600 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
               onClick={handleBookNow}
+              aria-label={`Book ${location.title}`}
             >
               <Calendar className="h-4 w-4" />
               Book Now
@@ -232,6 +236,7 @@ const LocationCard = ({ location }: LocationCardProps) => {
             <button 
               className="bg-gray-100 text-gray-600 p-2 rounded-xl hover:bg-gray-200 transition-all duration-200 hover:text-coral-600 transform hover:scale-105"
               onClick={handleMessage}
+              aria-label={`Send message about ${location.title}`}
             >
               <MessageCircle className="h-4 w-4" />
             </button>

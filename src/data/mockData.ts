@@ -20,9 +20,7 @@ export const mockLocations = mockDataService.getProperties().map(property => ({
   }
 }));
 
-// Debug log to check data
-console.log('Mock locations loaded:', mockLocations.length, 'locations');
-console.log('Sample location:', mockLocations[0]);
+// Data loaded successfully
 
 // Export the service for direct access
 export { default as mockDataService } from '../services/mockDataService';
