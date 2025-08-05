@@ -168,7 +168,7 @@ const LocationDetail = () => {
         <div className="aspect-[16/9] md:aspect-[3/1] bg-gray-100">
           <img
             src={allImages[currentImageIndex]}
-            alt={location.title}
+            alt={`${location.title} - Main view ${currentImageIndex + 1} of ${allImages.length}`}
             className="w-full h-full object-cover cursor-pointer hover:brightness-110 transition-all"
             onClick={() => handleImageClick(currentImageIndex)}
           />

@@ -65,8 +65,7 @@ const UploadLocation = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log('Submitting location:', formData);
+    // Submit location data to backend
     navigate('/');
   };
 

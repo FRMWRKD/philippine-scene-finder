@@ -110,8 +110,8 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
         <div key={stepName} className="flex items-center">
           <div className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300",
-            step === stepName ? "bg-coral-500 text-white shadow-lg scale-110" :
-            ["type", "details"].indexOf(step) > index ? "bg-green-500 text-white" :
+            step === stepName ? "bg-primary text-primary-foreground shadow-lg scale-110" :
+            ["type", "details"].indexOf(step) > index ? "bg-green-500 text-primary-foreground" :
             "bg-gray-200 text-gray-500"
           )}>
             {["type", "details"].indexOf(step) > index ? (
@@ -148,20 +148,20 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
         <Card 
           className={cn(
             "cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 border-2 group",
-            bookingType === "virtual" ? "border-coral-500 bg-coral-50 shadow-lg" : "border-gray-200 hover:border-coral-300"
+            bookingType === "virtual" ? "border-primary bg-primary/5 shadow-lg" : "border-border hover:border-primary/50"
           )}
           onClick={() => setBookingType("virtual")}
         >
           <CardContent className="p-8 text-center">
             <div className={cn(
               "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300",
-              bookingType === "virtual" ? "bg-coral-500 text-white" : "bg-coral-100 text-coral-600 group-hover:bg-coral-200"
+              bookingType === "virtual" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary group-hover:bg-primary/20"
             )}>
               <Calendar className="h-10 w-10" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">Virtual Tour</h3>
             <p className="text-gray-600 mb-6 text-lg">Live 30-minute video walkthrough with professional scout</p>
-            <div className="text-4xl font-bold text-coral-600">₱500</div>
+            <div className="text-4xl font-bold text-primary">₱500</div>
             <p className="text-sm text-gray-500 mt-2">Fixed price</p>
           </CardContent>
         </Card>
@@ -169,20 +169,20 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
         <Card 
           className={cn(
             "cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 border-2 group",
-            bookingType === "onsite" ? "border-coral-500 bg-coral-50 shadow-lg" : "border-gray-200 hover:border-coral-300"
+            bookingType === "onsite" ? "border-primary bg-primary/5 shadow-lg" : "border-border hover:border-primary/50"
           )}
           onClick={() => setBookingType("onsite")}
         >
           <CardContent className="p-8 text-center">
             <div className={cn(
               "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300",
-              bookingType === "onsite" ? "bg-coral-500 text-white" : "bg-coral-100 text-coral-600 group-hover:bg-coral-200"
+              bookingType === "onsite" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary group-hover:bg-primary/20"
             )}>
               <MapPin className="h-10 w-10" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">On-Site Visit</h3>
             <p className="text-gray-600 mb-6 text-lg">Physical location scouting with professional guidance</p>
-            <div className="text-4xl font-bold text-coral-600">
+            <div className="text-4xl font-bold text-primary">
               ₱{(location.price / 8).toLocaleString()}/hr
             </div>
             <p className="text-sm text-gray-500 mt-2">Starting from 2 hours</p>
@@ -210,7 +210,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
                   className={cn(
                     "w-full justify-start text-left h-14 text-lg border-2 transition-all duration-200",
                     !selectedDate && "text-muted-foreground",
-                    errors.date ? "border-red-300 bg-red-50" : "border-gray-200 hover:border-coral-300"
+                    errors.date ? "border-red-300 bg-red-50" : "border-border hover:border-primary/50"
                   )}
                 >
                   <Calendar className="mr-3 h-5 w-5" />
@@ -239,7 +239,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
             <Select value={timeSlot} onValueChange={setTimeSlot}>
               <SelectTrigger className={cn(
                 "h-14 text-lg border-2 transition-all duration-200",
-                errors.time ? "border-red-300 bg-red-50" : "border-gray-200 hover:border-coral-300"
+                errors.time ? "border-red-300 bg-red-50" : "border-border hover:border-primary/50"
               )}>
                 <Clock className="mr-2 h-5 w-5" />
                 <SelectValue placeholder="Select time slot" />
@@ -262,7 +262,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
                 <Select value={duration} onValueChange={setDuration}>
                   <SelectTrigger className={cn(
                     "h-14 text-lg border-2 transition-all duration-200",
-                    errors.duration ? "border-red-300 bg-red-50" : "border-gray-200 hover:border-coral-300"
+                    errors.duration ? "border-red-300 bg-red-50" : "border-border hover:border-primary/50"
                   )}>
                     <Clock className="mr-2 h-5 w-5" />
                     <SelectValue />
@@ -281,7 +281,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
                 <Select value={crewSize} onValueChange={setCrewSize}>
                   <SelectTrigger className={cn(
                     "h-14 text-lg border-2 transition-all duration-200",
-                    errors.crewSize ? "border-red-300 bg-red-50" : "border-gray-200 hover:border-coral-300"
+                    errors.crewSize ? "border-red-300 bg-red-50" : "border-border hover:border-primary/50"
                   )}>
                     <Users className="mr-2 h-5 w-5" />
                     <SelectValue />
@@ -305,7 +305,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
               onChange={(e) => setMessage(e.target.value)}
               rows={6}
               placeholder="Tell us about your project, specific requirements, or any questions you have..."
-              className="resize-none text-lg border-2 border-gray-200 hover:border-coral-300 focus:border-coral-500 transition-all duration-200"
+              className="resize-none text-lg border-2 border-border hover:border-primary/50 focus:border-primary transition-all duration-200"
               maxLength={1000}
             />
             <div className="text-sm text-gray-500 text-right mt-2">
@@ -315,11 +315,11 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
         </div>
       </div>
 
-      <Card className="border-2 border-coral-200 bg-gradient-to-br from-coral-50 to-orange-50 shadow-lg">
+      <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-lg">
         <CardContent className="p-8">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-2xl font-bold text-gray-900">Booking Summary</h3>
-            <CreditCard className="h-8 w-8 text-coral-600" />
+            <CreditCard className="h-8 w-8 text-primary" />
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg">
@@ -359,10 +359,10 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
             </div>
           </div>
           
-          <div className="border-t border-coral-200 mt-6 pt-6">
+          <div className="border-t border-primary/20 mt-6 pt-6">
             <div className="flex justify-between items-center">
               <span className="text-2xl font-bold text-gray-900">Total Cost:</span>
-              <span className="text-3xl font-bold text-coral-600">
+              <span className="text-3xl font-bold text-primary">
                 ₱{totalCost.toLocaleString()}
               </span>
             </div>
@@ -411,7 +411,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
             </div>
             <div className="flex justify-between border-t pt-4">
               <strong className="text-xl">Total:</strong> 
-              <span className="text-xl font-bold text-coral-600">₱{totalCost.toLocaleString()}</span>
+              <span className="text-xl font-bold text-primary">₱{totalCost.toLocaleString()}</span>
             </div>
           </div>
         </CardContent>
@@ -461,7 +461,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
                 <Button
                   onClick={handleNext}
                   disabled={isSubmitting}
-                  className="px-8 py-3 text-lg bg-coral-500 hover:bg-coral-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="px-8 py-3 text-lg bg-primary hover:bg-primary/90 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   {isSubmitting ? (
                     <>
@@ -487,7 +487,7 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
               <div className="mt-8 pt-8 border-t-2 border-gray-100">
                 <Button
                   onClick={handleClose}
-                  className="w-full py-4 text-lg bg-coral-500 hover:bg-coral-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="w-full py-4 text-lg bg-primary hover:bg-primary/90 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   Done
                 </Button>

@@ -22,7 +22,7 @@ const HeroSection = ({ searchTerm, onSearchChange, onFiltersClick, showFilters }
           </p>
 
           {/* Clean Search Bar */}
-          <div className="glass bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-200/50 max-w-3xl mx-auto">
+          <div className="glass bg-background/95 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-border/50 max-w-3xl mx-auto">
             <div className="flex gap-3 items-center">
               <div className="flex-1 relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -31,7 +31,7 @@ const HeroSection = ({ searchTerm, onSearchChange, onFiltersClick, showFilters }
                   placeholder="Search locations, scouts, or areas..."
                   value={searchTerm}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 text-base bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-coral-500/50 focus:border-coral-300 text-gray-900 placeholder-gray-500 transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-4 text-base bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary text-foreground placeholder-muted-foreground transition-all duration-200"
                 />
               </div>
               <button
@@ -39,8 +39,8 @@ const HeroSection = ({ searchTerm, onSearchChange, onFiltersClick, showFilters }
                 onClick={onFiltersClick}
                 className={`px-6 py-4 rounded-xl font-medium text-base transition-all duration-200 flex items-center gap-2 ${
                   showFilters
-                    ? 'bg-coral-500 text-white shadow-md hover:bg-coral-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
+                    ? 'bg-primary text-primary-foreground shadow-md hover:bg-primary/90'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80 border border-border'
                 }`}
               >
                 <SlidersHorizontal className="h-4 w-4" />

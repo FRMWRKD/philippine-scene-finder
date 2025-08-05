@@ -84,7 +84,7 @@ const LocationCard = ({ location }: LocationCardProps) => {
         <div className="relative h-64 overflow-hidden">
           <img
             src={allImages[currentImageIndex]}
-            alt={location.title}
+            alt={`${location.title} - Image ${currentImageIndex + 1} of ${allImages.length}`}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             onClick={(e) => handleImageClick(e, currentImageIndex)}
           />
@@ -132,7 +132,7 @@ const LocationCard = ({ location }: LocationCardProps) => {
             aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
           >
             <svg
-              className={`h-5 w-5 transition-colors ${isLiked ? 'text-coral-500 fill-current' : 'text-gray-600 hover:text-coral-500'}`}
+              className={`h-5 w-5 transition-colors ${isLiked ? 'text-primary fill-current' : 'text-gray-600 hover:text-primary'}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -173,7 +173,7 @@ const LocationCard = ({ location }: LocationCardProps) => {
           </div>
 
           {/* Title */}
-          <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2 group-hover:text-coral-600 transition-colors">
+          <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2 group-hover:text-primary transition-colors">
             {location.title}
           </h3>
 
@@ -182,7 +182,7 @@ const LocationCard = ({ location }: LocationCardProps) => {
             {location.tags.slice(0, 3).map((tag, index) => (
               <span
                 key={index}
-                className="px-2 py-1 bg-coral-50 text-coral-600 text-xs rounded-full font-medium border border-coral-100"
+                className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full font-medium border border-primary/20"
               >
                 {tag}
               </span>
@@ -226,7 +226,7 @@ const LocationCard = ({ location }: LocationCardProps) => {
           {/* Action buttons */}
           <div className="flex gap-2">
             <button 
-              className="flex-1 bg-coral-500 text-white py-2 px-4 rounded-xl font-medium hover:bg-coral-600 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="flex-1 bg-primary text-primary-foreground py-2 px-4 rounded-xl font-medium hover:bg-primary/90 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
               onClick={handleBookNow}
               aria-label={`Book ${location.title}`}
             >
@@ -234,7 +234,7 @@ const LocationCard = ({ location }: LocationCardProps) => {
               Book Now
             </button>
             <button 
-              className="bg-gray-100 text-gray-600 p-2 rounded-xl hover:bg-gray-200 transition-all duration-200 hover:text-coral-600 transform hover:scale-105"
+              className="bg-gray-100 text-gray-600 p-2 rounded-xl hover:bg-gray-200 transition-all duration-200 hover:text-primary transform hover:scale-105"
               onClick={handleMessage}
               aria-label={`Send message about ${location.title}`}
             >

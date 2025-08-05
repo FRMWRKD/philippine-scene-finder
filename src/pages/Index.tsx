@@ -37,9 +37,6 @@ const Index = () => {
   };
 
   const filteredLocations = useMemo(() => {
-    console.log('Filtering locations...', mockLocations.length, 'total locations');
-    console.log('Current filters:', { searchTerm, selectedFilters, priceRange, currentLocation });
-    
     return mockLocations.filter((location) => {
       const matchesSearch = !searchTerm || location.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         location.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,14 +53,6 @@ const Index = () => {
       const matchesLocation = currentLocation === "Metro Manila" || 
         !currentLocation.trim() || 
         location.location.toLowerCase().includes(currentLocation.toLowerCase());
-
-      console.log(`Location ${location.title}:`, {
-        matchesSearch,
-        matchesFilters,
-        matchesPrice,
-        matchesLocation,
-        passed: matchesSearch && matchesFilters && matchesPrice && matchesLocation
-      });
 
       return matchesSearch && matchesFilters && matchesPrice && matchesLocation;
     });
@@ -130,7 +119,6 @@ const Index = () => {
   }, [allImages, searchTerm, selectedFilters, priceRange, currentLocation]);
 
   const handleImageClick = (imageData: any) => {
-    console.log('Navigating to image detail:', imageData.locationId, imageData.imageIndex);
     navigate(`/image/${imageData.locationId}/${imageData.imageIndex}`);
   };
 
@@ -145,8 +133,6 @@ const Index = () => {
       setSearchParams(newSearchParams);
     }
   };
-
-  console.log('Rendering Index page with', filteredLocations.length, 'filtered locations');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
@@ -187,7 +173,7 @@ const Index = () => {
                 onClick={() => setViewMode('locations')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   viewMode === 'locations' 
-                    ? 'bg-coral-500 text-white shadow-sm' 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
@@ -197,7 +183,7 @@ const Index = () => {
                 onClick={() => setViewMode('images')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   viewMode === 'images' 
-                    ? 'bg-coral-500 text-white shadow-sm' 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
@@ -207,7 +193,7 @@ const Index = () => {
                 onClick={() => setViewMode('map')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                   viewMode === 'map' 
-                    ? 'bg-coral-500 text-white shadow-sm' 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
@@ -251,13 +237,13 @@ const Index = () => {
                   <div className="aspect-square rounded-2xl overflow-hidden bg-gray-100 mb-4 shadow-lg hover:shadow-2xl transition-all duration-300">
                     <img
                       src={imageData.image}
-                      alt={imageData.title}
+                      alt={`${imageData.title} - Professional location photo`}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                   
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 group-hover:text-coral-600 transition-colors">
+                    <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 group-hover:text-primary transition-colors">
                       {imageData.title}
                     </h3>
                     
@@ -274,7 +260,7 @@ const Index = () => {
                             e.stopPropagation();
                             handleTagClick(tag);
                           }}
-                          className="px-3 py-1 bg-coral-50/80 backdrop-blur-sm text-coral-600 text-xs rounded-full font-medium hover:bg-coral-100 transition-all duration-200 border border-coral-200/50 transform hover:scale-105"
+                          className="px-3 py-1 bg-primary/10 backdrop-blur-sm text-primary text-xs rounded-full font-medium hover:bg-primary/20 transition-all duration-200 border border-primary/20 transform hover:scale-105"
                         >
                           {tag}
                         </button>
@@ -308,7 +294,7 @@ const Index = () => {
                   const newSearchParams = new URLSearchParams();
                   setSearchParams(newSearchParams);
                 }}
-                className="bg-coral-500 text-white px-8 py-3 rounded-xl font-medium hover:bg-coral-600 transition-all duration-200 shadow-sm"
+                className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-medium hover:bg-primary/90 transition-all duration-200 shadow-sm"
               >
                 Clear All Filters
               </button>

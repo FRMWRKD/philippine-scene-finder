@@ -66,7 +66,7 @@ const ImageModal = ({
       <div className="flex-1 relative flex items-center justify-center p-6">
         <img
           src={images[currentIndex]}
-          alt={`${locationTitle} ${currentIndex + 1}`}
+          alt={`${locationTitle} - Image ${currentIndex + 1} of ${images.length}`}
           className="max-w-full max-h-full object-contain"
         />
 

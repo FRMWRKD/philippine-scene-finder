@@ -18,13 +18,10 @@ function Calendar({
   ...props
 }: CalendarProps) {
   const handleDayClick: DayClickEventHandler = React.useCallback((day, modifiers, e) => {
-    console.log('Calendar: Day clicked:', day, 'Modifiers:', modifiers);
-    
     e.preventDefault();
     e.stopPropagation();
     
     if (modifiers.disabled) {
-      console.log('Calendar: Day is disabled, ignoring click');
       return;
     }
     
